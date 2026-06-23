@@ -1,0 +1,32 @@
+allprojects {
+    repositories {
+        maven { url("$rootDir/../node_modules/react-native/android") }
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }
+
+        maven { 
+            url 'https://maven.aliyun.com/repository/public'
+            allowInsecureProtocol = true
+        }
+        maven { 
+            url 'https://maven.aliyun.com/repository/google'
+            allowInsecureProtocol = true
+        }
+
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+    }
+
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android {
+                buildFeatures {
+                    buildConfig true
+                }
+                if (hasProperty('buildToolsVersion')) {
+                    buildToolsVersion rootProject.ext.buildToolsVersion
+                }
+            }
+        }
+    }
+}

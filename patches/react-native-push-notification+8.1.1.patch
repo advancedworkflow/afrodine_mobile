@@ -1,0 +1,16 @@
+diff --git a/node_modules/react-native-push-notification/android/build.gradle b/node_modules/react-native-push-notification/android/build.gradle
+index d6019f6..6ab7570 100644
+--- a/node_modules/react-native-push-notification/android/build.gradle
++++ b/node_modules/react-native-push-notification/android/build.gradle
+@@ -24,8 +24,9 @@ def safeExtGet(prop, fallback) {
+ }
+ 
+ android {
+-    compileSdkVersion safeExtGet('compileSdkVersion', 28)
+-    buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')
++    namespace "com.dieam.reactnativepushnotification"
++    compileSdkVersion safeExtGet('compileSdkVersion', 34)
++    buildToolsVersion safeExtGet('buildToolsVersion', '34.0.0')
+ 
+     compileOptions {
+         sourceCompatibility JavaVersion.VERSION_1_8

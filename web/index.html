@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>namke</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..72,500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        #root {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        /* Styles pour les icônes @expo/vector-icons sur le web */
+        svg {
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <!-- En dev : masque l'erreur connue des extensions navigateur (message channel closed) -->
+    <script>
+      (function () {
+        if (typeof window === 'undefined') return;
+        window.addEventListener('unhandledrejection', function (e) {
+          var msg = (e.reason && (e.reason.message || String(e.reason))) || '';
+          if (msg.indexOf('message channel closed') !== -1) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        });
+      })();
+    </script>
+</body>
+</html>
+
