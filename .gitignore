@@ -75,3 +75,7 @@ fastlane/test_output
 server_pid.txt
 *.log
 
+# Firebase / Google Sign-In credentials (fournis par l'utilisateur, jamais commit)
+android/app/google-services.json
+ios/**/GoogleService-Info.plist
+

@@ -54,3 +54,10 @@ dependencies {
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
 applyNativeModulesAppBuildGradle(project)
+
+// Applique le plugin Google Services seulement si google-services.json a été déposé
+// (voir google-services.json.example) — évite de casser le build tant que le fichier réel
+// n'est pas fourni par l'utilisateur.
+if (file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
+}

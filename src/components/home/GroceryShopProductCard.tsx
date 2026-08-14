@@ -3,9 +3,13 @@ import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import {Colors} from '../../utils/colors';
 import type {GroceryShopProductApi} from '../../services/groceryShop';
 
+const namkeFallback = require('../../assets/namke-fallback.png');
+
 type Props = {
   product: GroceryShopProductApi;
   onPress?: () => void;
+  /** Mise en page verticale compacte, adaptée à un carrousel horizontal. */
+  compact?: boolean;
 };
 
 const formatPrice = (p: number | string) => {
@@ -14,8 +18,39 @@ const formatPrice = (p: number | string) => {
   return `${n.toFixed(2).replace('.', ',')} €`;
 };
 
-const GroceryShopProductCard = ({product, onPress}: Props) => {
+const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
   const origin = [product.origin_country, product.origin_region].filter(Boolean).join(' · ');
+  const imageSource = product.image_url ? {uri: product.image_url} : namkeFallback;
+
+  if (compact) {
+    return (
+      <TouchableOpacity
+        style={styles.compactCard}
+        onPress={onPress}
+        disabled={!onPress}
+        activeOpacity={0.85}>
+        <View style={styles.compactImageWrap}>
+          <Image source={imageSource} style={styles.compactImage} resizeMode="cover" />
+          {product.is_african ? (
+            <View style={styles.compactBadge}>
+              <Text style={styles.badgeText}>Afrique</Text>
+            </View>
+          ) : null}
+        </View>
+        <View style={styles.compactBody}>
+          <Text style={styles.compactName} numberOfLines={2}>
+            {product.name}
+          </Text>
+          {product.category ? (
+            <Text style={styles.category} numberOfLines={1}>
+              {product.category}
+            </Text>
+          ) : null}
+          <Text style={styles.compactPrice}>{formatPrice(product.price)}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <TouchableOpacity
@@ -24,13 +59,7 @@ const GroceryShopProductCard = ({product, onPress}: Props) => {
       disabled={!onPress}
       activeOpacity={0.85}>
       <View style={styles.imageColumn}>
-        {product.image_url ? (
-          <Image source={{uri: product.image_url}} style={styles.image} resizeMode="cover" />
-        ) : (
-          <View style={[styles.image, styles.imagePlaceholder]}>
-            <Text style={styles.placeholderIcon}>🛒</Text>
-          </View>
-        )}
+        <Image source={imageSource} style={styles.image} resizeMode="cover" />
       </View>
       <View style={styles.body}>
         <View style={styles.titleRow}>
@@ -91,13 +120,6 @@ const styles = StyleSheet.create({
     height: 140,
     backgroundColor: Colors.gray?.[100] ?? '#f3f4f6',
   },
-  imagePlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderIcon: {
-    fontSize: 32,
-  },
   body: {
     flex: 1,
     padding: 14,
@@ -150,6 +172,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textLight,
     marginTop: 2,
+  },
+  // Variante compacte (carrousel)
+  compactCard: {
+    width: 152,
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.gray?.[100] ?? '#f3f4f6',
+    shadowColor: Colors.black,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  compactImageWrap: {
+    width: '100%',
+    height: 110,
+  },
+  compactImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.gray?.[100] ?? '#f3f4f6',
+  },
+  compactBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: Colors.category.green.bg,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  compactBody: {
+    padding: 10,
+  },
+  compactName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.primaryDark ?? Colors.primary,
+    minHeight: 34,
+  },
+  compactPrice: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: Colors.primary,
+    marginTop: 6,
   },
 });
 

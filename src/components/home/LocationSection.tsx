@@ -9,7 +9,7 @@ interface LocationSectionProps {
 }
 
 const LocationSection: React.FC<LocationSectionProps> = ({
-  address = '123 Rue de la Paix, Paris',
+  address = 'Adresse non renseignée',
   onPress,
 }) => {
   return (

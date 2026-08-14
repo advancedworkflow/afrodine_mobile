@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Switch,
 } from 'react-native';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -62,6 +63,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   const [dishDesc, setDishDesc] = useState('');
   const [dishPrice, setDishPrice] = useState('');
   const [dishImageUrl, setDishImageUrl] = useState('');
+  const [dishCateringOnly, setDishCateringOnly] = useState(false);
   const [menuName, setMenuName] = useState('');
   const [menuDesc, setMenuDesc] = useState('');
   const [menuPrice, setMenuPrice] = useState('');
@@ -143,6 +145,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     setDishDesc('');
     setDishPrice('');
     setDishImageUrl('');
+    setDishCateringOnly(false);
     setModalDish(true);
   };
 
@@ -246,6 +249,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         description: dishDesc.trim() || undefined,
         price,
         dish_image_url: dishImageUrl.trim() || DEFAULT_IMAGE_URL,
+        catering_only: dishCateringOnly,
       });
       setModalDish(false);
       load();
@@ -604,6 +608,18 @@ const RestaurantMenuScreen = ({navigation}: any) => {
                   )}
                 </TouchableOpacity>
               )}
+            </View>
+            <View style={styles.toggleRow}>
+              <View style={styles.toggleInfo}>
+                <Text style={styles.toggleLabel}>Traiteur uniquement</Text>
+                <Text style={styles.toggleSub}>Masqué du menu public, visible dans les offres traiteur</Text>
+              </View>
+              <Switch
+                value={dishCateringOnly}
+                onValueChange={setDishCateringOnly}
+                trackColor={{ false: Colors.gray[300], true: Colors.primary }}
+                thumbColor={Colors.white}
+              />
             </View>
             <TouchableOpacity
               style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
@@ -1146,6 +1162,32 @@ const styles = StyleSheet.create({
   inputArea: {
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.gray[100],
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  toggleInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  toggleLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    fontFamily: secondaryFont,
+  },
+  toggleSub: {
+    fontSize: 12,
+    color: Colors.textLight,
+    marginTop: 2,
+    fontFamily: secondaryFont,
   },
   submitBtn: {
     backgroundColor: Colors.primary,

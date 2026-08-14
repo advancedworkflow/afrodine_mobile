@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   Linking,
+  Dimensions,
 } from 'react-native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 import TopBar from '../components/TopBar';
 import LocationSection from '../components/home/LocationSection';
 import SearchBar, {type SearchSuggestion} from '../components/home/SearchBar';
@@ -24,15 +27,22 @@ import {Colors} from '../utils/colors';
 import IconWrapper from '../components/IconWrapper';
 import {useSearch} from '../contexts/SearchContext';
 import {useAuth} from '../contexts/AuthContext';
+import {useCart} from '../contexts/CartContext';
 import * as restaurantsApi from '../services/restaurants';
 import * as dishesApi from '../services/dishes';
 import * as categoriesApi from '../services/categories';
 import * as promotionsApi from '../services/promotions';
 import * as cateringApi from '../services/catering';
 import * as groceryShopApi from '../services/groceryShop';
+import {getMenuById, type MenuApi} from '../services/menus';
 import {getClientProfile} from '../services/clientProfile';
 import {formatAxiosError} from '../utils/formatApiError';
+import {getAbsoluteImageUrl} from '../utils/api';
 import GroceryShopProductCard from '../components/home/GroceryShopProductCard';
+import GroceryShopCard from '../components/home/GroceryShopCard';
+import MenuPromotionModal from '../components/home/MenuPromotionModal';
+
+const namkeFallback = require('../assets/namke-fallback.png');
 
 type HomeTab = 'accueil' | 'groceryShop';
 
@@ -62,20 +72,27 @@ const extractCityFromAddress = (address?: string | null): string | undefined => 
 const HomeScreen = ({navigation}: any) => {
   const {isAuthenticated, isRestaurant} = useAuth();
   const {setSearchQuery, setSearchResults, setIsSearching} = useSearch();
+  const {addItem} = useCart();
   const stackNav = navigation.getParent()?.getParent() ?? navigation.getParent() ?? navigation;
+  const [menuPromoVisible, setMenuPromoVisible] = useState(false);
+  const [menuPromoLoading, setMenuPromoLoading] = useState(false);
+  const [menuPromoDetail, setMenuPromoDetail] = useState<MenuApi | null>(null);
+  const [menuPromoRestaurantId, setMenuPromoRestaurantId] = useState<number | null>(null);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(defaultFilterOptions);
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
   const [popularDishes, setPopularDishes] = useState<dishesApi.DishForList[]>([]);
   const [nearbyRestaurants, setNearbyRestaurants] = useState<restaurantsApi.RestaurantForList[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [categoryDishes, setCategoryDishes] = useState<dishesApi.DishForList[]>([]);
+  const [categoryDishesLoading, setCategoryDishesLoading] = useState(false);
   const [topBannerPromos, setTopBannerPromos] = useState<promotionsApi.PromotionForList[]>([]);
   const [sectionPromos, setSectionPromos] = useState<promotionsApi.PromotionForList[]>([]);
   const [floatingPromos, setFloatingPromos] = useState<promotionsApi.PromotionForList[]>([]);
   const [cateringServices, setCateringServices] = useState<cateringApi.CateringServiceForList[]>([]);
   const [groceryShopProducts, setGroceryShopProducts] = useState<groceryShopApi.GroceryShopProductApi[]>([]);
-  const [groceryPage, setGroceryPage] = useState(1);
-  const groceryItemsPerPage = 8;
+  const [groceryShops, setGroceryShops] = useState<groceryShopApi.GroceryShopApi[]>([]);
   const [homeTab, setHomeTab] = useState<HomeTab>('accueil');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -171,11 +188,14 @@ const HomeScreen = ({navigation}: any) => {
       if (getIsCancelled?.()) return;
 
       let groceryShopRes: groceryShopApi.GroceryShopProductApi[] = [];
+      let groceryShopsRes: groceryShopApi.GroceryShopApi[] = [];
       try {
-        const [catalog, dishRows] = await Promise.all([
+        const [catalog, dishRows, shops] = await Promise.all([
           groceryShopApi.getGroceryShopProducts({limit: 200}),
           groceryShopApi.getPublicGroceryDishes({limit: 200}).catch(() => []),
+          groceryShopApi.getGroceryShops().catch(() => []),
         ]);
+        groceryShopsRes = Array.isArray(shops) ? shops : [];
         const mappedDishes = (Array.isArray(dishRows) ? dishRows : []).map(d => ({
           id: d.id,
           source: 'dish' as const,
@@ -221,6 +241,7 @@ const HomeScreen = ({navigation}: any) => {
       setFloatingPromos(floatingPromosList);
       setCateringServices(cateringRes);
       setGroceryShopProducts(groceryShopRes);
+      setGroceryShops(groceryShopsRes);
     } catch (e: any) {
       if (getIsCancelled?.()) return;
       setError(formatAxiosError(e, 'Erreur de chargement'));
@@ -232,6 +253,7 @@ const HomeScreen = ({navigation}: any) => {
       setFloatingPromos([]);
       setCateringServices([]);
       setGroceryShopProducts([]);
+      setGroceryShops([]);
     } finally {
       if (!getIsCancelled?.()) {
         setLoading(false);
@@ -248,39 +270,64 @@ const HomeScreen = ({navigation}: any) => {
     };
   }, [loadData]);
 
+  const handleCategoryPress = useCallback(async (category: Category) => {
+    if (selectedCategoryId === category.id) {
+      setSelectedCategoryId(null);
+      setCategoryDishes([]);
+      return;
+    }
+    setSelectedCategoryId(category.id);
+    setCategoryDishesLoading(true);
+    try {
+      const dishes = await dishesApi.getDishesByCategory(category.id, {limit: 12});
+      setCategoryDishes(dishes);
+    } catch {
+      setCategoryDishes([]);
+    } finally {
+      setCategoryDishesLoading(false);
+    }
+  }, [selectedCategoryId]);
+
   const cateringRestaurantIds = new Set(cateringServices.map(s => s.restaurantId));
 
-  const groceryTotalPages = Math.max(1, Math.ceil(groceryShopProducts.length / groceryItemsPerPage));
-  const groceryPageSafe = Math.min(groceryPage, groceryTotalPages);
-  const pagedGroceryProducts = useMemo(() => {
-    const start = (groceryPageSafe - 1) * groceryItemsPerPage;
-    return groceryShopProducts.slice(start, start + groceryItemsPerPage);
-  }, [groceryShopProducts, groceryPageSafe, groceryItemsPerPage]);
+  const openMenuPromotion = async (promo: promotionsApi.PromotionForList) => {
+    const menuId = promo.menuIds?.[0];
+    if (!menuId) {
+      navigation.navigate('RestaurantDetails', {restaurantId: promo.restaurantId});
+      return;
+    }
+    setMenuPromoRestaurantId(promo.restaurantId);
+    setMenuPromoVisible(true);
+    setMenuPromoLoading(true);
+    setMenuPromoDetail(null);
+    try {
+      const menu = await getMenuById(menuId);
+      setMenuPromoDetail(menu);
+    } catch {
+      setMenuPromoVisible(false);
+    } finally {
+      setMenuPromoLoading(false);
+    }
+  };
 
-  useEffect(() => {
-    setGroceryPage(p => Math.min(p, groceryTotalPages));
-  }, [groceryTotalPages]);
+  const closeMenuPromotion = () => {
+    setMenuPromoVisible(false);
+    setMenuPromoDetail(null);
+  };
 
-  const quickBites = [
-    {
-      id: '1',
-      name: 'Frites croustillantes',
-      price: 3.5,
-      imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200',
-    },
-    {
-      id: '2',
-      name: 'Nuggets poulet',
-      price: 5.5,
-      imageUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200',
-    },
-    {
-      id: '3',
-      name: 'Nems végé',
-      price: 4.5,
-      imageUrl: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=200',
-    },
-  ];
+  const addMenuPromotionToCart = (menu: MenuApi) => {
+    addItem({
+      dishId: 0,
+      menuId: menu.id,
+      restaurantId: menuPromoRestaurantId ?? menu.restaurant_id ?? undefined,
+      name: `Menu: ${menu.name}`,
+      price: menu.price ?? 0,
+      quantity: 1,
+      imageUrl: menu.image_url ?? undefined,
+    });
+    closeMenuPromotion();
+    stackNav.navigate('Cart');
+  };
 
   return (
     <View style={styles.container}>
@@ -301,7 +348,10 @@ const HomeScreen = ({navigation}: any) => {
       />
       <LocationSection
         address={deliveryAddress}
-        onPress={() => console.log('Change location')}
+        onPress={() => {
+          if (!isAuthenticated || isRestaurant) return;
+          navigation.navigate('EditProfile');
+        }}
       />
       <SearchBar
         onSearch={async query => {
@@ -410,6 +460,11 @@ const HomeScreen = ({navigation}: any) => {
         </View>
         {homeTab === 'accueil' ? (
         <>
+        <Image
+          source={require('../assets/namke-banner.png')}
+          style={styles.brandBanner}
+          resizeMode="cover"
+        />
         <View style={styles.promosSection}>
           {topBannerPromos.length > 0 ? (
             <ScrollView
@@ -417,8 +472,8 @@ const HomeScreen = ({navigation}: any) => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.promosScroll}
               style={styles.promosScrollView}
-              pagingEnabled={false}
-              snapToInterval={312}
+              pagingEnabled
+              snapToInterval={SCREEN_WIDTH}
               snapToAlignment="start"
               decelerationRate="fast">
               {topBannerPromos.map(promo => (
@@ -428,6 +483,7 @@ const HomeScreen = ({navigation}: any) => {
                     subtitle={promo.subtitle}
                     buttonText={promo.buttonText}
                     imageUrl={promo.imageUrl}
+                    backgroundColor={promo.backgroundColor}
                     discountLabel={promo.discountLabel}
                     onPress={() =>
                       navigation.navigate('RestaurantDetails', {
@@ -449,9 +505,8 @@ const HomeScreen = ({navigation}: any) => {
         </View>
         <CategoryGrid
           categories={categories}
-          onCategoryPress={category => {
-            navigation.navigate('Restaurants', {categoryId: category.id, categoryName: category.name});
-          }}
+          selectedCategoryId={selectedCategoryId}
+          onCategoryPress={handleCategoryPress}
         />
         </>
         ) : null}
@@ -473,13 +528,19 @@ const HomeScreen = ({navigation}: any) => {
         <>
         <View style={styles.section}>
           <SectionHeader
-            title="Plats populaires"
+            title={
+              selectedCategoryId
+                ? categories.find(c => c.id === selectedCategoryId)?.name ?? 'Plats populaires'
+                : 'Plats populaires'
+            }
             onSeeAllPress={() => stackNav.navigate('PopularDishes')}
           />
-          {popularDishes.length === 0 ? (
+          {selectedCategoryId && categoryDishesLoading ? (
+            <ActivityIndicator size="small" color={Colors.primary} style={styles.loadingText} />
+          ) : (selectedCategoryId ? categoryDishes : popularDishes).length === 0 ? (
             <Text style={styles.emptyText}>Aucun plat pour le moment</Text>
           ) : (
-            popularDishes.map(dish => (
+            (selectedCategoryId ? categoryDishes : popularDishes).map(dish => (
               <DishCard
                 key={dish.id}
                 {...dish}
@@ -491,10 +552,7 @@ const HomeScreen = ({navigation}: any) => {
           )}
         </View>
         <View style={styles.section}>
-          <SectionHeader
-            title="Offres spéciales"
-            onSeeAllPress={() => navigation.navigate('Restaurants')}
-          />
+          <SectionHeader title="Offres spéciales" />
           {sectionPromos.length > 0 ? (
             sectionPromos.map(promo => (
               <SpecialOfferCard
@@ -503,13 +561,14 @@ const HomeScreen = ({navigation}: any) => {
                 title={promo.title}
                 description={promo.subtitle}
                 discount={promo.discountLabel ?? ''}
-                originalPrice={0}
-                currentPrice={0}
+                imageUrl={promo.imageUrl}
+                backgroundColor={promo.backgroundColor}
+                buttonText={promo.buttonText}
                 icon="pricetag"
-                gradientColors={[Colors.primary, Colors.primaryLight]}
                 onPress={() =>
                   navigation.navigate('RestaurantDetails', {restaurantId: promo.restaurantId})
                 }
+                onButtonPress={() => openMenuPromotion(promo)}
               />
             ))
           ) : (
@@ -557,6 +616,7 @@ const HomeScreen = ({navigation}: any) => {
                     subtitle={promo.subtitle}
                     buttonText={promo.buttonText}
                     imageUrl={promo.imageUrl}
+                    backgroundColor={promo.backgroundColor}
                     discountLabel={promo.discountLabel}
                     onPress={() =>
                       navigation.navigate('RestaurantDetails', {restaurantId: promo.restaurantId})
@@ -606,9 +666,11 @@ const HomeScreen = ({navigation}: any) => {
                     })
                   }
                   activeOpacity={0.8}>
-                  <View style={[styles.cateringCardIcon, {backgroundColor: Colors.category.green.bg}]}>
-                    <IconWrapper name="restaurant-outline" size={26} color={Colors.category.green.icon} />
-                  </View>
+                  <Image
+                    source={service.imageUrl ? {uri: getAbsoluteImageUrl(service.imageUrl) ?? service.imageUrl} : namkeFallback}
+                    style={styles.cateringCardImage}
+                    resizeMode="cover"
+                  />
                   <Text style={styles.cateringCardName} numberOfLines={2}>
                     {service.name}
                   </Text>
@@ -631,56 +693,21 @@ const HomeScreen = ({navigation}: any) => {
         </View>
         <View style={styles.section}>
           <SectionHeader
-            title="Snacks rapides"
-            onSeeAllPress={() => console.log('See all snacks')}
+            title="Épicerie"
+            onSeeAllPress={() => setHomeTab('groceryShop')}
           />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}>
-            {quickBites.map(item => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.quickBiteCard}
-                onPress={() => console.log('Quick bite pressed:', item.id)}>
-                <Image
-                  source={{uri: item.imageUrl}}
-                  style={styles.quickBiteImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.quickBiteContent}>
-                  <Text style={styles.quickBiteName} numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  <View style={styles.quickBiteFooter}>
-                    <Text style={styles.quickBitePrice}>
-                      {item.price.toFixed(2)}€
-                    </Text>
-                    <TouchableOpacity style={styles.quickBiteAddButton}>
-                      <IconWrapper name="add-outline" size={14} color={Colors.white} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-        </>
-        )}
-        {homeTab === 'groceryShop' && (
-          <View style={styles.section}>
-            <SectionHeader title="Grocery shop" />
-            {groceryShopProducts.length === 0 ? (
-              <Text style={styles.emptyText}>Aucun produit pour le moment</Text>
-            ) : (
-              <>
-                <Text style={styles.groceryCountText}>
-                  {groceryShopProducts.length} produit{groceryShopProducts.length > 1 ? 's' : ''}
-                </Text>
-                {pagedGroceryProducts.map(p => (
+          {groceryShopProducts.length === 0 ? (
+            <Text style={styles.emptyText}>Aucun produit pour le moment</Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalScroll}>
+              {groceryShopProducts.slice(0, 6).map(p => (
+                <View key={`grocery-preview-${p.source ?? 'catalog'}-${p.id}`} style={styles.groceryPreviewCard}>
                   <GroceryShopProductCard
-                    key={`${p.source ?? 'catalog'}-${p.id}`}
                     product={p}
+                    compact
                     onPress={() => {
                       if (p.source === 'dish' && p.restaurant_id != null) {
                         stackNav.navigate('DishDetails', {
@@ -689,47 +716,45 @@ const HomeScreen = ({navigation}: any) => {
                         });
                         return;
                       }
-                      const base = String(WEB_APP_BASE).replace(/\/+$/, '');
-                      Linking.openURL(`${base}/grocery-shop-product/${p.id}`).catch(() => {});
+                      if (p.grocery_shop_id != null) {
+                        stackNav.navigate('GroceryShopDetails', {
+                          groceryShopId: p.grocery_shop_id,
+                          groceryShopName: p.grocery_shop_name ?? undefined,
+                        });
+                        return;
+                      }
+                      setHomeTab('groceryShop');
                     }}
                   />
+                </View>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+        </>
+        )}
+        {homeTab === 'groceryShop' && (
+          <View style={styles.section}>
+            <SectionHeader title="Grocery shop" />
+            {groceryShops.length === 0 ? (
+              <Text style={styles.emptyText}>Aucune boutique pour le moment</Text>
+            ) : (
+              <>
+                <Text style={styles.groceryCountText}>
+                  {groceryShops.length} boutique{groceryShops.length > 1 ? 's' : ''}
+                </Text>
+                {groceryShops.map(shop => (
+                  <GroceryShopCard
+                    key={shop.id}
+                    shop={shop}
+                    onPress={() =>
+                      stackNav.navigate('GroceryShopDetails', {
+                        groceryShopId: shop.id,
+                        groceryShopName: shop.name,
+                      })
+                    }
+                  />
                 ))}
-                {groceryTotalPages > 1 ? (
-                  <View style={styles.groceryPagination}>
-                    <TouchableOpacity
-                      style={[styles.groceryPageBtn, groceryPageSafe <= 1 && styles.groceryPageBtnDisabled]}
-                      disabled={groceryPageSafe <= 1}
-                      onPress={() => setGroceryPage(p => Math.max(1, p - 1))}
-                      activeOpacity={0.8}>
-                      <Text
-                        style={[
-                          styles.groceryPageBtnText,
-                          groceryPageSafe <= 1 && styles.groceryPageBtnTextDisabled,
-                        ]}>
-                        Précédent
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={styles.groceryPageInfo}>
-                      Page {groceryPageSafe} / {groceryTotalPages}
-                    </Text>
-                    <TouchableOpacity
-                      style={[
-                        styles.groceryPageBtn,
-                        groceryPageSafe >= groceryTotalPages && styles.groceryPageBtnDisabled,
-                      ]}
-                      disabled={groceryPageSafe >= groceryTotalPages}
-                      onPress={() => setGroceryPage(p => Math.min(groceryTotalPages, p + 1))}
-                      activeOpacity={0.8}>
-                      <Text
-                        style={[
-                          styles.groceryPageBtnText,
-                          groceryPageSafe >= groceryTotalPages && styles.groceryPageBtnTextDisabled,
-                        ]}>
-                        Suivant
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : null}
               </>
             )}
           </View>
@@ -807,6 +832,13 @@ const HomeScreen = ({navigation}: any) => {
           </>
         )}
       </ScrollView>
+      <MenuPromotionModal
+        visible={menuPromoVisible}
+        loading={menuPromoLoading}
+        menu={menuPromoDetail}
+        onClose={closeMenuPromotion}
+        onAddToCart={addMenuPromotionToCart}
+      />
     </View>
   );
 };
@@ -854,6 +886,11 @@ const styles = StyleSheet.create({
   homeTabLabelActive: {
     color: Colors.white,
   },
+  brandBanner: {
+    width: '100%',
+    height: 140,
+    marginBottom: 12,
+  },
   promosSection: {
     minHeight: 192,
     marginBottom: 8,
@@ -864,13 +901,10 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   promosScroll: {
-    paddingHorizontal: 16,
-    paddingRight: 32,
     alignItems: 'stretch',
   },
   promoBannerWrap: {
-    width: 300,
-    marginRight: 12,
+    width: SCREEN_WIDTH,
     height: 192,
   },
   floatingPromoScroll: {
@@ -925,87 +959,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: 4,
   },
-  groceryPagination: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    marginTop: 12,
-    marginBottom: 8,
-    paddingHorizontal: 8,
-  },
-  groceryPageBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  groceryPageBtnDisabled: {
-    opacity: 0.45,
-    borderColor: Colors.border,
-  },
-  groceryPageBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  groceryPageBtnTextDisabled: {
-    color: Colors.textLight,
-  },
-  groceryPageInfo: {
-    fontSize: 14,
-    color: Colors.textDark,
-    fontWeight: '600',
-  },
   horizontalScroll: {
     paddingRight: 16,
   },
-  quickBiteCard: {
-    width: 144,
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    overflow: 'hidden',
+  groceryPreviewCard: {
     marginRight: 12,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
-  },
-  quickBiteImage: {
-    width: '100%',
-    height: 112,
-  },
-  quickBiteContent: {
-    padding: 10,
-  },
-  quickBiteName: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 8,
-  },
-  quickBiteFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  quickBitePrice: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: Colors.primary,
-  },
-  quickBiteAddButton: {
-    width: 24,
-    height: 24,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   deliveryBanner: {
     borderRadius: 16,
@@ -1134,34 +1092,36 @@ const styles = StyleSheet.create({
     width: 160,
     backgroundColor: Colors.white,
     borderRadius: 14,
-    padding: 14,
+    overflow: 'hidden',
     marginRight: 12,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  cateringCardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
+  cateringCardImage: {
+    width: '100%',
+    height: 90,
+    backgroundColor: Colors.gray[100],
   },
   cateringCardName: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.primaryDark,
     marginBottom: 4,
+    marginTop: 10,
+    paddingHorizontal: 14,
   },
   cateringCardPrice: {
     fontSize: 13,
     fontWeight: '600',
     color: Colors.primary,
+    paddingHorizontal: 14,
   },
   cateringCardGuests: {
     fontSize: 12,
     color: Colors.textLight,
     marginTop: 2,
+    paddingHorizontal: 14,
+    paddingBottom: 12,
   },
   cateringSeeAll: {
     width: 100,

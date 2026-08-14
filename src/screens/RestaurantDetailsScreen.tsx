@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
+import RestaurantMap from '../components/RestaurantMap';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
 import DishCard from '../components/home/DishCard';
@@ -170,6 +171,8 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
             description: restData.description,
             address: restData.address,
             city: restData.city,
+            latitude: restData.latitude,
+            longitude: restData.longitude,
             phone: restData.phone,
             hours: hoursDisplay,
             loyaltyEnabled: restData.loyalty_enabled !== false,
@@ -469,6 +472,12 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
               <IconWrapper name="time-outline" size={20} color={Colors.primary} />
               <Text style={styles.contactText}>{restaurant.hours}</Text>
             </View>
+            <RestaurantMap
+              latitude={restaurant.latitude}
+              longitude={restaurant.longitude}
+              address={restaurant.address}
+              city={restaurant.city}
+            />
           </View>
 
           {/* Images du restaurant */}

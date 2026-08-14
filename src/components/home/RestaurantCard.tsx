@@ -4,6 +4,8 @@ import IconWrapper from '../IconWrapper';
 import {Colors} from '../../utils/colors';
 import api, {getAbsoluteImageUrl, getJpegFallbackUrl} from '../../utils/api';
 
+const namkeFallback = require('../../assets/namke-fallback.png');
+
 interface RestaurantCardProps {
   id: string;
   name: string;
@@ -123,9 +125,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
         />
         )
       ) : (
-        <View style={[styles.image, styles.imagePlaceholder]}>
-          <IconWrapper name="restaurant-outline" size={48} color={Colors.textLight} />
-        </View>
+        <Image source={namkeFallback} style={styles.image} resizeMode="cover" />
       )}
       <View style={styles.content}>
         <View style={styles.header}>
@@ -191,11 +191,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     color: Colors.white,
-  },
-  imagePlaceholder: {
-    backgroundColor: Colors.gray[100],
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   content: {
     padding: 12,

@@ -5,6 +5,8 @@ export type GroceryListItemSource = 'catalog' | 'dish';
 export interface GroceryShopProductApi {
   id: number;
   grocery_shop_id?: number;
+  grocery_shop_name?: string | null;
+  grocery_shop_description?: string | null;
   /** catalogue plateforme vs plat menu tagué épicerie */
   source?: GroceryListItemSource;
   restaurant_id?: number;
@@ -20,6 +22,44 @@ export interface GroceryShopProductApi {
   unit: string;
   image_url?: string | null;
   is_active?: boolean;
+}
+
+export interface GroceryShopApi {
+  id: number;
+  name: string;
+  description?: string | null;
+  restaurant_id?: number | null;
+  is_active: boolean;
+  image_url?: string | null;
+  banner_url?: string | null;
+}
+
+export async function getGroceryShops(params?: {active_only?: boolean}): Promise<GroceryShopApi[]> {
+  const {data} = await api.get<GroceryShopApi[]>('/grocery-shops/', {
+    params: {active_only: params?.active_only ?? true},
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getGroceryShopById(groceryShopId: number): Promise<GroceryShopApi> {
+  const {data} = await api.get<GroceryShopApi>(`/grocery-shops/${groceryShopId}`);
+  return data;
+}
+
+export async function getProductsForGroceryShop(
+  groceryShopId: number,
+  params?: {category?: string; is_african?: boolean; search?: string; skip?: number; limit?: number},
+): Promise<GroceryShopProductApi[]> {
+  const {data} = await api.get<GroceryShopProductApi[]>(`/grocery-shops/${groceryShopId}/products`, {
+    params: {
+      category: params?.category,
+      is_african: params?.is_african,
+      search: params?.search,
+      skip: params?.skip ?? 0,
+      limit: params?.limit ?? 200,
+    },
+  });
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getGroceryShopProducts(params?: {

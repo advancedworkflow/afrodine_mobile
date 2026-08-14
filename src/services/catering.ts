@@ -42,6 +42,7 @@ export interface CateringServiceForList {
   restaurantId: string;
   rating?: number;
   reviewCount?: number;
+  imageUrl?: string;
 }
 
 function toCateringForList(s: CateringServiceApi): CateringServiceForList {
@@ -57,6 +58,7 @@ function toCateringForList(s: CateringServiceApi): CateringServiceForList {
     restaurantId: String(s.restaurant_id),
     rating: s.rating != null ? Number(s.rating) : undefined,
     reviewCount: s.review_count ?? 0,
+    imageUrl: s.image_url ?? undefined,
   };
 }
 

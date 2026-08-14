@@ -1,7 +1,20 @@
 import React, {createContext, useState, useEffect, useContext} from 'react';
+import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type {GoogleSignin as GoogleSigninType} from '@react-native-google-signin/google-signin';
 import api, {registerOn401} from '../utils/api';
 import {formatAxiosError} from '../utils/formatApiError';
+import {GOOGLE_WEB_CLIENT_ID} from '../config/googleSignIn';
+import notificationService from '../services/notificationService';
+
+// @react-native-google-signin/google-signin n'a pas de variante web — chargé uniquement
+// sur Android/iOS (le build web de cette app utilise react-native-web).
+const GoogleSignin: typeof GoogleSigninType | null =
+  Platform.OS !== 'web' ? require('@react-native-google-signin/google-signin').GoogleSignin : null;
+
+if (GoogleSignin) {
+  GoogleSignin.configure({webClientId: GOOGLE_WEB_CLIENT_ID});
+}
 
 interface User {
   id: number;
@@ -19,6 +32,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   signupClient: (email: string, password: string, first_name: string, last_name: string, phone?: string, address?: string) => Promise<void>;
   signupRestaurant: (email: string, password: string, name: string, address: string, phone: string, city: string, description?: string, cuisine_type?: string) => Promise<void>;
@@ -150,6 +164,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
 
       await AsyncStorage.setItem('user_data', JSON.stringify(userData));
       setUser(userData);
+      notificationService.registerDeviceToken().catch(() => {});
     } catch (error: any) {
       console.error('Login error:', {
         message: error.message,
@@ -159,6 +174,54 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
       });
       throw new Error(
         formatAxiosError(error, 'Erreur lors de la connexion'),
+      );
+    }
+  };
+
+  /**
+   * Connexion via Google (client ET restaurateur — même endpoint backend que
+   * loginWithPassword, le profil est résolu ensuite comme pour un login classique).
+   */
+  const loginWithGoogle = async () => {
+    if (!GoogleSignin) {
+      throw new Error('La connexion Google n\'est pas disponible sur cette plateforme');
+    }
+    try {
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      const result = await GoogleSignin.signIn();
+      const idToken =
+        (result as any)?.data?.idToken ?? (result as any)?.idToken;
+      if (!idToken) {
+        throw new Error('Aucun token Google reçu');
+      }
+
+      const {data} = await api.post('/users/login/google', {id_token: idToken});
+      const {access_token} = data;
+      if (!access_token) {
+        throw new Error('Token non reçu dans la réponse');
+      }
+
+      await AsyncStorage.setItem('access_token', access_token);
+
+      let userData: User;
+      try {
+        const {data: me} = await api.get('/users/me');
+        userData = me as User;
+      } catch (err: any) {
+        if (err?.response?.status === 401 || err?.response?.status === 403) {
+          const {data: me} = await api.get('/restaurants/me');
+          userData = mapRestaurantMeToUser(me as Record<string, unknown>);
+        } else {
+          throw err;
+        }
+      }
+
+      await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+      setUser(userData);
+      notificationService.registerDeviceToken().catch(() => {});
+    } catch (error: any) {
+      throw new Error(
+        formatAxiosError(error, 'Erreur lors de la connexion avec Google'),
       );
     }
   };
@@ -261,6 +324,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
         isAuthenticated: !!user,
         isLoading,
         login,
+        loginWithGoogle,
         signup,
         signupClient,
         signupRestaurant,

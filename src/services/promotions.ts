@@ -7,14 +7,18 @@ export interface PromotionApi {
   title: string;
   description?: string;
   media_url?: string;
+  background_color?: string;
   original_price: number;
   discount_percentage?: number;
   fixed_discount_amount?: number;
   final_price?: number;
   cta_label?: string;
   cta_url?: string;
+  cta_type?: string;
   display_format?: string;
   is_featured?: boolean;
+  menu_ids?: number[];
+  dish_ids?: number[];
 }
 
 export interface PromotionForList {
@@ -23,8 +27,14 @@ export interface PromotionForList {
   title: string;
   subtitle: string;
   imageUrl?: string;
+  backgroundColor?: string;
   buttonText: string;
+  ctaType?: string;
   discountLabel?: string;
+  menuIds?: number[];
+  dishIds?: number[];
+  finalPrice?: number;
+  originalPrice?: number;
 }
 
 function toPromotionForList(p: PromotionApi): PromotionForList {
@@ -42,8 +52,14 @@ function toPromotionForList(p: PromotionApi): PromotionForList {
     title: p.title,
     subtitle: p.description ?? (discountLabel ? `À partir de ${p.final_price?.toFixed(2) ?? ''}€` : 'Offre limitée'),
     imageUrl: safeImage ?? undefined,
+    backgroundColor: p.background_color || undefined,
     buttonText: p.cta_label ?? 'Découvrir',
+    ctaType: p.cta_type,
     discountLabel,
+    menuIds: p.menu_ids,
+    dishIds: p.dish_ids,
+    finalPrice: p.final_price,
+    originalPrice: p.original_price,
   };
 }
 

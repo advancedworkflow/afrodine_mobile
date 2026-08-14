@@ -32,6 +32,8 @@ export interface RestaurantApi {
   description?: string;
   address?: string;
   city?: string;
+  latitude?: number;
+  longitude?: number;
   phone?: string;
   email?: string;
   cuisine_type?: string;

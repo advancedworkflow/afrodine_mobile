@@ -86,6 +86,7 @@ export interface ManagementDish {
   category_id?: number;
   is_available?: boolean;
   restaurant_id?: number;
+  catering_only?: boolean;
 }
 
 export interface MenuWithDishes {
@@ -126,6 +127,7 @@ export interface DishCreatePayload {
   category_id?: number;
   diet_type?: string;
   is_available?: boolean;
+  catering_only?: boolean;
 }
 
 export interface MenuCreatePayload {
@@ -144,6 +146,7 @@ export async function createDish(payload: DishCreatePayload): Promise<Management
     category_id: payload.category_id ?? null,
     diet_type: payload.diet_type ?? 'none',
     is_available: payload.is_available ?? true,
+    catering_only: payload.catering_only ?? false,
   });
   return data;
 }
@@ -157,6 +160,7 @@ export async function updateDish(dishId: number, payload: Partial<DishCreatePayl
     category_id: payload.category_id ?? null,
     diet_type: payload.diet_type ?? 'none',
     is_available: payload.is_available ?? true,
+    catering_only: payload.catering_only ?? false,
   });
   return data;
 }
@@ -582,6 +586,70 @@ export interface PromotionStats {
 export async function getManagementPromotionStats(): Promise<PromotionStats> {
   const {data} = await api.get<PromotionStats>(`${BASE}/promotions/stats`);
   return data ?? {};
+}
+
+// --- Employés ---
+export type EmployeeRole = 'manager' | 'kitchen' | 'service' | 'cashier' | 'delivery' | 'staff';
+
+export interface ManagementEmployee {
+  id: number;
+  restaurant_id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  role: EmployeeRole;
+  hire_date: string;
+  salary?: number;
+  permissions?: Record<string, unknown>;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
+}
+
+export interface EmployeeCreatePayload {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  role: EmployeeRole;
+  hire_date: string;
+  salary?: number;
+}
+
+export type EmployeeUpdatePayload = Partial<Omit<EmployeeCreatePayload, 'password'>>;
+
+export async function getEmployees(): Promise<ManagementEmployee[]> {
+  const { data } = await api.get<ManagementEmployee[]>(`${BASE}/employees`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createEmployee(payload: EmployeeCreatePayload): Promise<ManagementEmployee> {
+  const restaurantId = await getCurrentRestaurantId();
+  const { data } = await api.post<ManagementEmployee>(`${BASE}/employees`, {
+    ...payload,
+    restaurant_id: restaurantId,
+  });
+  return data!;
+}
+
+export async function updateEmployee(
+  employeeId: number,
+  payload: EmployeeUpdatePayload,
+): Promise<ManagementEmployee> {
+  const { data } = await api.put<ManagementEmployee>(`${BASE}/employees/${employeeId}`, payload);
+  return data!;
+}
+
+export async function deleteEmployee(employeeId: number): Promise<void> {
+  await api.delete(`${BASE}/employees/${employeeId}`);
+}
+
+export async function toggleEmployeeStatus(employeeId: number): Promise<ManagementEmployee> {
+  const { data } = await api.patch<ManagementEmployee>(`${BASE}/employees/${employeeId}/toggle-status`);
+  return data!;
 }
 
 // --- Upload image (React Native: uri + name + type) ---

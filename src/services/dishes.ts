@@ -125,3 +125,14 @@ export async function getDishes(params?: {
   const list = Array.isArray(data) ? data : [];
   return list.map(toDishForListFromApi);
 }
+
+export async function getDishesByCategory(
+  categoryId: number | string,
+  params?: {limit?: number; skip?: number},
+): Promise<DishForList[]> {
+  const {data} = await api.get<any[]>(`/dishes/by_category/${categoryId}`, {
+    params: {limit: params?.limit ?? 20, skip: params?.skip ?? 0},
+  });
+  const list = Array.isArray(data) ? data : [];
+  return list.map(toDishForListFromApi);
+}

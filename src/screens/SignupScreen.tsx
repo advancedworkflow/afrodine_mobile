@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,14 @@ import {
   Platform,
   Modal,
   Image,
+  FlatList,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
 import {useAuth} from '../contexts/AuthContext';
 import {Colors} from '../utils/colors';
 import {useNavigation} from '@react-navigation/native';
 import type {SignupType} from '../contexts/AuthContext';
+import {getReferenceCountries, GeoCountry} from '../services/reference';
 
 const SignupScreen = () => {
   const [accountType, setAccountType] = useState<SignupType | null>(null);
@@ -34,9 +36,38 @@ const SignupScreen = () => {
   const [description, setDescription] = useState('');
   const [cuisineType, setCuisineType] = useState('');
 
+  const [countryList, setCountryList] = useState<GeoCountry[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<GeoCountry | null>(null);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const {signupClient, signupRestaurant} = useAuth();
   const navigation = useNavigation();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const countries = await getReferenceCountries();
+        if (cancelled) return;
+        setCountryList(countries);
+        if (countries.length > 0) setSelectedCountry(countries[0]);
+      } catch (e) {
+        console.error('Erreur chargement pays:', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const buildFullPhone = (rawPhone: string) => {
+    const trimmed = rawPhone.trim();
+    if (!trimmed) return trimmed;
+    if (trimmed.startsWith('+')) return trimmed;
+    const dial = selectedCountry?.dial_code || '+33';
+    return `${dial}${trimmed.replace(/^0+/, '')}`;
+  };
 
   const openTypeModal = () => {
     setAccountType(null);
@@ -63,7 +94,8 @@ const SignupScreen = () => {
     }
     setLoading(true);
     try {
-      await signupClient(email, password, firstName.trim(), lastName.trim(), phone.trim() || undefined, address.trim() || undefined);
+      const fullPhone = phone.trim() ? buildFullPhone(phone) : undefined;
+      await signupClient(email, password, firstName.trim(), lastName.trim(), fullPhone, address.trim() || undefined);
     } catch (error: any) {
       Alert.alert('Erreur d\'inscription', error.message);
     } finally {
@@ -91,7 +123,7 @@ const SignupScreen = () => {
         password,
         name.trim(),
         address.trim(),
-        phone.trim(),
+        buildFullPhone(phone),
         city.trim(),
         description.trim() || undefined,
         cuisineType.trim() || undefined,
@@ -156,9 +188,15 @@ const SignupScreen = () => {
         <IconWrapper name="lock-closed-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
         <TextInput style={styles.input} placeholder="Confirmer le mot de passe *" placeholderTextColor={Colors.textLight} value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry autoCapitalize="none" />
       </View>
-      <View style={styles.inputContainer}>
-        <IconWrapper name="call-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
-        <TextInput style={styles.input} placeholder="Téléphone (optionnel)" placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      <View style={styles.phoneRow}>
+        <TouchableOpacity style={styles.countryCodeButton} onPress={() => setShowCountryPicker(true)}>
+          <Text style={styles.countryCodeText}>{selectedCountry?.dial_code || '+33'}</Text>
+          <IconWrapper name="chevron-down-outline" size={16} color={Colors.textLight} />
+        </TouchableOpacity>
+        <View style={[styles.inputContainer, styles.phoneInputContainer]}>
+          <IconWrapper name="call-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
+          <TextInput style={styles.input} placeholder="Téléphone (optionnel)" placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        </View>
       </View>
       <View style={styles.inputContainer}>
         <IconWrapper name="location-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
@@ -201,9 +239,15 @@ const SignupScreen = () => {
         <IconWrapper name="location-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
         <TextInput style={styles.input} placeholder="Adresse *" placeholderTextColor={Colors.textLight} value={address} onChangeText={setAddress} autoCapitalize="words" />
       </View>
-      <View style={styles.inputContainer}>
-        <IconWrapper name="call-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
-        <TextInput style={styles.input} placeholder="Téléphone *" placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      <View style={styles.phoneRow}>
+        <TouchableOpacity style={styles.countryCodeButton} onPress={() => setShowCountryPicker(true)}>
+          <Text style={styles.countryCodeText}>{selectedCountry?.dial_code || '+33'}</Text>
+          <IconWrapper name="chevron-down-outline" size={16} color={Colors.textLight} />
+        </TouchableOpacity>
+        <View style={[styles.inputContainer, styles.phoneInputContainer]}>
+          <IconWrapper name="call-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
+          <TextInput style={styles.input} placeholder="Téléphone *" placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        </View>
       </View>
       <View style={styles.inputContainer}>
         <IconWrapper name="business-outline" size={20} color={Colors.textLight} style={styles.inputIcon} />
@@ -229,10 +273,40 @@ const SignupScreen = () => {
     </View>
   );
 
+  const renderCountryPickerModal = () => (
+    <Modal visible={showCountryPicker} transparent animationType="fade" onRequestClose={() => setShowCountryPicker(false)}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.countryModalBox}>
+          <Text style={styles.typeModalTitle}>Choisissez votre pays</Text>
+          <FlatList
+            data={countryList}
+            keyExtractor={(item) => String(item.id)}
+            style={styles.countryList}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={styles.countryRow}
+                onPress={() => {
+                  setSelectedCountry(item);
+                  setShowCountryPicker(false);
+                }}>
+                <Text style={styles.countryRowName}>{item.name}</Text>
+                <Text style={styles.countryRowDial}>{item.dial_code}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          <TouchableOpacity onPress={() => setShowCountryPicker(false)} style={styles.typeModalCancel}>
+            <Text style={styles.typeModalCancelText}>Fermer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
       {renderTypeChoiceModal()}
+      {renderCountryPickerModal()}
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
@@ -309,6 +383,61 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: Colors.text,
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  countryCodeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray[50],
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
+    height: 56,
+    gap: 4,
+  },
+  countryCodeText: {
+    fontSize: 16,
+    color: Colors.text,
+    fontWeight: '600',
+  },
+  phoneInputContainer: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  countryModalBox: {
+    width: '100%',
+    maxWidth: 360,
+    maxHeight: '70%',
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 24,
+    ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }),
+    ...(Platform.OS !== 'web' && { elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 12 }),
+  },
+  countryList: {
+    marginTop: 8,
+  },
+  countryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray[100],
+  },
+  countryRowName: {
+    fontSize: 15,
+    color: Colors.text,
+  },
+  countryRowDial: {
+    fontSize: 15,
+    color: Colors.textLight,
+    fontWeight: '600',
   },
   button: {
     backgroundColor: Colors.secondary,

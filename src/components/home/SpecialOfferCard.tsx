@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import IconWrapper from '../IconWrapper';
 import {Colors} from '../../utils/colors';
 
@@ -8,46 +8,48 @@ interface SpecialOfferCardProps {
   title: string;
   description: string;
   discount: string;
-  originalPrice?: number;
-  currentPrice?: number;
+  imageUrl?: string;
+  backgroundColor?: string;
+  buttonText?: string;
   icon?: string;
-  gradientColors?: string[];
   onPress?: () => void;
+  onButtonPress?: () => void;
 }
 
 const SpecialOfferCard: React.FC<SpecialOfferCardProps> = ({
   title,
   description,
   discount,
-  originalPrice,
-  currentPrice,
+  imageUrl,
+  backgroundColor,
+  buttonText = 'Découvrir',
   icon = 'fast-food',
-  gradientColors = ['#f97316', '#ef4444'], // orange to red
   onPress,
+  onButtonPress,
 }) => {
+  const bg = backgroundColor || Colors.primary;
+
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        {backgroundColor: gradientColors[0]},
-      ]}
+      style={[styles.container, {backgroundColor: bg}]}
       onPress={onPress}
-      activeOpacity={0.8}>
+      activeOpacity={0.9}>
       <View style={styles.content}>
         <View style={styles.discountBadge}>
           <Text style={styles.discountText}>{discount}</Text>
         </View>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{description}</Text>
-        {originalPrice && currentPrice && (
-          <View style={styles.priceContainer}>
-            <Text style={styles.originalPrice}>{originalPrice.toFixed(2)}€</Text>
-            <Text style={styles.currentPrice}>{currentPrice.toFixed(2)}€</Text>
-          </View>
-        )}
+        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        <Text style={styles.description} numberOfLines={2}>{description}</Text>
+        <TouchableOpacity style={styles.button} onPress={onButtonPress ?? onPress} activeOpacity={0.85}>
+          <Text style={styles.buttonText}>{buttonText}</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.iconContainer}>
-        <IconWrapper name={icon} size={32} color={Colors.white} />
+        {imageUrl ? (
+          <Image source={{uri: imageUrl}} style={styles.image} resizeMode="cover" />
+        ) : (
+          <IconWrapper name={icon} size={32} color={Colors.white} />
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -64,6 +66,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingRight: 12,
   },
   discountBadge: {
     backgroundColor: Colors.white + '33', // 20% opacity
@@ -90,20 +93,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     lineHeight: 16,
   },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  button: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.white,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
   },
-  originalPrice: {
-    fontSize: 14,
-    color: Colors.white + 'BF', // 75% opacity
-    textDecorationLine: 'line-through',
-  },
-  currentPrice: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.white,
+  buttonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.primaryDark ?? Colors.primary,
   },
   iconContainer: {
     width: 80,
@@ -112,8 +112,12 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
 });
 
 export default SpecialOfferCard;
-

@@ -1,73 +1,30 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
-import IconWrapper from '../IconWrapper';
+import {View, Text, TouchableOpacity, StyleSheet, ScrollView, Image} from 'react-native';
 import {Colors} from '../../utils/colors';
+import {getGroceryCategoryIcon} from '../../utils/groceryCategoryIcon';
 
 export interface Category {
   id: string;
   name: string;
-  icon: string;
-  color: {bg: string; icon: string};
 }
 
 interface CategoryGridProps {
   categories?: Category[];
+  selectedCategoryId?: string | null;
   onCategoryPress?: (category: Category) => void;
 }
 
-function normalizeCategoryName(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim();
-}
-
-type ColorSet = {bg: string; icon: string};
-
-/** Associe chaque catégorie (nom normalisé ou mots-clés) à une icône et une couleur. */
-const CATEGORY_ICON_MAP: { keywords: string[]; icon: string; color: ColorSet }[] = [
-  { keywords: ['africain', 'afrique'], icon: 'restaurant', color: Colors.category.orange },
-  { keywords: ['europeen', 'europe', 'pizza', 'pates', 'steak'], icon: 'pizza', color: Colors.category.red },
-  { keywords: ['asiatique', 'asia', 'sushi', 'riz', 'nouilles'], icon: 'restaurant', color: Colors.category.yellow },
-  { keywords: ['fast-food', 'fastfood', 'burger', 'frites', 'snack'], icon: 'fast-food', color: Colors.category.orange },
-  { keywords: ['vegetarien', 'vegan', 'vegane', 'legumes', 'salade', 'vert'], icon: 'leaf', color: Colors.category.green },
-  { keywords: ['dessert', 'desserts', 'glace', 'gateau', 'sucré', 'sucr', 'patisserie'], icon: 'ice-cream', color: Colors.category.purple },
-  { keywords: ['boisson', 'boissons', 'cafe', 'the', 'jus', 'soda', 'alcool', 'vin', 'biere'], icon: 'cafe', color: Colors.category.blue },
-  { keywords: ['viande', 'viandes', 'grill', 'barbecue'], icon: 'flame', color: Colors.category.red },
-  { keywords: ['poisson', 'fruits de mer', 'fruit de mer', 'seafood', 'mer'], icon: 'fish', color: Colors.category.blue },
-  { keywords: ['entree', 'entrées', 'entrees', 'tapas', 'starter'], icon: 'restaurant', color: Colors.category.yellow },
-  { keywords: ['soupe', 'soupes'], icon: 'restaurant', color: Colors.category.orange },
-];
-
-const DEFAULT_ICON = 'restaurant';
-const DEFAULT_COLOR: ColorSet = { bg: Colors.gray[100], icon: Colors.gray[600] };
-
-function getIconAndColorForCategory(name: string): { icon: string; color: ColorSet } {
-  const normalized = normalizeCategoryName(name);
-  for (const entry of CATEGORY_ICON_MAP) {
-    if (entry.keywords.some(kw => normalized.includes(kw))) {
-      return { icon: entry.icon, color: entry.color };
-    }
-  }
-  return { icon: DEFAULT_ICON, color: DEFAULT_COLOR };
-}
-
-/** Mappe les catégories API / DB (id, name) vers le format UI (id, name, icon, color). */
+/** Mappe les catégories API / DB (id, name) vers le format UI (id, name). */
 export function mapApiCategoriesToUi(apiCategories: {id: number; name: string}[]): Category[] {
-  return apiCategories.map((c) => {
-    const { icon, color } = getIconAndColorForCategory(c.name);
-    return {
-      id: String(c.id),
-      name: c.name,
-      icon,
-      color,
-    };
-  });
+  return apiCategories.map((c) => ({
+    id: String(c.id),
+    name: c.name,
+  }));
 }
 
 const CategoryGrid: React.FC<CategoryGridProps> = ({
   categories = [],
+  selectedCategoryId = null,
   onCategoryPress,
 }) => {
   const displayCategories = Array.isArray(categories) ? categories : [];
@@ -79,29 +36,43 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
           <Text style={styles.seeAll}>Voir tout</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.grid}>
-        {displayCategories.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>Aucune catégorie pour le moment</Text>
-          </View>
-        ) : (
-        displayCategories.map(category => (
-          <TouchableOpacity
-            key={category.id}
-            style={styles.categoryItem}
-            onPress={() => onCategoryPress?.(category)}>
-            <View
-              style={[
-                styles.iconContainer,
-                {backgroundColor: category.color.bg},
-              ]}>
-              <IconWrapper name={category.icon} size={24} color={category.color.icon} />
-            </View>
-            <Text style={styles.categoryName}>{category.name}</Text>
-          </TouchableOpacity>
-        ))
-        )}
-      </View>
+      {displayCategories.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>Aucune catégorie pour le moment</Text>
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.grid}>
+          {displayCategories.map(category => {
+            const isActive = selectedCategoryId === category.id;
+            return (
+              <TouchableOpacity
+                key={category.id}
+                style={styles.categoryItem}
+                onPress={() => onCategoryPress?.(category)}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    isActive ? styles.iconContainerActive : null,
+                  ]}>
+                  <Image
+                    source={getGroceryCategoryIcon(category.name)}
+                    style={styles.iconImage}
+                    resizeMode="cover"
+                  />
+                </View>
+                <Text
+                  style={[styles.categoryName, isActive ? styles.categoryNameActive : null]}
+                  numberOfLines={1}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -129,13 +100,12 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    paddingRight: 16,
   },
   categoryItem: {
-    width: '23%',
+    width: 76,
     alignItems: 'center',
-    marginBottom: 12,
+    marginRight: 16,
   },
   iconContainer: {
     width: 64,
@@ -144,12 +114,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    overflow: 'hidden',
+    backgroundColor: Colors.gray[100],
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  iconContainerActive: {
+    backgroundColor: Colors.category.orange.bg,
+    borderColor: Colors.category.orange.icon,
+  },
+  iconImage: {
+    width: '100%',
+    height: '100%',
   },
   categoryName: {
     fontSize: 12,
     fontWeight: '500',
     color: Colors.text,
     textAlign: 'center',
+  },
+  categoryNameActive: {
+    fontWeight: '700',
+    color: Colors.category.orange.icon,
   },
   emptyState: {
     width: '100%',
@@ -163,4 +149,3 @@ const styles = StyleSheet.create({
 });
 
 export default CategoryGrid;
-

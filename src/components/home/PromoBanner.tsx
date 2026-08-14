@@ -3,40 +3,40 @@ import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import {Colors} from '../../utils/colors';
 import {getAbsoluteImageUrl} from '../../utils/api';
 
+const namkeFallback = require('../../assets/namke-fallback.png');
+
 interface PromoBannerProps {
   title?: string;
   subtitle?: string;
   buttonText?: string;
   imageUrl?: string;
+  backgroundColor?: string;
   discountLabel?: string;
   onPress?: () => void;
 }
-
-const DEFAULT_IMAGE = 'https://placehold.co/800x400/png?text=Promo';
 
 const PromoBanner: React.FC<PromoBannerProps> = ({
   title = '30% OFF',
   subtitle = 'Sur votre première\ncommande',
   buttonText = 'Commander',
   imageUrl,
+  backgroundColor,
   discountLabel,
   onPress,
 }) => {
   const [imgError, setImgError] = useState(false);
   const resolvedUri =
-    imageUrl && !imgError
-      ? (getAbsoluteImageUrl(imageUrl) ?? imageUrl)
-      : DEFAULT_IMAGE;
+    imageUrl && !imgError ? (getAbsoluteImageUrl(imageUrl) ?? imageUrl) : null;
   return (
     <View style={styles.container}>
       <Image
-        source={{uri: resolvedUri}}
+        source={resolvedUri ? {uri: resolvedUri} : namkeFallback}
         style={styles.image}
         resizeMode="cover"
         onError={() => setImgError(true)}
       />
       <View style={styles.overlay}>
-        <View style={styles.gradient} />
+        <View style={[styles.gradient, backgroundColor ? {backgroundColor: backgroundColor + 'CC'} : null]} />
         {discountLabel ? (
           <View style={styles.discountBadge}>
             <Text style={styles.discountBadgeText}>{discountLabel}</Text>
@@ -57,9 +57,8 @@ const PromoBanner: React.FC<PromoBannerProps> = ({
 const styles = StyleSheet.create({
   container: {
     height: 160,
-    borderRadius: 16,
     overflow: 'hidden',
-    marginHorizontal: 16,
+    width: '100%',
     marginVertical: 16,
   },
   image: {

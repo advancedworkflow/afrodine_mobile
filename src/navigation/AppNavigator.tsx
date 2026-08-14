@@ -34,6 +34,7 @@ import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RestaurantsScreen from '../screens/RestaurantsScreen';
 import RestaurantDetailsScreen from '../screens/RestaurantDetailsScreen';
+import GroceryShopDetailsScreen from '../screens/GroceryShopDetailsScreen';
 import DishDetailsScreen from '../screens/DishDetailsScreen';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import CartScreen from '../screens/CartScreen';
@@ -60,6 +61,8 @@ import CateringManagementScreen from '../screens/restaurant/CateringManagementSc
 import CateringOfferDetailScreen from '../screens/restaurant/CateringOfferDetailScreen';
 import PromotionsManagementScreen from '../screens/restaurant/PromotionsManagementScreen';
 import PromotionFormScreen from '../screens/restaurant/PromotionFormScreen';
+import EmployeesManagementScreen from '../screens/restaurant/EmployeesManagementScreen';
+import EmployeeFormScreen from '../screens/restaurant/EmployeeFormScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -306,6 +309,13 @@ const AppNavigator = () => {
             })}
           />
           <Stack.Screen
+            name="GroceryShopDetails"
+            component={GroceryShopDetailsScreen}
+            options={({route}: any) => ({
+              ...modalScreenOptions(route.params?.groceryShopName || 'Épicerie', false),
+            })}
+          />
+          <Stack.Screen
             name="DishDetails"
             component={DishDetailsScreen}
             options={({route}: any) => ({
@@ -397,6 +407,16 @@ const AppNavigator = () => {
             component={PromotionFormScreen}
             options={{headerShown: false}}
           />
+          <Stack.Screen
+            name="EmployeesManagement"
+            component={EmployeesManagementScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="EmployeeForm"
+            component={EmployeeFormScreen}
+            options={{headerShown: false}}
+          />
         </>
       ) : (
         <>
@@ -406,6 +426,13 @@ const AppNavigator = () => {
             component={RestaurantDetailsScreen}
             options={({route}: any) => ({
               ...modalScreenOptions(route.params?.restaurantName || 'Restaurant', false),
+            })}
+          />
+          <Stack.Screen
+            name="GroceryShopDetails"
+            component={GroceryShopDetailsScreen}
+            options={({route}: any) => ({
+              ...modalScreenOptions(route.params?.groceryShopName || 'Épicerie', false),
             })}
           />
           <Stack.Screen

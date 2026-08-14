@@ -19,7 +19,8 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const {login} = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const {login, loginWithGoogle} = useAuth();
   const navigation = useNavigation();
 
   const handleLogin = async () => {
@@ -36,6 +37,18 @@ const LoginScreen = () => {
       Alert.alert('Erreur de connexion', error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+      // Navigation handled by AppNavigator based on auth state
+    } catch (error: any) {
+      Alert.alert('Erreur de connexion', error.message);
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -97,6 +110,16 @@ const LoginScreen = () => {
             disabled={loading}>
             <Text style={styles.buttonText}>
               {loading ? 'Connexion...' : 'Se connecter'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+            onPress={handleGoogleLogin}
+            disabled={googleLoading}>
+            <IconWrapper name="logo-google" size={20} color={Colors.text} style={styles.googleIcon} />
+            <Text style={styles.googleButtonText}>
+              {googleLoading ? 'Connexion...' : 'Continuer avec Google'}
             </Text>
           </TouchableOpacity>
 
@@ -185,6 +208,25 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
+  },
+  googleIcon: {
+    marginRight: 10,
+  },
+  googleButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',

@@ -656,6 +656,19 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             <Text style={styles.traiteurButtonText}>Gérer les promotions</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <IconWrapper name="people-outline" size={22} color={Colors.primary} />
+            <Text style={styles.sectionTitle}>Employés</Text>
+          </View>
+          <Text style={styles.mutedText}>Gérez les membres de votre équipe et leurs rôles.</Text>
+          <TouchableOpacity
+            style={styles.traiteurButton}
+            onPress={() => navigation.navigate('EmployeesManagement')}
+            activeOpacity={0.8}>
+            <Text style={styles.traiteurButtonText}>Gérer les employés</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       <Modal
         visible={payoutModalVisible}
