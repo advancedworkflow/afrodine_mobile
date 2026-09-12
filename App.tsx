@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {StatusBar} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
+import './src/utils/applyDefaultFont';
+import './src/i18n';
 import {AuthProvider} from './src/contexts/AuthContext';
 import {SearchProvider} from './src/contexts/SearchContext';
 import {CartProvider} from './src/contexts/CartContext';

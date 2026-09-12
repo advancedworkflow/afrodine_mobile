@@ -1,51 +1,101 @@
-/** Charte Namke — couleurs principales et secondaires (RGB) */
+/**
+ * Charte Namke — d'après les maquettes "Namke App Mobile" (12 écrans, onboarding → paiement).
+ * Fond crème, terracotta pour l'action, vert foncé pour la structure, moutarde en accent.
+ */
 export const Colors = {
-  mustard: 'rgb(255, 199, 23)',
-  terracotta: 'rgb(239, 76, 35)',
-  olive: 'rgb(114, 183, 68)',
-  darkGreen: 'rgb(5, 70, 37)',
-  cream: 'rgb(251, 249, 217)',
-  /** Blanc pur — compatibilité (concat hex type + 'E6') */
+  // Couleurs de marque
+  mustard: '#FFC717',
+  terracotta: '#EF4C23',
+  olive: '#72B744',
+  darkGreen: '#054625',
+  cream: '#FBF9D9',
+  namkeWhite: '#FCFBF5',
+  namkeBlack: '#051004',
+  /** Alias de `cream` — fond des champs/puces/cards secondaires. */
+  surface: '#FBF9D9',
+
   white: '#ffffff',
   black: '#000000',
-  namkeWhite: 'rgb(252, 251, 245)',
-  namkeBlack: 'rgb(5, 16, 4)',
 
-  primary: 'rgb(5, 70, 37)',
-  primaryLight: 'rgb(114, 183, 68)',
-  primaryLighter: 'rgb(114, 183, 68)',
-  primaryDark: 'rgb(3, 40, 22)',
-  secondary: 'rgb(239, 76, 35)',
-  background: 'rgb(252, 251, 245)',
-  // Retire le beige global de fond dans l'app mobile
-  backgroundLight: 'rgb(252, 251, 245)',
-  text: 'rgb(5, 70, 37)',
-  textLight: '#6b7280',
-  textDark: 'rgb(5, 16, 4)',
-  border: '#e5e7eb',
+  primary: '#EF4C23',
+  primaryLight: '#F47A54',
+  primaryLighter: '#FBC7B4',
+  primaryDark: '#B8340F',
+  secondary: '#054625',
+  background: '#FCFBF5',
+  backgroundLight: '#FCFBF5',
+  text: '#051004',
+  textLight: 'rgba(5,16,4,0.62)',
+  textDark: '#051004',
+  border: 'rgba(5,16,4,0.12)',
   error: '#ef4444',
-  success: 'rgb(114, 183, 68)',
-  warning: 'rgb(255, 199, 23)',
+  success: '#72B744',
+  warning: '#FFC717',
+
   gray: {
-    50: '#f9fafb',
-    100: '#f3f4f6',
-    200: '#e5e7eb',
-    300: '#d1d5db',
-    400: '#9ca3af',
-    500: '#6b7280',
-    600: '#4b5563',
-    700: '#374151',
-    800: '#1f2937',
-    900: '#111827',
+    50: '#FBF9D9',
+    100: 'rgba(5,16,4,0.06)',
+    200: 'rgba(5,16,4,0.1)',
+    300: 'rgba(5,16,4,0.16)',
+    400: 'rgba(5,16,4,0.34)',
+    500: 'rgba(5,16,4,0.5)',
+    600: 'rgba(5,16,4,0.62)',
+    700: 'rgba(5,16,4,0.76)',
+    800: 'rgba(5,16,4,0.88)',
+    900: '#051004',
   },
+
   category: {
-    darkGreenWhite: {bg: '#ffffff', icon: 'rgb(5, 70, 37)'},
-    orange: {bg: '#fff7ed', icon: '#f97316'},
-    red: {bg: '#fef2f2', icon: '#ef4444'},
-    yellow: {bg: '#fefce8', icon: '#ca8a04'},
-    green: {bg: 'rgb(251, 249, 217)', icon: 'rgb(114, 183, 68)'},
+    darkGreenWhite: {bg: '#FCFBF5', icon: '#EF4C23'},
+    orange: {bg: '#FBF9D9', icon: '#EF4C23'},
+    red: {bg: '#fdecea', icon: '#ef4444'},
+    yellow: {bg: '#FBF9D9', icon: '#FFC717'},
+    green: {bg: '#FBF9D9', icon: '#72B744'},
     purple: {bg: '#faf5ff', icon: '#a855f7'},
     blue: {bg: '#eff6ff', icon: '#3b82f6'},
     pink: {bg: '#fdf2f8', icon: '#ec4899'},
+  },
+};
+
+/** Rayons — très arrondi, jusqu'à la pilule pour boutons/champs/tags. */
+export const Radius = {
+  sm: 9,
+  md: 18,
+  lg: 26,
+  pill: 999,
+};
+
+/** Espacements. */
+export const Spacing = {
+  1: 4,
+  2: 8,
+  3: 12,
+  4: 16,
+  6: 22,
+  8: 30,
+};
+
+/** Ombres — teintées encre (namkeBlack), jamais du noir pur. */
+export const Shadows = {
+  sm: {
+    shadowColor: '#051004',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#051004',
+    shadowOffset: {width: 0, height: 6},
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
+  },
+  lg: {
+    shadowColor: '#051004',
+    shadowOffset: {width: 0, height: 22},
+    shadowOpacity: 0.16,
+    shadowRadius: 50,
+    elevation: 10,
   },
 };

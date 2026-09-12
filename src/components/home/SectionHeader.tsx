@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {Colors} from '../../utils/colors';
+import {fontDisplay, fontHeading} from '../../utils/fonts';
 
 interface SectionHeaderProps {
   title: string;
@@ -33,14 +34,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    fontSize: 22,
+    color: Colors.text,
+    fontFamily: fontDisplay,
   },
   seeAll: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.primaryLight,
+    fontSize: 13,
+    color: Colors.primary,
+    fontFamily: fontHeading,
   },
 });
 

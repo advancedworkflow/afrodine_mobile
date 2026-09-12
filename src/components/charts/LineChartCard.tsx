@@ -209,6 +209,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginBottom: 8,
   },
+  areaStrip: {
+    position: 'absolute',
+  },
   segment: {
     position: 'absolute',
     width: 1,

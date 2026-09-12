@@ -7,10 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {alert} from '../utils/alert';
 import TopBar from '../components/TopBar';
 import IconWrapper from '../components/IconWrapper';
 import {Colors} from '../utils/colors';
@@ -70,14 +70,14 @@ const EditProfileScreen = ({navigation}: any) => {
       const updated = await updateClientProfile(payload);
       if (updated) {
         setProfile(updated);
-        Alert.alert('Profil enregistré', 'Les modifications ont bien été enregistrées.', [
+        alert('Profil enregistré', 'Les modifications ont bien été enregistrées.', [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       } else {
-        Alert.alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+        alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
       }
     } catch {
-      Alert.alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+      alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
     } finally {
       setSaving(false);
     }

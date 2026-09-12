@@ -84,6 +84,7 @@ export interface DishForList {
   imageUrl?: string;
   isFavorite?: boolean;
   restaurantId?: string;
+  restaurantName?: string;
 }
 
 function toDishForListFromApi(d: {
@@ -95,6 +96,7 @@ function toDishForListFromApi(d: {
   image_url?: string;
   image?: string;
   restaurant_id?: number;
+  restaurant?: {name: string; rating?: number};
 }): DishForList {
   const baseImageUrl =
     (d as any).dish_image_url ||
@@ -109,9 +111,11 @@ function toDishForListFromApi(d: {
     name: d.name,
     description: d.description ?? undefined,
     price: d.price,
+    rating: d.restaurant?.rating,
     imageUrl,
     isFavorite: false,
     restaurantId: d.restaurant_id ? String(d.restaurant_id) : undefined,
+    restaurantName: d.restaurant?.name,
   };
 }
 

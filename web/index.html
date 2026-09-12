@@ -7,7 +7,7 @@
     <title>namke</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..72,500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..72,600;700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -21,9 +21,13 @@
         }
         #root {
             width: 100%;
+            max-width: 480px;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            margin: 0 auto;
+            background: #FCFBF5;
+            box-shadow: 0 0 40px rgba(5,16,4,0.12);
         }
         html, body {
             margin: 0;
@@ -31,6 +35,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background: #E9E4C9;
         }
         /* Styles pour les icônes @expo/vector-icons sur le web */
         svg {

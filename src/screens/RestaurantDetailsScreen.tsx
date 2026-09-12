@@ -9,13 +9,12 @@ import {
   StatusBar,
   ActivityIndicator,
   TextInput,
-  Alert,
 } from 'react-native';
+import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import RestaurantMap from '../components/RestaurantMap';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
-import DishCard from '../components/home/DishCard';
+import {Colors, Radius} from '../utils/colors';
+import {secondaryFont, fontButton, fontDisplay, fontDisplayMedium, fontHeading} from '../utils/fonts';
 import SectionHeader from '../components/home/SectionHeader';
 import {useFavorites} from '../contexts/FavoritesContext';
 import {useCart} from '../contexts/CartContext';
@@ -24,11 +23,14 @@ import {getLoyaltyAccount} from '../services/loyalty';
 import {getAbsoluteImageUrl} from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {formatAxiosError} from '../utils/formatApiError';
+import ReportModal from '../components/ReportModal';
 
 interface RestaurantDetailsScreenProps {
   route: any;
   navigation: any;
 }
+
+type DetailTab = 'carte' | 'avis' | 'infos';
 
 const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   route,
@@ -42,7 +44,8 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   const [imageLoadError, setImageLoadError] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showMenuSection, setShowMenuSection] = useState(true);
-  const [activeTab, setActiveTab] = useState<'menu' | 'plats'>('menu');
+  const [detailTab, setDetailTab] = useState<DetailTab>('carte');
+  const [cardTab, setCardTab] = useState<'menu' | 'plats'>('plats');
   const [reviews, setReviews] = useState<restaurantsApi.RestaurantReviewApi[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [reviewRating, setReviewRating] = useState(0);
@@ -52,6 +55,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loyaltyPointsBalance, setLoyaltyPointsBalance] = useState<number | null>(null);
   const [loyaltyBalanceLoading, setLoyaltyBalanceLoading] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const {isFavorite: isFav, toggleFavorite} = useFavorites();
   const {items: cartItems, addItem} = useCart();
   const isFavorite = restaurant ? isFav(String(restaurant.id)) : false;
@@ -168,6 +172,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                   : `${Number(restData.delivery_fee).toFixed(1)}€`
                 : '—',
             imageUrl: imageUrl || undefined,
+            avatarUrl: restData.profile?.logo_url || undefined,
             description: restData.description,
             address: restData.address,
             city: restData.city,
@@ -175,6 +180,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
             longitude: restData.longitude,
             phone: restData.phone,
             hours: hoursDisplay,
+            minimumOrder: restData.minimum_order ?? undefined,
             loyaltyEnabled: restData.loyalty_enabled !== false,
             loyaltyTrancheEuros:
               restData.loyalty_tranche_euros != null
@@ -283,11 +289,11 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
 
   const handleSubmitReview = async () => {
     if (!restaurantId || reviewRating < 1 || reviewRating > 5) {
-      Alert.alert('Erreur', 'Veuillez choisir une note entre 1 et 5 étoiles.');
+      alert('Erreur', 'Veuillez choisir une note entre 1 et 5 étoiles.');
       return;
     }
     if (!isLoggedIn) {
-      Alert.alert('Connexion requise', 'Connectez-vous pour laisser un avis.');
+      alert('Connexion requise', 'Connectez-vous pour laisser un avis.');
       return;
     }
     setReviewSubmitting(true);
@@ -308,14 +314,14 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
       setReviewRating(0);
       setReviewComment('');
       setUserHasReviewed(true);
-      Alert.alert('Merci !', 'Votre avis a bien été enregistré.');
+      alert('Merci !', 'Votre avis a bien été enregistré.');
     } catch (e: any) {
       const msg = formatAxiosError(e, 'Erreur lors de l\'envoi.');
       if (msg.toLowerCase().includes('already reviewed')) {
         setUserHasReviewed(true);
-        Alert.alert('Déjà avis', 'Vous avez déjà laissé un avis pour ce restaurant.');
+        alert('Déjà avis', 'Vous avez déjà laissé un avis pour ce restaurant.');
       } else {
-        Alert.alert('Erreur', msg);
+        alert('Erreur', msg);
       }
     } finally {
       setReviewSubmitting(false);
@@ -347,27 +353,28 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Image header */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* Couverture */}
         <View style={styles.imageContainer}>
           {(() => {
             const bannerUri = getAbsoluteImageUrl(restaurant.imageUrl);
             const showBanner = restaurant.imageUrl && bannerUri && !imageLoadError;
             return showBanner ? (
-            <Image
+              <Image
                 source={{uri: bannerUri}}
-              style={styles.headerImage}
-              resizeMode="cover"
-              onError={() => setImageLoadError(true)}
-            />
-          ) : (
-            <View style={[styles.headerImage, styles.headerPlaceholder]}>
-              <IconWrapper name="restaurant-outline" size={64} color={Colors.textLight} />
-              <Text style={styles.headerPlaceholderText}>Bannière du restaurant</Text>
-            </View>
+                style={styles.headerImage}
+                resizeMode="cover"
+                onError={() => setImageLoadError(true)}
+              />
+            ) : (
+              <View style={[styles.headerImage, styles.headerPlaceholder]}>
+                <IconWrapper name="restaurant-outline" size={64} color={Colors.textLight} />
+              </View>
             );
           })()}
-          <View style={styles.headerOverlay} />
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <IconWrapper name="arrow-back-outline" size={22} color={Colors.darkGreen} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.favoriteButton}
             onPress={() => {
@@ -386,238 +393,179 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
             }}>
             <IconWrapper
               name={isFavorite ? 'heart' : 'heart-outline'}
-              size={24}
-              color={isFavorite ? Colors.error : Colors.primary}
+              size={22}
+              color={isFavorite ? Colors.error : Colors.terracotta}
             />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.reportButton}
+            onPress={() => setShowReportModal(true)}>
+            <IconWrapper name="flag-outline" size={18} color={Colors.text} />
           </TouchableOpacity>
         </View>
 
-        {/* Restaurant Info */}
         <View style={styles.content}>
+          {/* Avatar */}
+          <View style={styles.avatarRow}>
+            <View style={styles.avatarWrap}>
+              {restaurant.avatarUrl ? (
+                <Image source={{uri: getAbsoluteImageUrl(restaurant.avatarUrl)}} style={styles.avatarImage} resizeMode="cover" />
+              ) : (
+                <View style={[styles.avatarImage, styles.avatarPlaceholder]}>
+                  <IconWrapper name="restaurant-outline" size={26} color={Colors.textLight} />
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Titre + meta */}
           <View style={styles.header}>
-            <View style={styles.titleRow}>
-              <View style={styles.titleLeft}>
-                <Text style={styles.name}>{restaurant.name}</Text>
-                <Text style={styles.cuisine}>{restaurant.cuisine} • {restaurant.priceRange}</Text>
-              </View>
-              <View style={styles.titleRight}>
-                <View style={styles.ratingBadge}>
-                  <IconWrapper name="star" size={16} color={Colors.warning} />
-                  <Text style={styles.ratingText}>{displayRating}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Info Cards */}
-          <View style={styles.infoCards}>
-            <View style={styles.infoCard}>
-              <IconWrapper name="time-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardText}>{restaurant.deliveryTime}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <IconWrapper name="bicycle-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardText}>{restaurant.deliveryFee}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <IconWrapper name="star-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardText}>{restaurant.rating}★</Text>
-            </View>
-          </View>
-
-          {restaurant.loyaltyEnabled !== false && (
-            <View style={styles.loyaltyBanner}>
-              <IconWrapper name="gift-outline" size={22} color={Colors.primary} />
-              <View style={styles.loyaltyBannerTextWrap}>
-                <Text style={styles.loyaltyBannerTitle}>Points de fidélité namke</Text>
-                <Text style={styles.loyaltyBannerSub}>
-                  {Number(restaurant.loyaltyPointsPerTranche ?? 1) || 0} point(s) tous les{' '}
-                  {Number(restaurant.loyaltyTrancheEuros ?? 10).toLocaleString('fr-FR', {
-                    maximumFractionDigits: 2,
-                  })}{' '}
-                  € dépensés (après paiement).
-                </Text>
-                {isLoggedIn && loyaltyBalanceLoading && (
-                  <ActivityIndicator style={{marginTop: 8}} size="small" color={Colors.primary} />
-                )}
-                {isLoggedIn && !loyaltyBalanceLoading && loyaltyPointsBalance !== null && (
-                  <Text style={styles.loyaltyBalance}>
-                    Vos points disponibles : <Text style={styles.loyaltyBalanceNum}>{loyaltyPointsBalance}</Text>
-                  </Text>
-                )}
-                {!isLoggedIn && (
-                  <Text style={styles.loyaltyHint}>Connectez-vous pour voir votre solde de points.</Text>
-                )}
-              </View>
-            </View>
-          )}
-
-          {/* Description */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>À propos</Text>
-            <Text style={styles.description}>{restaurant.description}</Text>
-          </View>
-
-          {/* Contact Info */}
-          <View style={styles.section}>
-            <View style={styles.contactItem}>
-              <IconWrapper name="location-outline" size={20} color={Colors.primary} />
-              <Text style={styles.contactText}>{restaurant.address}</Text>
-            </View>
-            <View style={styles.contactItem}>
-              <IconWrapper name="call-outline" size={20} color={Colors.primary} />
-              <Text style={styles.contactText}>{restaurant.phone}</Text>
-            </View>
-            <View style={styles.contactItem}>
-              <IconWrapper name="time-outline" size={20} color={Colors.primary} />
-              <Text style={styles.contactText}>{restaurant.hours}</Text>
-            </View>
-            <RestaurantMap
-              latitude={restaurant.latitude}
-              longitude={restaurant.longitude}
-              address={restaurant.address}
-              city={restaurant.city}
-            />
-          </View>
-
-          {/* Images du restaurant */}
-          {galleryImages.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Images du restaurant</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.galleryScroll}
-              >
-                {galleryImages.map((uri, index) => (
-                  <View key={`gallery-${index}`} style={styles.galleryItem}>
-                    <Image
-                      source={{ uri: getAbsoluteImageUrl(uri) }}
-                      style={styles.galleryImage}
-                      resizeMode="cover"
-                    />
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-
-          {/* Laisser un avis */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Laisser un avis</Text>
-            {!isLoggedIn ? (
-              <Text style={styles.reviewHint}>Connectez-vous pour noter ce restaurant.</Text>
-            ) : userHasReviewed ? (
-              <Text style={styles.reviewHint}>Vous avez déjà laissé un avis.</Text>
-            ) : (
-              <>
-                <View style={styles.starRow}>
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <TouchableOpacity
-                      key={star}
-                      onPress={() => setReviewRating(star)}
-                      style={styles.starButton}
-                      activeOpacity={0.7}>
-                      <IconWrapper
-                        name={reviewRating >= star ? 'star' : 'star-outline'}
-                        size={32}
-                        color={reviewRating >= star ? Colors.warning : Colors.textLight}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <TextInput
-                  style={styles.reviewInput}
-                  placeholder="Votre avis (optionnel)"
-                  placeholderTextColor={Colors.textLight}
-                  value={reviewComment}
-                  onChangeText={setReviewComment}
-                  multiline
-                  numberOfLines={3}
-                />
-                <TouchableOpacity
-                  style={[styles.reviewSubmitButton, reviewSubmitting && styles.reviewSubmitDisabled]}
-                  onPress={handleSubmitReview}
-                  disabled={reviewSubmitting || reviewRating < 1}>
-                  {reviewSubmitting ? (
-                    <ActivityIndicator size="small" color={Colors.white} />
-                  ) : (
-                    <Text style={styles.reviewSubmitText}>Envoyer l'avis</Text>
-                  )}
-                </TouchableOpacity>
-              </>
-            )}
-            {reviews.length > 0 && (
-              <View style={styles.reviewsList}>
-                <Text style={styles.reviewsListTitle}>Avis ({reviews.length})</Text>
-                {reviews.slice(0, 5).map(r => (
-                  <View key={r.id} style={styles.reviewItem}>
-                    <View style={styles.reviewItemHeader}>
-                      <Text style={styles.reviewItemRating}>{r.rating} ★</Text>
-                    </View>
-                    {r.comment ? (
-                      <Text style={styles.reviewItemComment}>{r.comment}</Text>
-                    ) : null}
-                  </View>
-                ))}
-              </View>
+            <Text style={styles.name}>{restaurant.name}</Text>
+            <Text style={styles.metaLine}>
+              ★ {displayRating} · {reviews.length} avis · {restaurant.cuisine}
+              {restaurant.city ? ` · ${restaurant.city}` : ''}
+            </Text>
+            {restaurant.minimumOrder != null && (
+              <Text style={styles.metaHighlight}>Min. {Number(restaurant.minimumOrder).toFixed(0)} €</Text>
             )}
           </View>
 
-          {/* Résumé: icône sombre, Plats, Prix total, Catégories */}
-          <View style={styles.summaryBar}>
-            <IconWrapper name="nutrition-outline" size={22} color={Colors.primary} />
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Plats</Text>
-              <Text style={styles.summaryValue}>{dishes.length}</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Prix total</Text>
-              <Text style={styles.summaryValue}>
-                {cartForRestaurant.total > 0 ? `${cartForRestaurant.total.toFixed(2)} €` : '—'}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Catégories</Text>
-              <Text style={styles.summaryValue}>{categories.length}</Text>
-            </View>
-          </View>
-
-          {/* Tabs Menu / Plats */}
+          {/* Onglets Carte / Avis / Infos */}
           <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'menu' && styles.tabActive]}
-              onPress={() => setActiveTab('menu')}
-              activeOpacity={0.8}>
-              <IconWrapper
-                name="restaurant-outline"
-                size={20}
-                color={activeTab === 'menu' ? Colors.primary : Colors.textLight}
-              />
-              <Text style={[styles.tabText, activeTab === 'menu' && styles.tabTextActive]}>
-                Menu {menusWithDishes.length > 0 ? `(${menusWithDishes.length})` : ''}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'plats' && styles.tabActive]}
-              onPress={() => setActiveTab('plats')}
-              activeOpacity={0.8}>
-              <IconWrapper
-                name="nutrition-outline"
-                size={20}
-                color={activeTab === 'plats' ? Colors.primary : Colors.textLight}
-              />
-              <Text style={[styles.tabText, activeTab === 'plats' && styles.tabTextActive]}>
-                Plats {dishes.length > 0 ? `(${dishes.length})` : ''}
-              </Text>
-            </TouchableOpacity>
+            {([
+              {key: 'carte', label: 'Carte'},
+              {key: 'avis', label: `Avis${reviews.length > 0 ? ` (${reviews.length})` : ''}`},
+              {key: 'infos', label: 'Infos'},
+            ] as {key: DetailTab; label: string}[]).map(tab => (
+              <TouchableOpacity
+                key={tab.key}
+                style={styles.tab}
+                onPress={() => setDetailTab(tab.key)}
+                activeOpacity={0.7}>
+                <Text style={[styles.tabText, detailTab === tab.key && styles.tabTextActive]}>
+                  {tab.label}
+                </Text>
+                {detailTab === tab.key && <View style={styles.tabIndicator} />}
+              </TouchableOpacity>
+            ))}
           </View>
 
-          {/* Contenu selon l’onglet actif */}
-          {activeTab === 'menu' ? (
+          {detailTab === 'carte' && (
             <View style={styles.section}>
-              <SectionHeader title="Menus" />
-              {menusWithDishes.length > 0 ? (
+              <View style={styles.cardSubTabs}>
+                <TouchableOpacity
+                  style={[styles.cardSubTab, cardTab === 'plats' && styles.cardSubTabActive]}
+                  onPress={() => setCardTab('plats')}
+                  activeOpacity={0.8}>
+                  <Text style={[styles.cardSubTabText, cardTab === 'plats' && styles.cardSubTabTextActive]}>
+                    Plats {dishes.length > 0 ? `(${dishes.length})` : ''}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.cardSubTab, cardTab === 'menu' && styles.cardSubTabActive]}
+                  onPress={() => setCardTab('menu')}
+                  activeOpacity={0.8}>
+                  <Text style={[styles.cardSubTabText, cardTab === 'menu' && styles.cardSubTabTextActive]}>
+                    Menus {menusWithDishes.length > 0 ? `(${menusWithDishes.length})` : ''}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {cardTab === 'plats' ? (
+                <>
+                  {categories.length > 0 && (
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.bubblesContainer}
+                      style={styles.bubblesScroll}>
+                      <TouchableOpacity
+                        style={[
+                          styles.bubble,
+                          (!selectedCategory || selectedCategory === 'Tout') && styles.bubbleActive,
+                        ]}
+                        onPress={() => setSelectedCategory('Tout')}
+                        activeOpacity={0.7}>
+                        <Text
+                          style={[
+                            styles.bubbleText,
+                            (!selectedCategory || selectedCategory === 'Tout') && styles.bubbleTextActive,
+                          ]}>
+                          Tout
+                        </Text>
+                      </TouchableOpacity>
+                      {categories.map(cat => (
+                        <TouchableOpacity
+                          key={cat}
+                          style={[styles.bubble, selectedCategory === cat && styles.bubbleActive]}
+                          onPress={() => setSelectedCategory(cat)}
+                          activeOpacity={0.7}>
+                          <Text
+                            style={[
+                              styles.bubbleText,
+                              selectedCategory === cat && styles.bubbleTextActive,
+                            ]}
+                            numberOfLines={1}>
+                            {cat}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  )}
+                  {filteredDishes.length === 0 ? (
+                    <Text style={styles.noDishes}>Aucun plat pour le moment.</Text>
+                  ) : (
+                    filteredDishes.map(dish => {
+                      const dishUri = getAbsoluteImageUrl(dish.imageUrl);
+                      return (
+                        <TouchableOpacity
+                          key={dish.id}
+                          style={styles.dishRow}
+                          activeOpacity={0.85}
+                          onPress={() =>
+                            navigation.navigate('DishDetails', {
+                              dishId: dish.id,
+                              restaurantId: restaurant.id,
+                            })
+                          }>
+                          {dishUri ? (
+                            <Image source={{uri: dishUri}} style={styles.dishRowImage} resizeMode="cover" />
+                          ) : (
+                            <View style={[styles.dishRowImage, styles.dishRowImagePlaceholder]}>
+                              <IconWrapper name="restaurant-outline" size={24} color={Colors.textLight} />
+                            </View>
+                          )}
+                          <View style={styles.dishRowInfo}>
+                            <Text style={styles.dishRowName} numberOfLines={1}>{dish.name}</Text>
+                            {dish.description ? (
+                              <Text style={styles.dishRowDescription} numberOfLines={1}>{dish.description}</Text>
+                            ) : null}
+                            <View style={styles.dishRowFooter}>
+                              <Text style={styles.dishRowPrice}>{dish.price.toFixed(2)} €</Text>
+                              <TouchableOpacity
+                                style={styles.dishRowAdd}
+                                onPress={() => {
+                                  addItem({
+                                    dishId: Number(dish.id),
+                                    restaurantId: restaurant.id,
+                                    name: dish.name,
+                                    price: dish.price,
+                                    quantity: 1,
+                                    imageUrl: dish.imageUrl ?? undefined,
+                                    deliveryFee: deliveryFeeNum > 0 ? deliveryFeeNum : undefined,
+                                  });
+                                }}
+                                activeOpacity={0.8}>
+                                <IconWrapper name="add" size={18} color={Colors.namkeWhite} />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })
+                  )}
+                </>
+              ) : menusWithDishes.length > 0 ? (
                 <>
                   <TouchableOpacity
                     style={styles.voirMenuButton}
@@ -665,41 +613,6 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                             </Text>
                           </View>
                         </View>
-                        {menu.dishes && menu.dishes.length > 0 ? (
-                          <View style={styles.menuCardDishes}>
-                            {menu.dishes.map(dish => (
-                              <DishCard
-                                key={`${menu.id}-${dish.id}`}
-                                id={String(dish.id)}
-                                name={dish.name}
-                                description={dish.description}
-                                price={dish.price}
-                                imageUrl={dish.image_url}
-                                onPress={() =>
-                                  navigation.navigate('DishDetails', {
-                                    dishId: String(dish.id),
-                                    restaurantId: restaurant.id,
-                                  })
-                                }
-                                onFavoritePress={() => {}}
-                                onAddPress={() => {
-                                  addItem({
-                                    dishId: dish.id,
-                                    restaurantId: restaurant.id,
-                                    name: dish.name,
-                                    price: dish.price ?? 0,
-                                    quantity: 1,
-                                    imageUrl: dish.image_url ?? undefined,
-                                    deliveryFee: deliveryFeeNum > 0 ? deliveryFeeNum : undefined,
-                                  });
-                                  navigation.navigate('Cart');
-                                }}
-                              />
-                            ))}
-                          </View>
-                        ) : (
-                          <Text style={styles.noDishes}>Aucun plat dans ce menu.</Text>
-                        )}
                         <TouchableOpacity
                           style={styles.addMenuToCartButton}
                           onPress={() => {
@@ -719,7 +632,6 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                               imageUrl: menu.dishes?.[0]?.image_url ?? undefined,
                               deliveryFee: deliveryFeeNum > 0 ? deliveryFeeNum : undefined,
                             });
-                            navigation.navigate('Cart');
                           }}
                           activeOpacity={0.8}>
                           <IconWrapper name="cart-outline" size={20} color={Colors.white} />
@@ -734,81 +646,172 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                 <Text style={styles.noDishes}>Aucun menu pour le moment.</Text>
               )}
             </View>
-          ) : (
+          )}
+
+          {detailTab === 'avis' && (
             <View style={styles.section}>
-              <SectionHeader title="Plats" />
-              {categories.length > 0 && (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.bubblesContainer}
-                  style={styles.bubblesScroll}>
-                  <TouchableOpacity
-                    style={[
-                      styles.bubble,
-                      (!selectedCategory || selectedCategory === 'Tout') && styles.bubbleActive,
-                    ]}
-                    onPress={() => setSelectedCategory('Tout')}
-                    activeOpacity={0.7}>
-                    <Text
-                      style={[
-                        styles.bubbleText,
-                        (!selectedCategory || selectedCategory === 'Tout') && styles.bubbleTextActive,
-                      ]}>
-                      Tout
-                    </Text>
-                  </TouchableOpacity>
-                  {categories.map(cat => (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[styles.bubble, selectedCategory === cat && styles.bubbleActive]}
-                      onPress={() => setSelectedCategory(cat)}
-                      activeOpacity={0.7}>
-                      <Text
-                        style={[
-                          styles.bubbleText,
-                          selectedCategory === cat && styles.bubbleTextActive,
-                        ]}
-                        numberOfLines={1}>
-                        {cat}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-              {filteredDishes.length === 0 ? (
-                <Text style={styles.noDishes}>Aucun plat pour le moment.</Text>
+              {!isLoggedIn ? (
+                <Text style={styles.reviewHint}>Connectez-vous pour noter ce restaurant.</Text>
+              ) : userHasReviewed ? (
+                <Text style={styles.reviewHint}>Vous avez déjà laissé un avis.</Text>
               ) : (
-                filteredDishes.map(dish => (
-              <DishCard
-                key={dish.id}
-                {...dish}
-                onPress={() =>
-                      navigation.navigate('DishDetails', {
-                        dishId: dish.id,
-                        restaurantId: restaurant.id,
-                      })
-                    }
-                    onFavoritePress={() => {}}
-                    onAddPress={() => {
-                      addItem({
-                        dishId: Number(dish.id),
-                        restaurantId: restaurant.id,
-                        name: dish.name,
-                        price: dish.price,
-                        quantity: 1,
-                        imageUrl: dish.imageUrl ?? undefined,
-                        deliveryFee: deliveryFeeNum > 0 ? deliveryFeeNum : undefined,
-                      });
-                      navigation.navigate('Cart');
-                    }}
+                <>
+                  <View style={styles.starRow}>
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <TouchableOpacity
+                        key={star}
+                        onPress={() => setReviewRating(star)}
+                        style={styles.starButton}
+                        activeOpacity={0.7}>
+                        <IconWrapper
+                          name={reviewRating >= star ? 'star' : 'star-outline'}
+                          size={32}
+                          color={reviewRating >= star ? Colors.warning : Colors.textLight}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TextInput
+                    style={styles.reviewInput}
+                    placeholder="Votre avis (optionnel)"
+                    placeholderTextColor={Colors.textLight}
+                    value={reviewComment}
+                    onChangeText={setReviewComment}
+                    multiline
+                    numberOfLines={3}
                   />
-                ))
+                  <TouchableOpacity
+                    style={[styles.reviewSubmitButton, reviewSubmitting && styles.reviewSubmitDisabled]}
+                    onPress={handleSubmitReview}
+                    disabled={reviewSubmitting || reviewRating < 1}>
+                    {reviewSubmitting ? (
+                      <ActivityIndicator size="small" color={Colors.white} />
+                    ) : (
+                      <Text style={styles.reviewSubmitText}>Envoyer l'avis</Text>
+                    )}
+                  </TouchableOpacity>
+                </>
               )}
-          </View>
+              {reviews.length > 0 ? (
+                <View style={styles.reviewsList}>
+                  {reviews.map(r => (
+                    <View key={r.id} style={styles.reviewItem}>
+                      <View style={styles.reviewItemHeader}>
+                        <Text style={styles.reviewItemRating}>{r.rating} ★</Text>
+                      </View>
+                      {r.comment ? (
+                        <Text style={styles.reviewItemComment}>{r.comment}</Text>
+                      ) : null}
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.noDishes}>Aucun avis pour le moment.</Text>
+              )}
+            </View>
+          )}
+
+          {detailTab === 'infos' && (
+            <View style={styles.section}>
+              {restaurant.description ? (
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionTitle}>À propos</Text>
+                  <Text style={styles.description}>{restaurant.description}</Text>
+                </View>
+              ) : null}
+
+              <View style={styles.infoBlock}>
+                <View style={styles.contactItem}>
+                  <IconWrapper name="location-outline" size={20} color={Colors.primary} />
+                  <Text style={styles.contactText}>{restaurant.address}</Text>
+                </View>
+                <View style={styles.contactItem}>
+                  <IconWrapper name="call-outline" size={20} color={Colors.primary} />
+                  <Text style={styles.contactText}>{restaurant.phone}</Text>
+                </View>
+                <View style={styles.contactItem}>
+                  <IconWrapper name="time-outline" size={20} color={Colors.primary} />
+                  <Text style={styles.contactText}>{restaurant.hours}</Text>
+                </View>
+                <RestaurantMap
+                  latitude={restaurant.latitude}
+                  longitude={restaurant.longitude}
+                  address={restaurant.address}
+                  city={restaurant.city}
+                />
+              </View>
+
+              {restaurant.loyaltyEnabled !== false && (
+                <View style={styles.loyaltyBanner}>
+                  <IconWrapper name="gift-outline" size={22} color={Colors.primary} />
+                  <View style={styles.loyaltyBannerTextWrap}>
+                    <Text style={styles.loyaltyBannerTitle}>Points de fidélité namke</Text>
+                    <Text style={styles.loyaltyBannerSub}>
+                      {Number(restaurant.loyaltyPointsPerTranche ?? 1) || 0} point(s) tous les{' '}
+                      {Number(restaurant.loyaltyTrancheEuros ?? 10).toLocaleString('fr-FR', {
+                        maximumFractionDigits: 2,
+                      })}{' '}
+                      € dépensés (après paiement).
+                    </Text>
+                    {isLoggedIn && loyaltyBalanceLoading && (
+                      <ActivityIndicator style={{marginTop: 8}} size="small" color={Colors.primary} />
+                    )}
+                    {isLoggedIn && !loyaltyBalanceLoading && loyaltyPointsBalance !== null && (
+                      <Text style={styles.loyaltyBalance}>
+                        Vos points disponibles : <Text style={styles.loyaltyBalanceNum}>{loyaltyPointsBalance}</Text>
+                      </Text>
+                    )}
+                    {!isLoggedIn && (
+                      <Text style={styles.loyaltyHint}>Connectez-vous pour voir votre solde de points.</Text>
+                    )}
+                  </View>
+                </View>
+              )}
+
+              {galleryImages.length > 0 && (
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionTitle}>Images du restaurant</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.galleryScroll}
+                  >
+                    {galleryImages.map((uri, index) => (
+                      <View key={`gallery-${index}`} style={styles.galleryItem}>
+                        <Image
+                          source={{ uri: getAbsoluteImageUrl(uri) }}
+                          style={styles.galleryImage}
+                          resizeMode="cover"
+                        />
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+            </View>
           )}
         </View>
       </ScrollView>
+
+      {cartForRestaurant.count > 0 && (
+        <View style={styles.cartBar}>
+          <TouchableOpacity
+            style={styles.cartBarButton}
+            onPress={() => navigation.navigate('Cart')}
+            activeOpacity={0.85}>
+            <Text style={styles.cartBarText}>
+              Voir le panier · {cartForRestaurant.count} article{cartForRestaurant.count > 1 ? 's' : ''}
+            </Text>
+            <Text style={styles.cartBarPrice}>{cartForRestaurant.total.toFixed(2)} €</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <ReportModal
+        visible={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        restaurantId={restaurant ? Number(restaurant.id) : undefined}
+      />
     </View>
   );
 };
@@ -817,6 +820,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   loadingContainer: {
     flex: 1,
@@ -829,7 +835,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   imageContainer: {
-    height: 300,
+    height: 230,
     position: 'relative',
   },
   headerImage: {
@@ -841,219 +847,142 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerPlaceholderText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-  },
-  headerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.black + '40',
-  },
   backButton: {
     position: 'absolute',
-    top: 50,
-    left: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.black + '60',
+    top: 16,
+    left: 20,
+    width: 48,
+    height: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(252,251,245,0.92)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   favoriteButton: {
     position: 'absolute',
-    top: 50,
-    right: 16,
+    top: 16,
+    right: 20,
+    width: 48,
+    height: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(252,251,245,0.92)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reportButton: {
+    position: 'absolute',
+    top: 72,
+    right: 20,
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.black + '60',
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(252,251,245,0.92)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
-    padding: 16,
+    paddingHorizontal: 22,
+  },
+  avatarRow: {
+    marginTop: -34,
+    marginBottom: 10,
+  },
+  avatarWrap: {
+    width: 76,
+    height: 76,
+    borderRadius: Radius.pill,
+    borderWidth: 4,
+    borderColor: Colors.background,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
-    marginBottom: 16,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  titleLeft: {
-    flex: 1,
-    marginRight: 12,
-  },
-  titleRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: 10,
+    gap: 5,
   },
   name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 4,
-    fontFamily: secondaryFont,
-  },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryLight + '1A',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  ratingText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginLeft: 4,
-    fontFamily: secondaryFont,
-  },
-  cuisine: {
-    fontSize: 16,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-  },
-  infoCards: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  infoCard: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
-  },
-  infoCardText: {
-    fontSize: 12,
+    fontSize: 26,
     color: Colors.text,
-    marginTop: 8,
-    fontWeight: '600',
-    textAlign: 'center',
-    fontFamily: secondaryFont,
+    fontFamily: fontDisplay,
   },
-  loyaltyBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
-    gap: 12,
-  },
-  loyaltyBannerTextWrap: {
-    flex: 1,
-  },
-  loyaltyBannerTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 4,
-    fontFamily: secondaryFont,
-  },
-  loyaltyBannerSub: {
-    fontSize: 13,
-    color: Colors.text,
-    lineHeight: 18,
-    fontFamily: secondaryFont,
-  },
-  loyaltyBalance: {
-    marginTop: 8,
+  metaLine: {
     fontSize: 13,
     color: Colors.textLight,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
-  loyaltyBalanceNum: {
-    fontWeight: '800',
-    color: Colors.primary,
-  },
-  loyaltyHint: {
-    marginTop: 6,
-    fontSize: 12,
-    color: Colors.textLight,
-    fontStyle: 'italic',
-    fontFamily: secondaryFont,
-  },
-  summaryBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
-    gap: 16,
-  },
-  summaryItem: {
-    flex: 1,
-  },
-  summaryLabel: {
-    fontSize: 11,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-    marginBottom: 2,
-  },
-  summaryValue: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
-    fontFamily: secondaryFont,
+  metaHighlight: {
+    fontSize: 13,
+    fontFamily: fontHeading,
+    color: Colors.darkGreen,
   },
   tabContainer: {
     flexDirection: 'row',
-    marginHorizontal: 16,
+    gap: 22,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
     marginBottom: 16,
-    backgroundColor: Colors.gray[100],
-    borderRadius: 12,
-    padding: 4,
   },
   tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  tabActive: {
-    backgroundColor: Colors.white,
+    paddingBottom: 12,
   },
   tabText: {
     fontSize: 15,
-    fontWeight: '600',
-    color: Colors.textLight,
     fontFamily: secondaryFont,
+    color: Colors.textLight,
   },
   tabTextActive: {
-    color: Colors.primary,
-    fontFamily: secondaryFont,
+    color: Colors.darkGreen,
+    fontFamily: fontButton,
+  },
+  tabIndicator: {
+    marginTop: 8,
+    height: 3,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.terracotta,
+  },
+  cardSubTabs: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
+    padding: 4,
+    marginBottom: 16,
+  },
+  cardSubTab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: Radius.pill,
+  },
+  cardSubTabActive: {
+    backgroundColor: Colors.primary,
+  },
+  cardSubTabText: {
+    fontSize: 13.5,
+    fontFamily: fontHeading,
+    color: Colors.textLight,
+  },
+  cardSubTabTextActive: {
+    color: Colors.white,
   },
   section: {
     marginBottom: 24,
   },
+  infoBlock: {
+    marginBottom: 24,
+  },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.text,
     marginBottom: 12,
-    fontFamily: secondaryFont,
+    fontFamily: fontDisplay,
   },
   description: {
     fontSize: 16,
@@ -1088,6 +1017,47 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  loyaltyBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: 14,
+    marginBottom: 24,
+    gap: 12,
+  },
+  loyaltyBannerTextWrap: {
+    flex: 1,
+  },
+  loyaltyBannerTitle: {
+    fontSize: 15,
+    color: Colors.text,
+    marginBottom: 4,
+    fontFamily: fontDisplayMedium,
+  },
+  loyaltyBannerSub: {
+    fontSize: 13,
+    color: Colors.text,
+    lineHeight: 18,
+    fontFamily: secondaryFont,
+  },
+  loyaltyBalance: {
+    marginTop: 8,
+    fontSize: 13,
+    color: Colors.textLight,
+    fontFamily: secondaryFont,
+  },
+  loyaltyBalanceNum: {
+    fontFamily: fontHeading,
+    color: Colors.primary,
+  },
+  loyaltyHint: {
+    marginTop: 6,
+    fontSize: 12,
+    color: Colors.textLight,
+    fontStyle: 'italic',
+    fontFamily: secondaryFont,
+  },
   reviewHint: {
     fontSize: 14,
     color: Colors.textLight,
@@ -1118,7 +1088,7 @@ const styles = StyleSheet.create({
   reviewSubmitButton: {
     backgroundColor: Colors.primary,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     alignItems: 'center',
   },
   reviewSubmitDisabled: {
@@ -1126,22 +1096,14 @@ const styles = StyleSheet.create({
   },
   reviewSubmitText: {
     fontSize: 16,
-    fontWeight: '600',
     color: Colors.white,
-    fontFamily: secondaryFont,
+    fontFamily: fontButton,
   },
   reviewsList: {
     marginTop: 20,
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-  },
-  reviewsListTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 12,
-    fontFamily: secondaryFont,
   },
   reviewItem: {
     marginBottom: 12,
@@ -1156,9 +1118,8 @@ const styles = StyleSheet.create({
   },
   reviewItemRating: {
     fontSize: 14,
-    fontWeight: '600',
     color: Colors.warning,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   reviewItemComment: {
     fontSize: 14,
@@ -1168,10 +1129,10 @@ const styles = StyleSheet.create({
   },
   bubblesScroll: {
     marginBottom: 16,
-    marginHorizontal: -16,
+    marginHorizontal: -22,
   },
   bubblesContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 22,
     flexDirection: 'row',
     paddingVertical: 4,
     alignItems: 'center',
@@ -1179,24 +1140,20 @@ const styles = StyleSheet.create({
   bubble: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 24,
-    backgroundColor: Colors.gray[100],
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.surface,
     marginRight: 10,
   },
   bubbleActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
   },
   bubbleText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13.5,
     color: Colors.text,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   bubbleTextActive: {
-    color: Colors.white,
+    color: Colors.cream,
   },
   noDishes: {
     fontSize: 14,
@@ -1204,6 +1161,60 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 24,
     fontFamily: secondaryFont,
+  },
+  dishRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.lg,
+    padding: 12,
+    marginBottom: 12,
+  },
+  dishRowImage: {
+    width: 74,
+    height: 74,
+    borderRadius: 18,
+    backgroundColor: Colors.gray[100],
+  },
+  dishRowImagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dishRowInfo: {
+    flex: 1,
+    gap: 4,
+    minWidth: 0,
+  },
+  dishRowName: {
+    fontSize: 17,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
+  },
+  dishRowDescription: {
+    fontSize: 12.5,
+    fontFamily: secondaryFont,
+    color: Colors.textLight,
+  },
+  dishRowFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  dishRowPrice: {
+    fontSize: 15.5,
+    fontFamily: fontHeading,
+    color: Colors.text,
+  },
+  dishRowAdd: {
+    marginLeft: 'auto',
+    width: 38,
+    height: 38,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.terracotta,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   voirMenuButton: {
     flexDirection: 'row',
@@ -1213,34 +1224,29 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     marginBottom: 16,
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
   },
   voirMenuButtonText: {
     fontSize: 16,
-    fontWeight: '600',
     color: Colors.primary,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   menuCard: {
-    marginBottom: 24,
-    backgroundColor: Colors.white,
-    borderRadius: 16,
+    marginBottom: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
+    padding: 12,
   },
   menuCardHeader: {
     flexDirection: 'row',
-    padding: 12,
     alignItems: 'center',
   },
   menuCardImage: {
     width: 80,
     height: 80,
-    borderRadius: 12,
+    borderRadius: Radius.md,
   },
   menuCardImagePlaceholder: {
     backgroundColor: Colors.gray[100],
@@ -1253,9 +1259,8 @@ const styles = StyleSheet.create({
   },
   menuCardName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    fontFamily: secondaryFont,
+    color: Colors.text,
+    fontFamily: fontDisplayMedium,
     marginBottom: 4,
   },
   menuCardDescription: {
@@ -1277,39 +1282,47 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     marginTop: 12,
   },
   addMenuToCartText: {
     fontSize: 14,
-    fontWeight: '600',
     color: Colors.white,
-    fontFamily: secondaryFont,
+    fontFamily: fontButton,
     marginLeft: 8,
     flexShrink: 1,
   },
-  menuCardDishes: {
-    paddingHorizontal: 12,
-    paddingBottom: 12,
+  cartBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 20,
+    backgroundColor: Colors.background,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
-  menuBlock: {
-    marginBottom: 24,
+  cartBarButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: Colors.darkGreen,
+    borderRadius: Radius.pill,
+    minHeight: 56,
   },
-  menuName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 6,
-    fontFamily: secondaryFont,
+  cartBarText: {
+    fontSize: 16,
+    fontFamily: fontButton,
+    color: Colors.cream,
   },
-  menuDescription: {
-    fontSize: 14,
-    color: Colors.textLight,
-    marginBottom: 12,
-    lineHeight: 20,
-    fontFamily: secondaryFont,
+  cartBarPrice: {
+    fontSize: 16,
+    fontFamily: fontHeading,
+    color: Colors.cream,
   },
 });
 
 export default RestaurantDetailsScreen;
-

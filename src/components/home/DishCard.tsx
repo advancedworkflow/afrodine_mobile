@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import IconWrapper from '../IconWrapper';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
+import {fontDisplayMedium, fontHeading, fontUI} from '../../utils/fonts';
 import {getAbsoluteImageUrl, getJpegFallbackUrl} from '../../utils/api';
 
 const namkeFallback = require('../../assets/namke-fallback.png');
@@ -109,17 +110,11 @@ const DishCard: React.FC<DishCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     padding: 12,
     marginBottom: 12,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
+    ...Shadows.sm,
   },
   contentTouchable: {
     flex: 1,
@@ -130,7 +125,7 @@ const styles = StyleSheet.create({
   image: {
     width: 96,
     height: 96,
-    borderRadius: 12,
+    borderRadius: Radius.md,
     marginRight: 12,
   },
   details: {
@@ -144,9 +139,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   name: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    fontSize: 16,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
     flex: 1,
     marginRight: 8,
   },
@@ -155,6 +150,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginBottom: 8,
     lineHeight: 16,
@@ -170,7 +166,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fontHeading,
     color: Colors.text,
     marginLeft: 4,
   },
@@ -181,6 +177,7 @@ const styles = StyleSheet.create({
   },
   deliveryTime: {
     fontSize: 12,
+    fontFamily: fontUI,
     color: Colors.textLight,
   },
   footer: {
@@ -190,14 +187,14 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: fontHeading,
     color: Colors.primary,
   },
   addButton: {
     width: 32,
     height: 32,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.pill,
     justifyContent: 'center',
     alignItems: 'center',
   },

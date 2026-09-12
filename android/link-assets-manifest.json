@@ -1,0 +1,57 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Archivo-Black.ttf",
+      "sha1": "28812a46d235370397449a63bc3b66cefcc4c7be"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-Light.ttf",
+      "sha1": "fca745b3e5c2df0fd9efcbdfe982fe4c6d8fd6d4"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-Medium.ttf",
+      "sha1": "5771716cd62abaa15c5a1f177319454aa0e60f5d"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-Regular.ttf",
+      "sha1": "6f8d7ccd854044d192abc1f84701d829f2325942"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-SemiBold.ttf",
+      "sha1": "5f8b8c73dd30a20d690026a8c9cfac904b1d06dd"
+    },
+    {
+      "path": "src/assets/fonts/Fraunces_72pt_Soft-Black.ttf",
+      "sha1": "8ec8613821cbb1e91f33335f55514131b2d0d6bb"
+    },
+    {
+      "path": "src/assets/fonts/Fraunces_72pt_Soft-Regular.ttf",
+      "sha1": "cdf30181c2aaaa49e3a409537f9801354dbc032f"
+    },
+    {
+      "path": "src/assets/fonts/Fraunces_72pt_Soft-SemiBold.ttf",
+      "sha1": "ab6270253858cfa3e7f24c77deef6de94d5dc60f"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-Black.ttf",
+      "sha1": "645e04c53c6b5b35bce654a811ebce16af8aa721"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-Light.ttf",
+      "sha1": "e247a92158e112f8bf7b638c8d95381d66b00dbb"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-Medium.ttf",
+      "sha1": "283f21b44efbdbf276ba802be2d949a36bbc4233"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-Regular.ttf",
+      "sha1": "fdd3002e7d814ee47c1c1b8487c72c6bbb3a2d00"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-SemiBold.ttf",
+      "sha1": "622ca6ccbe2f22c5611dffa016b745bd26be154c"
+    }
+  ]
+}

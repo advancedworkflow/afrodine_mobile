@@ -1,10 +1,10 @@
-import PushNotification from 'react-native-push-notification';
 import {Platform, PermissionsAndroid} from 'react-native';
 import type {FirebaseMessagingTypes} from '@react-native-firebase/messaging';
 import api from '../utils/api';
 
-// Firebase Messaging n'existe pas sur le build web (react-native-web) — chargé
-// uniquement sur Android/iOS.
+// react-native-push-notification et Firebase Messaging n'existent pas sur le build web
+// (react-native-web) — chargés uniquement sur Android/iOS.
+const PushNotification = Platform.OS !== 'web' ? require('react-native-push-notification').default : null;
 const messaging = Platform.OS !== 'web' ? require('@react-native-firebase/messaging').default : null;
 
 class NotificationService {
@@ -12,11 +12,15 @@ class NotificationService {
   private foregroundMessageUnsubscribe: (() => void) | null = null;
 
   configure = () => {
+    if (!PushNotification) {
+      return;
+    }
+
     PushNotification.configure({
-      onRegister: function (token) {
+      onRegister: function (token: unknown) {
         console.log('TOKEN:', token);
       },
-      onNotification: function (notification) {
+      onNotification: function (notification: unknown) {
         console.log('NOTIFICATION:', notification);
       },
       permissions: {
@@ -39,7 +43,7 @@ class NotificationService {
         importance: 4,
         vibrate: true,
       },
-      created => console.log(`createChannel returned '${created}'`),
+      (created: boolean) => console.log(`createChannel returned '${created}'`),
     );
 
     // Affiche localement les notifications push reçues pendant que l'app est au premier plan
@@ -123,6 +127,10 @@ class NotificationService {
   };
 
   localNotification = (title: string, message: string) => {
+    if (!PushNotification) {
+      return;
+    }
+
     PushNotification.localNotification({
       channelId: 'afrodine-channel',
       title,
@@ -133,6 +141,10 @@ class NotificationService {
   };
 
   scheduleNotification = (title: string, message: string, date: Date) => {
+    if (!PushNotification) {
+      return;
+    }
+
     PushNotification.localNotificationSchedule({
       channelId: 'afrodine-channel',
       title,
@@ -144,6 +156,10 @@ class NotificationService {
   };
 
   cancelAll = () => {
+    if (!PushNotification) {
+      return;
+    }
+
     PushNotification.cancelAllLocalNotifications();
   };
 }

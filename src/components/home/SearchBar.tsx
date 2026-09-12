@@ -1,7 +1,8 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {View, TextInput, StyleSheet, TouchableOpacity, Text} from 'react-native';
 import IconWrapper from '../IconWrapper';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius} from '../../utils/colors';
+import {fontHeading, fontUI} from '../../utils/fonts';
 import {useSearch} from '../../contexts/SearchContext';
 
 export type SearchSuggestion = {
@@ -28,6 +29,8 @@ interface SearchBarProps {
   suggestions?: SearchSuggestion[];
   /** Action au clic sur une suggestion */
   onSuggestionPress?: (item: SearchSuggestion) => void;
+  /** Couleur du champ + bouton filtre (Colors.surface par défaut ; passer Colors.background quand le parent est déjà teinté surface, ex. l'en-tête crème de l'accueil). */
+  pillColor?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -41,6 +44,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onLiveQueryChange,
   suggestions = [],
   onSuggestionPress,
+  pillColor = Colors.surface,
 }) => {
   const {searchQuery, setSearchQuery, isSearching} = useSearch();
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -100,11 +104,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <IconWrapper
               name="search"
               size={20}
-              color={Colors.gray[400]}
+              color={Colors.darkGreen}
             />
           </TouchableOpacity>
           <TextInput
-            style={styles.input}
+            style={[styles.input, {backgroundColor: pillColor}]}
             placeholder={placeholder}
             placeholderTextColor={Colors.gray[400]}
             value={localQuery}
@@ -135,7 +139,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           )}
         </View>
         {onFilterPress && (
-          <TouchableOpacity onPress={onFilterPress} style={styles.filterButton} activeOpacity={0.7}>
+          <TouchableOpacity onPress={onFilterPress} style={[styles.filterButton, {backgroundColor: pillColor}]} activeOpacity={0.7}>
             <IconWrapper name="filter-outline" size={22} color={Colors.primary} />
           </TouchableOpacity>
         )}
@@ -178,9 +182,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: Colors.white,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
     zIndex: 20,
   },
   inputRow: {
@@ -197,10 +201,8 @@ const styles = StyleSheet.create({
   filterButton: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: Colors.gray[50],
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -214,11 +216,12 @@ const styles = StyleSheet.create({
     height: 48,
     paddingLeft: 48,
     paddingRight: 40,
-    backgroundColor: Colors.gray[50],
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
+    borderWidth: 1.5,
+    borderColor: 'rgba(5,16,4,0.22)',
     fontSize: 14,
+    fontFamily: fontUI,
     color: Colors.text,
   },
   clearButton: {
@@ -236,19 +239,17 @@ const styles = StyleSheet.create({
   },
   suggestionsPanel: {
     marginTop: 8,
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
   },
   suggestionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    borderBottomColor: Colors.border,
     gap: 10,
   },
   suggestionTextWrap: {
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
   suggestionTitle: {
     fontSize: 14,
     color: Colors.text,
-    fontWeight: '600',
+    fontFamily: fontHeading,
   },
   suggestionSubtitle: {
     fontSize: 12,

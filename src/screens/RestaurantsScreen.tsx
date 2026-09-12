@@ -1,8 +1,9 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl} from 'react-native';
-import TopBar from '../components/TopBar';
 import FilterModal, {type FilterOptions, type SelectedFilters} from '../components/FilterModal';
-import {Colors} from '../utils/colors';
+import {Colors, Radius} from '../utils/colors';
+import {fontButton, fontDisplay, fontHeading, fontUI} from '../utils/fonts';
+import IconWrapper from '../components/IconWrapper';
 import RestaurantCard from '../components/home/RestaurantCard';
 import SearchBar from '../components/home/SearchBar';
 import {useSearch} from '../contexts/SearchContext';
@@ -158,6 +159,14 @@ const RestaurantsScreen = ({navigation, route}: any) => {
     setSelectedFilters({});
   }, []);
 
+  const selectCuisineChip = (cuisine: string | null) => {
+    setSelectedFilters(prev => {
+      const next = {...prev, cuisine_type: cuisine ?? undefined};
+      loadRestaurants(false, next);
+      return next;
+    });
+  };
+
   return (
     <View style={styles.container}>
       <FilterModal
@@ -169,12 +178,13 @@ const RestaurantsScreen = ({navigation, route}: any) => {
         selectedFilters={selectedFilters}
         onFilterChange={onFilterChange}
       />
-      <TopBar navigation={navigation} title="Restaurants" />
+      <View style={styles.header}>
+        <Text style={styles.title}>Cuisiniers</Text>
+      </View>
       <SearchBar
-        placeholder="Rechercher un restaurant..."
+        placeholder="Nom, cuisine, quartier…"
         onSearch={handleSearch}
         onPress={() => navigation.navigate('SearchResults')}
-        onFilterPress={() => setFilterModalVisible(true)}
       />
       <ScrollView
         style={styles.content}
@@ -187,11 +197,39 @@ const RestaurantsScreen = ({navigation, route}: any) => {
           />
         }
         keyboardShouldPersistTaps="handled">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}>
+          <TouchableOpacity
+            style={[styles.chip, !selectedFilters.cuisine_type && styles.chipActive]}
+            onPress={() => selectCuisineChip(null)}
+            activeOpacity={0.8}>
+            <Text style={[styles.chipText, !selectedFilters.cuisine_type && styles.chipTextActive]}>Toutes</Text>
+          </TouchableOpacity>
+          {filterOptions.cuisine_types.map(c => (
+            <TouchableOpacity
+              key={c}
+              style={[styles.chip, selectedFilters.cuisine_type === c && styles.chipActive]}
+              onPress={() => selectCuisineChip(c)}
+              activeOpacity={0.8}>
+              <Text style={[styles.chipText, selectedFilters.cuisine_type === c && styles.chipTextActive]}>{c}</Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity style={styles.filterChip} onPress={() => setFilterModalVisible(true)} activeOpacity={0.8}>
+            <IconWrapper name="options-outline" size={15} color={Colors.text} />
+            <Text style={styles.chipText}>Filtres</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        <Text style={styles.countText}>
+          {loading ? 'Chargement…' : `${restaurants.length} cuisinier${restaurants.length > 1 ? 's' : ''} disponible${restaurants.length > 1 ? 's' : ''}`}
+        </Text>
+
         <View style={styles.restaurantsList}>
           {loading ? (
             <View style={styles.loadingWrap}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>Chargement...</Text>
             </View>
           ) : error ? (
             <View style={styles.errorWrap}>
@@ -201,7 +239,7 @@ const RestaurantsScreen = ({navigation, route}: any) => {
               </TouchableOpacity>
             </View>
           ) : restaurants.length === 0 ? (
-            <Text style={styles.emptyText}>Aucun restaurant</Text>
+            <Text style={styles.emptyText}>Aucun cuisinier</Text>
           ) : (
             restaurants.map(restaurant => (
               <RestaurantCard
@@ -220,23 +258,69 @@ const RestaurantsScreen = ({navigation, route}: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  title: {
+    fontSize: 30,
+    fontFamily: fontDisplay,
+    color: Colors.text,
   },
   content: {
     flex: 1,
   },
+  chipsRow: {
+    gap: 8,
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+  },
+  chip: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+  },
+  chipActive: {
+    backgroundColor: Colors.darkGreen,
+    borderColor: Colors.darkGreen,
+  },
+  chipText: {
+    fontSize: 13.5,
+    fontFamily: fontHeading,
+    color: Colors.text,
+  },
+  chipTextActive: {
+    color: Colors.cream,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+  },
+  countText: {
+    fontSize: 13,
+    fontFamily: fontUI,
+    color: Colors.textLight,
+    paddingHorizontal: 22,
+    marginBottom: 14,
+  },
   restaurantsList: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 22,
+    paddingBottom: 24,
   },
   loadingWrap: {
     padding: 40,
     alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: Colors.textLight,
   },
   errorWrap: {
     padding: 24,
@@ -244,6 +328,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.error,
     textAlign: 'center',
   },
@@ -252,15 +337,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
   },
   retryText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fontButton,
   },
   emptyText: {
     fontSize: 15,
+    fontFamily: fontUI,
     color: Colors.textLight,
     fontStyle: 'italic',
   },

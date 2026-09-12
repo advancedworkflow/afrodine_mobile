@@ -6,13 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  Alert,
   Platform,
 } from 'react-native';
+import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import {useAuth} from '../contexts/AuthContext';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
+import {Colors, Radius} from '../utils/colors';
+import {fontButton, fontHeading, fontUI} from '../utils/fonts';
 
 const SettingsScreen = ({navigation}: any) => {
   const {user, logout, isRestaurant} = useAuth();
@@ -26,12 +26,12 @@ const SettingsScreen = ({navigation}: any) => {
         : true;
       if (!ok) return;
       logout().catch(() => {
-        Alert.alert('Erreur', 'Impossible de se déconnecter.');
+        alert('Erreur', 'Impossible de se déconnecter.');
       });
       return;
     }
 
-    Alert.alert(
+    alert(
       'Déconnexion',
       'Êtes-vous sûr de vouloir vous déconnecter ?',
       [
@@ -44,7 +44,7 @@ const SettingsScreen = ({navigation}: any) => {
               await logout();
               // L'écran Login s'affiche automatiquement : le navigator affiche la branche "non authentifié" quand user devient null
             } catch (e) {
-              Alert.alert('Erreur', 'Impossible de se déconnecter.');
+              alert('Erreur', 'Impossible de se déconnecter.');
             }
           },
         },
@@ -102,8 +102,8 @@ const SettingsScreen = ({navigation}: any) => {
           <Switch
             value={notificationsEnabled}
             onValueChange={setNotificationsEnabled}
-            trackColor={{false: Colors.border, true: Colors.primaryLight}}
-            thumbColor={notificationsEnabled ? Colors.primary : Colors.gray[400]}
+            trackColor={{false: Colors.border, true: Colors.olive}}
+            thumbColor={Colors.background}
           />
         </View>
         <TouchableOpacity
@@ -149,24 +149,27 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundLight,
   },
   section: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     marginTop: 16,
-    paddingVertical: 8,
+    marginHorizontal: 16,
+    borderRadius: Radius.lg,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 12,
     color: Colors.textLight,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    fontFamily: secondaryFont,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontFamily: fontHeading,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -176,23 +179,21 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.text,
-    fontFamily: secondaryFont,
   },
   settingValue: {
-    fontSize: 14,
+    fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 2,
-    fontFamily: secondaryFont,
   },
   logoutButton: {
     flexDirection: 'row',
     margin: 16,
     padding: 16,
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.error,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -202,8 +203,7 @@ const styles = StyleSheet.create({
   logoutText: {
     color: Colors.error,
     fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: secondaryFont,
+    fontFamily: fontButton,
   },
 });
 

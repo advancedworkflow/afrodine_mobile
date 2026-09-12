@@ -22,6 +22,8 @@ export interface CartItem {
   menuId?: number;
   /** IDs des plats du menu (pour expansion au checkout) */
   dishIds?: number[];
+  /** Si présent, l'article est un produit du catalogue épicerie (dishId = 0) */
+  groceryShopProductId?: number;
 }
 
 interface CartContextType {

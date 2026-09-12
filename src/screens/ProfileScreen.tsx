@@ -5,19 +5,20 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
   Platform,
   RefreshControl,
   ActivityIndicator,
   Image,
 } from 'react-native';
+import {alert} from '../utils/alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IconWrapper from '../components/IconWrapper';
 import {useAuth} from '../contexts/AuthContext';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
-import TopBar from '../components/TopBar';
+import {Colors, Radius} from '../utils/colors';
+import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI, secondaryFont} from '../utils/fonts';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import {getClientProfile, type ClientProfileRead} from '../services/clientProfile';
+import {getMyOrders} from '../services/orders';
 import {getAbsoluteImageUrl} from '../utils/api';
 
 const ProfileScreen = ({navigation}: any) => {
@@ -27,6 +28,7 @@ const ProfileScreen = ({navigation}: any) => {
   const [refreshing, setRefreshing] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [orderCount, setOrderCount] = useState<number | null>(null);
 
   const photoStorageKey = user?.id ? `profile_photo_${user.id}` : 'profile_photo_me';
 
@@ -60,6 +62,25 @@ const ProfileScreen = ({navigation}: any) => {
       loadClientProfile();
     }
   }, [isAuthenticated, isRestaurant, loadClientProfile]);
+
+  useEffect(() => {
+    if (!isAuthenticated || isRestaurant) {
+      setOrderCount(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const orders = await getMyOrders();
+        if (!cancelled) setOrderCount(orders.length);
+      } catch {
+        if (!cancelled) setOrderCount(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, isRestaurant]);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,7 +126,7 @@ const ProfileScreen = ({navigation}: any) => {
         try {
           const objectUrl = URL.createObjectURL(file);
           const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-            const image = new Image();
+            const image = new window.Image();
             image.onload = () => resolve(image);
             image.onerror = reject;
             image.src = objectUrl;
@@ -130,7 +151,7 @@ const ProfileScreen = ({navigation}: any) => {
         await AsyncStorage.setItem(photoStorageKey, dataUrl);
         setProfilePhotoUrl(dataUrl);
       } catch {
-        Alert.alert('Erreur', 'Impossible de charger l’image sélectionnée.');
+        alert('Erreur', 'Impossible de charger l’image sélectionnée.');
       } finally {
         setUploadingPhoto(false);
         if (target) target.value = '';
@@ -161,12 +182,12 @@ const ProfileScreen = ({navigation}: any) => {
         : true;
       if (!ok) return;
       logout().catch(() => {
-        Alert.alert('Erreur', 'Impossible de se déconnecter.');
+        alert('Erreur', 'Impossible de se déconnecter.');
       });
       return;
     }
 
-    Alert.alert(
+    alert(
       'Déconnexion',
       'Êtes-vous sûr de vouloir vous déconnecter ?',
       [
@@ -179,7 +200,7 @@ const ProfileScreen = ({navigation}: any) => {
               await logout();
               // L'écran Login s'affiche automatiquement quand user devient null
             } catch (e) {
-              Alert.alert('Erreur', 'Impossible de se déconnecter.');
+              alert('Erreur', 'Impossible de se déconnecter.');
             }
           },
         },
@@ -193,7 +214,7 @@ const ProfileScreen = ({navigation}: any) => {
       input?.click();
       return;
     }
-    Alert.alert(
+    alert(
       'Sélection image',
       'La sélection de fichier locale nécessite une librairie native. Je peux l’ajouter ensuite si vous voulez.',
     );
@@ -202,10 +223,9 @@ const ProfileScreen = ({navigation}: any) => {
   if (!isAuthenticated) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Profil" />
         <View style={styles.unauthorizedContainer}>
           <View style={styles.iconContainer}>
-            <IconWrapper name="lock-closed-outline" size={64} color={Colors.textLight} />
+            <IconWrapper name="lock-closed-outline" size={56} color={Colors.textLight} />
           </View>
           <Text style={styles.unauthorizedText}>
             Vous devez être connecté pour accéder à votre profil
@@ -220,21 +240,26 @@ const ProfileScreen = ({navigation}: any) => {
     );
   }
 
+  const roleLabel = isRestaurant
+    ? 'Cuisinier'
+    : orderCount != null
+      ? `Cliente · ${orderCount} commande${orderCount > 1 ? 's' : ''}`
+      : 'Cliente';
+
   return (
     <View style={styles.container}>
-      <TopBar
-        navigation={navigation}
-        title="Profil"
-      />
       <ScrollView
         style={styles.content}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           !isRestaurant ? (
             <RefreshControl refreshing={refreshing} onRefresh={() => loadClientProfile(true)} colors={[Colors.primary]} />
           ) : undefined
         }>
-        <View style={styles.profileHeader}>
+        <Text style={styles.pageTitle}>Mon profil</Text>
+
+        <View style={styles.profileCard}>
           {profileImageSrc ? (
             <Image source={{uri: profileImageSrc}} style={styles.avatarImage} />
           ) : (
@@ -244,136 +269,105 @@ const ProfileScreen = ({navigation}: any) => {
               </Text>
             </View>
           )}
-          <TouchableOpacity style={styles.uploadPhotoButton} onPress={handleOpenUpload}>
-            <IconWrapper
-              name="cloud-upload-outline"
-              size={18}
-              color={Colors.white}
-              style={styles.uploadPhotoIcon}
-            />
-            <Text style={styles.uploadPhotoText}>
-              {uploadingPhoto ? 'Chargement...' : 'Upload photo'}
+          <View style={styles.profileCardInfo}>
+            <Text style={styles.name} numberOfLines={1}>{user?.name}</Text>
+            <Text style={styles.email} numberOfLines={1}>{user?.email}</Text>
+            <Text style={styles.role}>
+              {uploadingPhoto ? 'Chargement de la photo…' : roleLabel}
             </Text>
+          </View>
+          <TouchableOpacity onPress={handleOpenUpload}>
+            <Text style={styles.editLink}>Modifier</Text>
           </TouchableOpacity>
-          <Text style={styles.name}>{user?.name}</Text>
-          <Text style={styles.email}>{user?.email}</Text>
         </View>
 
         {!isRestaurant && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Profil & adresse</Text>
-            <View style={styles.profileCard}>
-              {loadingProfile ? (
-                <View style={styles.profileLoading}>
-                  <ActivityIndicator size="small" color={Colors.primary} />
-                  <Text style={styles.profileLoadingText}>Chargement du profil…</Text>
+            <Text style={styles.sectionLabel}>Commande</Text>
+            <View style={styles.rowGroup}>
+              <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('EditProfile')} activeOpacity={0.7}>
+                <View style={[styles.rowIcon, {backgroundColor: Colors.category.orange.bg}]}>
+                  <IconWrapper name="location-outline" size={17} color={Colors.category.orange.icon} />
                 </View>
-              ) : clientProfile ? (
-                <>
-                  <View style={styles.infoRow}>
-                    <IconWrapper name="person-outline" size={20} color={Colors.primary} style={styles.infoIcon} />
-                    <Text style={styles.infoLabel}>Nom</Text>
-                    <Text style={styles.infoValue} numberOfLines={2}>
-                      {[clientProfile.first_name, clientProfile.last_name].filter(Boolean).join(' ') || '—'}
-                    </Text>
-                  </View>
-                  {clientProfile.phone ? (
-                    <View style={styles.infoRow}>
-                      <IconWrapper name="call-outline" size={20} color={Colors.primary} style={styles.infoIcon} />
-                      <Text style={styles.infoLabel}>Tél.</Text>
-                      <Text style={styles.infoValue}>{clientProfile.phone}</Text>
-                    </View>
-                  ) : null}
-                  <View style={styles.infoRow}>
-                    <IconWrapper name="location-outline" size={20} color={Colors.primary} style={styles.infoIcon} />
-                    <Text style={styles.infoLabel}>Adresse</Text>
-                    <Text style={styles.infoValue} numberOfLines={4}>
-                      {clientProfile.address?.trim() || 'Aucune adresse renseignée'}
-                    </Text>
-                  </View>
-                </>
-              ) : (
-                <Text style={styles.profileHint}>
-                  Complétez votre profil et votre adresse de livraison pour un checkout plus rapide.
+                <Text style={styles.rowLabel}>Mes adresses</Text>
+                <Text style={styles.rowValue} numberOfLines={1}>
+                  {loadingProfile ? '…' : clientProfile?.address ? '1 enregistrée' : 'Aucune'} ›
                 </Text>
-              )}
-              <TouchableOpacity
-                style={styles.editProfileButton}
-                onPress={() => navigation.navigate('EditProfile')}
-                activeOpacity={0.85}>
-                <IconWrapper name="create-outline" size={20} color={Colors.white} style={styles.editProfileIcon} />
-                <Text style={styles.editProfileButtonText}>Modifier le profil et l’adresse</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mon compte</Text>
-          <View style={styles.menu}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Settings')}>
-              <View style={styles.menuItemLeft}>
-                <IconWrapper name="settings-outline" size={24} color={Colors.primary} style={styles.menuItemIcon} />
-                <Text style={styles.menuItemText}>Paramètres</Text>
+          <Text style={styles.sectionLabel}>Commandes</Text>
+          <View style={styles.rowGroup}>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('OrderHistory')} activeOpacity={0.7}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.green.bg}]}>
+                <IconWrapper name="receipt-outline" size={17} color={Colors.category.green.icon} />
               </View>
-              <IconWrapper name="chevron-forward-outline" size={20} color={Colors.textLight} />
+              <Text style={styles.rowLabel}>Mes commandes</Text>
+              <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Notifications')}>
-              <View style={styles.menuItemLeft}>
-                <IconWrapper name="notifications-outline" size={24} color={Colors.primary} />
-                <Text style={styles.menuItemText}>Notifications</Text>
+            <View style={styles.rowDivider} />
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('OrderStats')} activeOpacity={0.7}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.blue.bg}]}>
+                <IconWrapper name="stats-chart-outline" size={17} color={Colors.category.blue.icon} />
               </View>
-              <IconWrapper name="chevron-forward-outline" size={20} color={Colors.textLight} />
+              <Text style={styles.rowLabel}>Stats commandes</Text>
+              <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
+            </TouchableOpacity>
+            <View style={styles.rowDivider} />
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Favorites')} activeOpacity={0.7}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.pink.bg}]}>
+                <IconWrapper name="heart-outline" size={17} color={Colors.category.pink.icon} />
+              </View>
+              <Text style={styles.rowLabel}>Favoris</Text>
+              <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
+            </TouchableOpacity>
+            <View style={styles.rowDivider} />
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('GroceryShops')} activeOpacity={0.7}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.yellow.bg}]}>
+                <IconWrapper name="basket-outline" size={17} color={Colors.category.yellow.icon} />
+              </View>
+              <Text style={styles.rowLabel}>Épicerie</Text>
+              <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Commandes</Text>
-          <View style={styles.menu}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('OrderHistory')}>
-              <View style={styles.menuItemLeft}>
-                <IconWrapper name="receipt-outline" size={24} color={Colors.primary} style={styles.menuItemIcon} />
-                <Text style={styles.menuItemText}>Mes commandes</Text>
+          <Text style={styles.sectionLabel}>Réglages</Text>
+          <View style={styles.rowGroup}>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Settings')} activeOpacity={0.7}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.purple.bg}]}>
+                <IconWrapper name="settings-outline" size={17} color={Colors.category.purple.icon} />
               </View>
-              <IconWrapper name="chevron-forward-outline" size={20} color={Colors.textLight} />
+              <Text style={styles.rowLabel}>Paramètres</Text>
+              <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('OrderStats')}>
-              <View style={styles.menuItemLeft}>
-                <IconWrapper name="stats-chart-outline" size={24} color={Colors.primary} style={styles.menuItemIcon} />
-                <Text style={styles.menuItemText}>Stats commandes</Text>
+            <View style={styles.rowDivider} />
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Notifications')} activeOpacity={0.7}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.red.bg}]}>
+                <IconWrapper name="notifications-outline" size={17} color={Colors.category.red.icon} />
               </View>
-              <IconWrapper name="chevron-forward-outline" size={20} color={Colors.textLight} />
+              <Text style={styles.rowLabel}>Notifications</Text>
+              <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Favorites')}>
-              <View style={styles.menuItemLeft}>
-                <IconWrapper name="heart-outline" size={24} color={Colors.primary} style={styles.menuItemIcon} />
-                <Text style={styles.menuItemText}>Favoris</Text>
+            <View style={styles.rowDivider} />
+            <View style={styles.row}>
+              <View style={[styles.rowIcon, {backgroundColor: Colors.category.darkGreenWhite.bg}]}>
+                <IconWrapper name="language-outline" size={17} color={Colors.darkGreen} />
               </View>
-              <IconWrapper name="chevron-forward-outline" size={20} color={Colors.textLight} />
-            </TouchableOpacity>
+              <Text style={styles.rowLabel}>Langue</Text>
+              <LanguageSwitcher />
+            </View>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <IconWrapper name="log-out-outline" size={20} color={Colors.error} style={styles.logoutIcon} />
-          <Text style={styles.logoutButtonText}>Déconnexion</Text>
+        <TouchableOpacity style={styles.logoutRow} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>
-
     </View>
   );
 };
@@ -381,202 +375,129 @@ const ProfileScreen = ({navigation}: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight,
+    backgroundColor: Colors.background,
   },
   content: {
     flex: 1,
   },
-  profileHeader: {
-    backgroundColor: Colors.white,
-    alignItems: 'center',
-    paddingVertical: 32,
+  scrollContent: {
+    padding: 22,
+    paddingBottom: 40,
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontFamily: fontDisplay,
+    color: Colors.text,
     marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: Colors.primary,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  avatarImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
-  avatarText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: Colors.white,
-    fontFamily: secondaryFont,
-  },
-  uploadPhotoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  uploadPhotoIcon: {
-    marginRight: 6,
-  },
-  uploadPhotoText: {
-    color: Colors.white,
-    fontSize: 13,
-    fontWeight: '700',
-    fontFamily: secondaryFont,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 4,
-    fontFamily: secondaryFont,
-  },
-  email: {
-    fontSize: 16,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
   },
   profileCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    marginHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
+    marginBottom: 20,
   },
-  profileLoading: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  profileLoadingText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-  },
-  profileHint: {
-    fontSize: 15,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  editProfileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  avatar: {
+    width: 66,
+    height: 66,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.category.orange.bg,
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginTop: 4,
+    alignItems: 'center',
   },
-  editProfileIcon: {
-    marginRight: 8,
+  avatarImage: {
+    width: 66,
+    height: 66,
+    borderRadius: Radius.pill,
   },
-  editProfileButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '700',
-    fontFamily: secondaryFont,
+  avatarText: {
+    fontSize: 26,
+    fontFamily: fontDisplay,
+    color: Colors.terracotta,
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  infoIcon: {
-    marginRight: 10,
-    marginTop: 2,
-  },
-  infoLabel: {
-    fontSize: 13,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-    width: 80,
-  },
-  infoValue: {
+  profileCardInfo: {
     flex: 1,
-    fontSize: 15,
+    gap: 2,
+    minWidth: 0,
+  },
+  name: {
+    fontSize: 19,
+    fontFamily: fontDisplayMedium,
     color: Colors.text,
-    fontFamily: secondaryFont,
+  },
+  email: {
+    fontSize: 12.5,
+    fontFamily: fontUI,
+    color: Colors.textLight,
+  },
+  role: {
+    fontSize: 12,
+    fontFamily: fontHeading,
+    color: Colors.darkGreen,
+  },
+  editLink: {
+    fontSize: 13,
+    fontFamily: fontHeading,
+    color: Colors.terracotta,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 12,
-    paddingHorizontal: 16,
-    fontFamily: secondaryFont,
+  sectionLabel: {
+    fontSize: 12,
+    fontFamily: fontHeading,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    color: 'rgba(5,16,4,0.58)',
+    marginBottom: 8,
   },
-  menu: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    overflow: 'hidden',
+  rowGroup: {
+    backgroundColor: Colors.background,
+    borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.gray[100],
+    borderColor: 'rgba(5,16,4,0.06)',
+    paddingHorizontal: 14,
   },
-  menuItem: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
+    gap: 12,
+    minHeight: 58,
   },
-  menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  menuItemIcon: {
-    marginRight: 12,
-  },
-  menuItemText: {
-    fontSize: 16,
-    color: Colors.text,
-    fontWeight: '500',
-    fontFamily: secondaryFont,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  rowIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: Radius.pill,
     justifyContent: 'center',
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.error,
-    marginHorizontal: 16,
-    marginBottom: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
+    alignItems: 'center',
   },
-  logoutIcon: {
-    marginRight: 8,
+  rowLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: fontUI,
+    color: Colors.text,
   },
-  logoutButtonText: {
-    color: Colors.error,
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: secondaryFont,
+  rowValue: {
+    fontSize: 13,
+    fontFamily: fontUI,
+    color: 'rgba(5,16,4,0.56)',
+  },
+  rowDivider: {
+    height: 1,
+    marginLeft: 46,
+    backgroundColor: 'rgba(5,16,4,0.08)',
+  },
+  logoutRow: {
+    minHeight: 48,
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  logoutText: {
+    fontSize: 15,
+    fontFamily: fontButton,
+    color: Colors.terracotta,
   },
   unauthorizedContainer: {
     flex: 1,
@@ -585,10 +506,10 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: Colors.gray[100],
+    width: 110,
+    height: 110,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
@@ -602,16 +523,15 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   loginButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.terracotta,
     paddingHorizontal: 32,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
   },
   loginButtonText: {
-    color: Colors.white,
+    color: Colors.namkeWhite,
     fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: secondaryFont,
+    fontFamily: fontButton,
   },
 });
 

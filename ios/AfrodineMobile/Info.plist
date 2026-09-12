@@ -27,7 +27,6 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- A REMPLACER par le REVERSED_CLIENT_ID du GoogleService-Info.plist fourni -->
 				<string>com.googleusercontent.apps.REPLACE_ME</string>
 			</array>
 		</dict>
@@ -46,7 +45,7 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
@@ -65,5 +64,21 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Archivo-Black.ttf</string>
+		<string>Archivo-Light.ttf</string>
+		<string>Archivo-Medium.ttf</string>
+		<string>Archivo-Regular.ttf</string>
+		<string>Archivo-SemiBold.ttf</string>
+		<string>Fraunces_72pt_Soft-Black.ttf</string>
+		<string>Fraunces_72pt_Soft-Regular.ttf</string>
+		<string>Fraunces_72pt_Soft-SemiBold.ttf</string>
+		<string>Poppins-Black.ttf</string>
+		<string>Poppins-Light.ttf</string>
+		<string>Poppins-Medium.ttf</string>
+		<string>Poppins-Regular.ttf</string>
+		<string>Poppins-SemiBold.ttf</string>
+	</array>
 </dict>
 </plist>

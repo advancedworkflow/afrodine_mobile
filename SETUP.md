@@ -48,11 +48,38 @@ npm start
 npm run android
 ```
 
-## Configuration des notifications push
+## Configuration des notifications push (Firebase Cloud Messaging)
 
-1. Créez un projet Firebase
-2. Téléchargez `google-services.json` et placez-le dans `android/app/`
-3. Configurez les notifications dans Firebase Console
+Le code d'intégration FCM (`@react-native-firebase/app`/`messaging`, permissions, handlers
+foreground/background, enregistrement du token côté backend) est déjà en place. Il ne manque
+que les fichiers de configuration du projet Firebase réel, volontairement exclus du repo
+(voir `.gitignore`) car spécifiques à chaque environnement.
+
+### Android
+
+1. Dans la [console Firebase](https://console.firebase.google.com/), créez (ou ouvrez) le projet.
+2. Ajoutez une app Android avec le package name `com.afrodine_mobile`.
+3. Téléchargez `google-services.json` et placez-le dans `android/app/` (remplace
+   `android/app/google-services.json.example`).
+4. Le plugin Gradle s'applique automatiquement dès que ce fichier existe (voir
+   `android/app/build.gradle`) — aucune autre étape n'est nécessaire.
+
+### iOS
+
+1. Dans le même projet Firebase, ajoutez une app iOS avec le bundle ID `com.afrodinemobile`.
+2. Téléchargez `GoogleService-Info.plist` et placez-le dans `ios/AfrodineMobile/` (voir
+   `ios/AfrodineMobile/GoogleService-Info.plist.README.md` pour l'ajout au projet Xcode).
+3. Dans ce même fichier, récupérez la valeur `REVERSED_CLIENT_ID` et remplacez le placeholder
+   `com.googleusercontent.apps.REPLACE_ME` dans `ios/AfrodineMobile/Info.plist`
+   (`CFBundleURLSchemes`) — nécessaire pour Google Sign-In, pas pour FCM lui-même.
+4. Lancez `pod install` depuis `ios/` (macOS uniquement — non exécutable depuis Windows).
+
+### Vérification
+
+- Dans Firebase Console → Cloud Messaging, envoyez un message de test à un token récupéré via
+  les logs (`registerDeviceToken` logue les erreurs mais pas le token ; ajoutez temporairement
+  un `console.log(fcmToken)` dans `notificationService.ts` si besoin).
+- Le backend doit exposer `/users/me/device-tokens` (voir `afrodineapi`) pour recevoir le token.
 
 ## Police Istok
 

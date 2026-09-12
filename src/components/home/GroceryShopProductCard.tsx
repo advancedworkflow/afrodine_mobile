@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
+import {fontDisplayMedium, fontHeading, fontUI} from '../../utils/fonts';
 import type {GroceryShopProductApi} from '../../services/groceryShop';
 
 const namkeFallback = require('../../assets/namke-fallback.png');
@@ -99,17 +100,11 @@ const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     marginBottom: 12,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.gray?.[100] ?? '#f3f4f6',
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
+    ...Shadows.sm,
   },
   imageColumn: {
     width: 144,
@@ -118,7 +113,7 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 140,
-    backgroundColor: Colors.gray?.[100] ?? '#f3f4f6',
+    backgroundColor: Colors.gray[100],
   },
   body: {
     flex: 1,
@@ -133,59 +128,57 @@ const styles = StyleSheet.create({
   name: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '700',
-    color: Colors.primaryDark ?? Colors.primary,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
   },
   badge: {
     backgroundColor: Colors.category.green.bg,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: Radius.pill,
   },
   badgeText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: fontHeading,
     color: Colors.primary,
   },
   category: {
     fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 4,
   },
   restaurantLine: {
     fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 2,
   },
   origin: {
     fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 2,
   },
   price: {
     fontSize: 17,
-    fontWeight: '800',
+    fontFamily: fontHeading,
     color: Colors.primary,
     marginTop: 6,
   },
   unit: {
     fontSize: 12,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 2,
   },
   // Variante compacte (carrousel)
   compactCard: {
     width: 152,
-    backgroundColor: Colors.white,
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.gray?.[100] ?? '#f3f4f6',
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
+    ...Shadows.sm,
   },
   compactImageWrap: {
     width: '100%',
@@ -194,7 +187,7 @@ const styles = StyleSheet.create({
   compactImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.gray?.[100] ?? '#f3f4f6',
+    backgroundColor: Colors.gray[100],
   },
   compactBadge: {
     position: 'absolute',
@@ -203,20 +196,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.category.green.bg,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: Radius.pill,
   },
   compactBody: {
     padding: 10,
   },
   compactName: {
     fontSize: 13,
-    fontWeight: '700',
-    color: Colors.primaryDark ?? Colors.primary,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
     minHeight: 34,
   },
   compactPrice: {
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: fontHeading,
     color: Colors.primary,
     marginTop: 6,
   },

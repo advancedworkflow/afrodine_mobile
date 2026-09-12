@@ -11,8 +11,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
+import {Colors, Radius} from '../utils/colors';
+import {secondaryFont, fontButton, fontDisplay, fontHeading} from '../utils/fonts';
 import * as dishesApi from '../services/dishes';
 import * as supplementsApi from '../services/supplements';
 import * as restaurantsApi from '../services/restaurants';
@@ -145,13 +145,16 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
             resizeMode="cover"
           />
           <View style={styles.headerOverlay} />
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <IconWrapper name="arrow-back-outline" size={22} color={Colors.darkGreen} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.favoriteButton}
             onPress={() => setIsFavorite(!isFavorite)}>
             <IconWrapper
               name={isFavorite ? 'heart' : 'heart-outline'}
-              size={24}
-              color={isFavorite ? Colors.error : Colors.primary}
+              size={22}
+              color={isFavorite ? Colors.error : Colors.terracotta}
             />
           </TouchableOpacity>
         </View>
@@ -160,44 +163,15 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.titleRow}>
-              <View style={styles.titleLeft}>
-                <Text style={styles.name}>{dish.name}</Text>
-                <Text style={styles.restaurantName}>{dish.restaurantName}</Text>
-              </View>
-              <View style={styles.titleRight}>
-                <View style={styles.ratingBadge}>
-                  <IconWrapper name="star" size={16} color={Colors.warning} />
-                  <Text style={styles.ratingText}>{dish.rating}</Text>
-                </View>
-              </View>
+              <Text style={styles.name} numberOfLines={2}>{dish.name}</Text>
+              <Text style={styles.headerPrice}>{dish.price.toFixed(2)} €</Text>
             </View>
+            <Text style={styles.metaLine}>
+              {dish.restaurantName ? `${dish.restaurantName} · ` : ''}
+              {dish.rating != null ? `★ ${dish.rating} · ` : ''}
+              {dish.deliveryTime ?? '—'}
+            </Text>
             <Text style={styles.description}>{dish.description}</Text>
-          </View>
-
-          {/* Info Cards */}
-          <View style={styles.infoCards}>
-            <View style={styles.infoCard}>
-              <IconWrapper name="flame-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardLabel}>Calories</Text>
-              <Text style={styles.infoCardValue}>{dish.calories ?? '—'}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <IconWrapper name="time-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardLabel}>Temps</Text>
-              <Text style={styles.infoCardValue}>{dish.deliveryTime ?? '—'}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <IconWrapper name="star-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardLabel}>Note</Text>
-              <Text style={styles.infoCardValue}>{dish.rating != null ? `${dish.rating}★` : '—'}</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <IconWrapper name="car-outline" size={20} color={Colors.primary} />
-              <Text style={styles.infoCardLabel}>Livraison</Text>
-              <Text style={styles.infoCardValue}>
-                {deliveryFee === 0 ? 'Gratuit' : `${deliveryFee.toFixed(2)}€`}
-              </Text>
-            </View>
           </View>
 
           {/* Ingredients */}
@@ -232,7 +206,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
           {/* Suppléments (depuis la base de données) */}
           {supplements.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Suppléments</Text>
+              <Text style={styles.sectionTitle}>Accompagnements</Text>
               {supplements.map(sup => (
                 <TouchableOpacity
                   key={sup.id}
@@ -271,15 +245,15 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
       <View style={styles.bottomBar}>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
-            style={styles.quantityButton}
+            style={styles.quantityButtonMinus}
             onPress={() => setQuantity(Math.max(1, quantity - 1))}>
-            <IconWrapper name="remove-outline" size={20} color={Colors.primary} />
+            <IconWrapper name="remove-outline" size={20} color={Colors.darkGreen} />
           </TouchableOpacity>
           <Text style={styles.quantity}>{quantity}</Text>
           <TouchableOpacity
-            style={styles.quantityButton}
+            style={styles.quantityButtonPlus}
             onPress={() => setQuantity(quantity + 1)}>
-            <IconWrapper name="add-outline" size={20} color={Colors.primary} />
+            <IconWrapper name="add-outline" size={20} color={Colors.cream} />
           </TouchableOpacity>
         </View>
         <TouchableOpacity
@@ -300,15 +274,10 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
             });
             navigation.navigate('Cart');
           }}>
-          <View style={styles.addToCartTextWrap}>
-            <Text style={styles.addToCartText} numberOfLines={1}>
-              Ajouter au panier
-            </Text>
-            <Text style={styles.addToCartPrice} numberOfLines={1}>
-              {totalPrice.toFixed(2)}€
-              {deliveryFee > 0 ? ` + ${deliveryFee.toFixed(2)}€ livr.` : ''}
-            </Text>
-          </View>
+          <Text style={styles.addToCartText} numberOfLines={1}>
+            Ajouter · {totalPrice.toFixed(2)} €
+            {deliveryFee > 0 ? ` (+ ${deliveryFee.toFixed(2)} € livr.)` : ''}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -341,118 +310,82 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: Colors.black + '40',
   },
+  backButton: {
+    position: 'absolute',
+    top: 16,
+    left: 20,
+    width: 48,
+    height: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(252,251,245,0.92)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   favoriteButton: {
     position: 'absolute',
-    top: 50,
-    right: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.black + '60',
+    top: 16,
+    right: 20,
+    width: 48,
+    height: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(252,251,245,0.92)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
-    padding: 16,
+    padding: 22,
     paddingBottom: 100,
   },
   header: {
     marginBottom: 16,
+    gap: 6,
   },
   titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  titleLeft: {
-    flex: 1,
-    marginRight: 12,
-  },
-  titleRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    gap: 12,
   },
   name: {
+    flex: 1,
     fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 4,
-    fontFamily: secondaryFont,
+    color: Colors.text,
+    fontFamily: fontDisplay,
   },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryLight + '1A',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 8,
+  headerPrice: {
+    fontSize: 24,
+    fontFamily: fontDisplay,
+    color: Colors.text,
   },
-  ratingText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginLeft: 4,
-    fontFamily: secondaryFont,
-  },
-  restaurantName: {
-    fontSize: 16,
-    color: Colors.primaryLight,
-    fontWeight: '600',
-    fontFamily: secondaryFont,
+  metaLine: {
+    fontSize: 13,
+    fontFamily: fontHeading,
+    color: Colors.textLight,
   },
   description: {
     fontSize: 16,
     color: Colors.text,
     lineHeight: 24,
     fontFamily: secondaryFont,
-  },
-  infoCards: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  infoCard: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
-  },
-  infoCardLabel: {
-    fontSize: 12,
-    color: Colors.textLight,
-    marginTop: 8,
-  },
-  infoCardValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginTop: 4,
-    fontFamily: secondaryFont,
+    marginTop: 2,
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.text,
     marginBottom: 12,
+    fontFamily: fontDisplay,
   },
   ingredientsList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   ingredientTag: {
-    backgroundColor: Colors.gray[100],
+    backgroundColor: Colors.surface,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: Radius.pill,
     marginRight: 8,
     marginBottom: 8,
   },
@@ -471,7 +404,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.error + '1A',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: Radius.pill,
     marginRight: 8,
     marginBottom: 8,
   },
@@ -486,16 +419,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: Radius.md,
     marginBottom: 12,
-    borderWidth: 2,
-    borderColor: Colors.gray[200],
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   extraItemSelected: {
-    borderColor: Colors.primaryLight,
-    backgroundColor: Colors.primaryLight + '0A',
+    borderColor: Colors.darkGreen,
+    borderWidth: 1,
+    backgroundColor: Colors.surface,
   },
   extraItemLeft: {
     flexDirection: 'row',
@@ -505,28 +439,26 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 6,
+    borderRadius: Radius.pill,
     borderWidth: 2,
-    borderColor: Colors.gray[300],
+    borderColor: Colors.border,
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxSelected: {
-    backgroundColor: Colors.primaryLight,
-    borderColor: Colors.primaryLight,
+    backgroundColor: Colors.darkGreen,
+    borderColor: Colors.darkGreen,
   },
   extraItemText: {
     fontSize: 16,
     color: Colors.text,
-    fontWeight: '500',
     fontFamily: secondaryFont,
   },
   extraItemPrice: {
     fontSize: 16,
-    color: Colors.primary,
-    fontWeight: 'bold',
-    fontFamily: secondaryFont,
+    color: Colors.text,
+    fontFamily: fontHeading,
   },
   bottomBar: {
     position: 'absolute',
@@ -535,64 +467,57 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.gray[200],
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: -2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 8,
+    borderTopColor: Colors.border,
   },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray[50],
-    borderRadius: 12,
-    padding: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
+    padding: 5,
     marginRight: 12,
   },
-  quantityButton: {
-    width: 32,
-    height: 32,
+  quantityButtonMinus: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityButtonPlus: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.darkGreen,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantity: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.text,
     marginHorizontal: 16,
     minWidth: 24,
     textAlign: 'center',
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   addToCartButton: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    backgroundColor: Colors.terracotta,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 12,
-  },
-  addToCartTextWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    minHeight: 56,
+    borderRadius: Radius.pill,
   },
   addToCartText: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 16,
     color: Colors.white,
-    fontFamily: secondaryFont,
-  },
-  addToCartPrice: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.white,
-    fontFamily: secondaryFont,
-    marginTop: 2,
-    opacity: 0.95,
+    fontFamily: fontButton,
   },
 });
 

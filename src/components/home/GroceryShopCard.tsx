@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
+import {fontDisplayMedium, fontUI} from '../../utils/fonts';
 import type {GroceryShopApi} from '../../services/groceryShop';
 import {getAbsoluteImageUrl} from '../../utils/api';
 
@@ -36,22 +37,16 @@ const GroceryShopCard = ({shop, onPress}: Props) => {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     marginBottom: 12,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.gray?.[100] ?? '#f3f4f6',
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
+    ...Shadows.sm,
   },
   image: {
     width: 90,
     height: 90,
-    backgroundColor: Colors.gray?.[100] ?? '#f3f4f6',
+    backgroundColor: Colors.gray[100],
   },
   body: {
     flex: 1,
@@ -60,11 +55,12 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: '700',
-    color: Colors.primaryDark ?? Colors.primary,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
   },
   description: {
     fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 4,
   },

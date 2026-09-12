@@ -1,7 +1,8 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import IconWrapper from '../IconWrapper';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius} from '../../utils/colors';
+import {fontButton, fontDisplayMedium, fontHeading, fontUI} from '../../utils/fonts';
 
 interface SpecialOfferCardProps {
   id: string;
@@ -57,7 +58,7 @@ const SpecialOfferCard: React.FC<SpecialOfferCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
+    borderRadius: Radius.lg,
     padding: 16,
     marginBottom: 12,
     flexDirection: 'row',
@@ -72,23 +73,24 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white + '33', // 20% opacity
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: Radius.pill,
     alignSelf: 'flex-start',
     marginBottom: 8,
   },
   discountText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontFamily: fontHeading,
     color: Colors.white,
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontFamily: fontDisplayMedium,
     color: Colors.white,
     marginBottom: 4,
   },
   description: {
     fontSize: 12,
+    fontFamily: fontUI,
     color: Colors.white + 'E6', // 90% opacity
     marginBottom: 12,
     lineHeight: 16,
@@ -98,11 +100,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: Radius.pill,
   },
   buttonText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fontButton,
     color: Colors.primaryDark ?? Colors.primary,
   },
   iconContainer: {

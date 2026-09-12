@@ -2,8 +2,8 @@ import React from 'react';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
 import TopBar from '../components/TopBar';
 import IconWrapper from '../components/IconWrapper';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
+import {Colors, Radius, Shadows} from '../utils/colors';
+import {fontButton, fontDisplay, fontUI} from '../utils/fonts';
 
 const CateringDetailsScreen = ({navigation}: any) => {
   return (
@@ -73,34 +73,32 @@ const styles = StyleSheet.create({
   heroIconWrap: {
     width: 100,
     height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.primary,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.terracotta,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
   heroTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
     color: Colors.text,
     textAlign: 'center',
     marginBottom: 12,
-    fontFamily: secondaryFont,
+    fontFamily: fontDisplay,
   },
   heroSubtitle: {
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
     lineHeight: 24,
-    fontFamily: secondaryFont,
   },
   features: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     padding: 20,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: Colors.gray[100],
+    ...Shadows.sm,
   },
   featureRow: {
     flexDirection: 'row',
@@ -109,25 +107,24 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.text,
     marginLeft: 12,
-    fontFamily: secondaryFont,
   },
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.terracotta,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     gap: 8,
   },
   ctaButtonText: {
     color: Colors.white,
     fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: secondaryFont,
+    fontFamily: fontButton,
   },
 });
 

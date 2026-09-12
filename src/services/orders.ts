@@ -107,7 +107,8 @@ export async function getOrderById(orderId: number | string): Promise<OrderApi |
 }
 
 export interface OrderItemCreatePayload {
-  dish_id: number;
+  dish_id?: number;
+  grocery_shop_product_id?: number;
   quantity: number;
   supplements?: {supplement_id: number; quantity: number}[];
 }
@@ -133,9 +134,12 @@ function normalizeOrderPayload(payload: OrderCreatePayload): OrderCreatePayload 
   const email = payload.email ? String(payload.email).trim() : undefined;
 
   const items = (Array.isArray(payload.items) ? payload.items : [])
-    .map((item) => {
+    .map((item): OrderItemCreatePayload | null => {
       const dishId = Number(item?.dish_id);
+      const groceryProductId = Number(item?.grocery_shop_product_id);
       const quantity = Number(item?.quantity);
+      const hasDish = Number.isInteger(dishId) && dishId > 0;
+      const hasGroceryProduct = Number.isInteger(groceryProductId) && groceryProductId > 0;
       const supplements = Array.isArray(item?.supplements)
         ? item.supplements
             .map((sup) => ({
@@ -151,12 +155,13 @@ function normalizeOrderPayload(payload: OrderCreatePayload): OrderCreatePayload 
             )
         : undefined;
 
-      if (!Number.isInteger(dishId) || dishId <= 0 || !Number.isInteger(quantity) || quantity <= 0) {
+      if ((!hasDish && !hasGroceryProduct) || !Number.isInteger(quantity) || quantity <= 0) {
         return null;
       }
 
       return {
-        dish_id: dishId,
+        dish_id: hasDish ? dishId : undefined,
+        grocery_shop_product_id: hasGroceryProduct ? groceryProductId : undefined,
         quantity,
         supplements: supplements && supplements.length > 0 ? supplements : undefined,
       };

@@ -32,6 +32,8 @@ export interface GroceryShopApi {
   is_active: boolean;
   image_url?: string | null;
   banner_url?: string | null;
+  restaurant_name?: string | null;
+  products_count?: number | null;
 }
 
 export async function getGroceryShops(params?: {active_only?: boolean}): Promise<GroceryShopApi[]> {
@@ -60,6 +62,16 @@ export async function getProductsForGroceryShop(
     },
   });
   return Array.isArray(data) ? data : [];
+}
+
+export async function getGroceryShopProductById(productId: number | string): Promise<GroceryShopProductApi | null> {
+  try {
+    const {data} = await api.get<GroceryShopProductApi>(`/grocery-shop-products/${productId}`);
+    return data;
+  } catch (e: any) {
+    if (e.response?.status === 404) return null;
+    throw e;
+  }
 }
 
 export async function getGroceryShopProducts(params?: {

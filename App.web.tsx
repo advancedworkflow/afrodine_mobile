@@ -2,6 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
 import {Colors} from './src/utils/colors';
 import WebAppRoot from './src/WebAppRoot';
+import './src/utils/webFonts.web';
+import './src/utils/applyDefaultFont';
+import './src/i18n';
 
 const App = () => {
   const [isReady, setIsReady] = useState(false);
@@ -27,7 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
   },
   loadingText: {
     fontSize: 18,

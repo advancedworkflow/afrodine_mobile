@@ -2,6 +2,14 @@ import axios from 'axios';
 import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+declare module 'axios' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  export interface AxiosRequestConfig<D = any> {
+    /** Si true, l'intercepteur d'erreurs n'affiche pas de message/log pour cette requête. */
+    silentError?: boolean;
+  }
+}
+
 // URL du backend : REACT_APP_API_URL (webpack/babel) — pas de slash final (évite //users/login → 404)
 const DEFAULT_API_URL = 'http://127.0.0.1:8000';
 const envApiUrl =
@@ -31,11 +39,18 @@ if (__DEV__) {
   console.log('[API] Base URL:', API_BASE_URL, envApiUrl ? '(surchargée par REACT_APP_API_URL)' : '');
 }
 
+// Secret partagé avec le backend (MOBILE_APP_SECRET dans afrodineapi/.env) : Turnstile n'a
+// pas de SDK React Native, donc l'app mobile ne peut pas produire de token anti-bot. Ce header
+// dit au backend de faire confiance à cette requête à la place (voir turnstile_service.py).
+// Embarqué dans le binaire comme n'importe quelle clé cliente mobile — à régénérer pour la prod.
+const MOBILE_APP_SECRET = 'namke-mobile-3f8a2c9e7b41d6f0a5c8e2b7d4f19a6c';
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: __DEV__ ? 30000 : 10000,
   headers: {
     'Content-Type': 'application/json',
+    'X-Mobile-App-Key': MOBILE_APP_SECRET,
   },
 });
 

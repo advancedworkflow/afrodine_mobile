@@ -79,3 +79,9 @@ server_pid.txt
 android/app/google-services.json
 ios/**/GoogleService-Info.plist
 
+# Build de la variante web (webpack) — artefact généré, pas du code source
+web-build/
+
+# Assets JS bundlés par les builds natifs (générés, pas du code source)
+android/app/src/main/assets/
+

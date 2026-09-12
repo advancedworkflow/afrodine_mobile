@@ -16,11 +16,14 @@ interface Notification {
   id: number;
   title: string;
   message: string;
+  type?: string;
+  category?: string | null;
   is_read: boolean;
   created_at: string;
+  data?: Record<string, any> | null;
 }
 
-const NotificationsScreen = () => {
+const NotificationsScreen = ({navigation}: any) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -57,13 +60,18 @@ const NotificationsScreen = () => {
     }
   };
 
+  const handleNotificationPress = (item: Notification) => {
+    if (!item.is_read) markAsRead(item.id);
+    navigation.navigate('NotificationDetail', {notification: item});
+  };
+
   const renderNotification = ({item}: {item: Notification}) => (
     <TouchableOpacity
       style={[
         styles.notificationItem,
         !item.is_read && styles.unreadNotification,
       ]}
-      onPress={() => markAsRead(item.id)}>
+      onPress={() => handleNotificationPress(item)}>
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>{item.title}</Text>
         <Text style={styles.notificationMessage}>{item.message}</Text>

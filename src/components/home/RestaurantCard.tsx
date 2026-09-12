@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-native';
-import IconWrapper from '../IconWrapper';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius} from '../../utils/colors';
+import {fontDisplayMedium, fontHeading, fontSub} from '../../utils/fonts';
 import api, {getAbsoluteImageUrl, getJpegFallbackUrl} from '../../utils/api';
 
 const namkeFallback = require('../../assets/namke-fallback.png');
@@ -129,29 +129,12 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
       )}
       <View style={styles.content}>
         <View style={styles.header}>
-          <View style={styles.info}>
-            <Text style={styles.name}>{name}</Text>
-            <Text style={styles.cuisine}>
-              {cuisine} • {priceRange}
-            </Text>
-          </View>
-          <View style={styles.ratingBadge}>
-            <IconWrapper name="star" size={12} color={Colors.warning} />
-            <Text style={styles.ratingText}>{rating}</Text>
-          </View>
+          <Text style={styles.name} numberOfLines={1}>{name}</Text>
+          {rating != null && <Text style={styles.rating}>★ {rating}</Text>}
         </View>
-        <View style={styles.footer}>
-          <View style={styles.meta}>
-            <View style={styles.metaItem}>
-              <IconWrapper name="time-outline" size={12} color={Colors.textLight} />
-              <Text style={styles.metaText}>{deliveryTime}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <IconWrapper name="bicycle-outline" size={12} color={Colors.textLight} />
-              <Text style={styles.metaText}>{deliveryFee}</Text>
-            </View>
-          </View>
-        </View>
+        <Text style={styles.meta} numberOfLines={1}>
+          {[cuisine, deliveryTime, deliveryFee].filter(Boolean).join(' · ')}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -159,93 +142,43 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 12,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.gray[100],
+    borderColor: Colors.border,
+    borderRadius: Radius.lg,
+    overflow: 'hidden',
+    marginBottom: 14,
   },
   image: {
     width: '100%',
-    height: 128,
-  },
-  cateringBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    gap: 4,
-  },
-  cateringBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.white,
+    height: 118,
   },
   content: {
-    padding: 12,
+    padding: 14,
+    paddingTop: 12,
+    gap: 5,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  info: {
-    flex: 1,
-    marginRight: 8,
+    alignItems: 'baseline',
+    gap: 10,
   },
   name: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 4,
+    flex: 1,
+    fontSize: 18,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
   },
-  cuisine: {
-    fontSize: 12,
-    color: Colors.textLight,
-  },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryLight + '1A',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginLeft: 4,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  rating: {
+    marginLeft: 'auto',
+    fontSize: 12.5,
+    fontFamily: fontHeading,
+    color: Colors.darkGreen,
   },
   meta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  metaText: {
-    fontSize: 12,
+    fontSize: 12.5,
+    fontFamily: fontSub,
     color: Colors.textLight,
-    marginLeft: 4,
   },
 });
 

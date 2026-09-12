@@ -5,17 +5,20 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   StatusBar,
   Image,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
 import {useAuth} from '../contexts/AuthContext';
-import {Colors} from '../utils/colors';
+import {alert} from '../utils/alert';
+import {Colors, Radius} from '../utils/colors';
+import {fontButton, fontDisplay, fontHeading, fontUI} from '../utils/fonts';
 import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 
 const LoginScreen = () => {
+  const {t} = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,7 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+      alert(t('login.errorTitle'), t('login.fillAllFields'));
       return;
     }
 
@@ -34,7 +37,7 @@ const LoginScreen = () => {
       await login(email, password);
       // Navigation handled by AppNavigator based on auth state
     } catch (error: any) {
-      Alert.alert('Erreur de connexion', error.message);
+      alert(t('login.loginErrorTitle'), error.message);
     } finally {
       setLoading(false);
     }
@@ -46,7 +49,7 @@ const LoginScreen = () => {
       await loginWithGoogle();
       // Navigation handled by AppNavigator based on auth state
     } catch (error: any) {
-      Alert.alert('Erreur de connexion', error.message);
+      alert(t('login.loginErrorTitle'), error.message);
     } finally {
       setGoogleLoading(false);
     }
@@ -54,16 +57,16 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image source={require('../assets/namke-logo-header.png')} style={styles.brandLogo} resizeMode="contain" />
-            <Text style={styles.subtitle}>Connectez-vous à votre compte</Text>
-          </View>
+          <Image source={require('../assets/namke-logo-header.png')} style={styles.brandLogo} resizeMode="contain" />
+          <Text style={styles.eyebrow}>{t('login.eyebrow')}</Text>
+          <Text style={styles.title}>{t('login.title')}</Text>
+          <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
         </View>
 
         <View style={styles.form}>
@@ -76,7 +79,7 @@ const LoginScreen = () => {
             />
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t('login.emailPlaceholder')}
               placeholderTextColor={Colors.textLight}
               value={email}
               onChangeText={setEmail}
@@ -95,7 +98,7 @@ const LoginScreen = () => {
             />
             <TextInput
               style={styles.input}
-              placeholder="Mot de passe"
+              placeholder={t('login.passwordPlaceholder')}
               placeholderTextColor={Colors.textLight}
               value={password}
               onChangeText={setPassword}
@@ -109,7 +112,7 @@ const LoginScreen = () => {
             onPress={handleLogin}
             disabled={loading}>
             <Text style={styles.buttonText}>
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? t('login.connecting') : t('login.submit')}
             </Text>
           </TouchableOpacity>
 
@@ -119,14 +122,14 @@ const LoginScreen = () => {
             disabled={googleLoading}>
             <IconWrapper name="logo-google" size={20} color={Colors.text} style={styles.googleIcon} />
             <Text style={styles.googleButtonText}>
-              {googleLoading ? 'Connexion...' : 'Continuer avec Google'}
+              {googleLoading ? t('login.connecting') : t('login.continueWithGoogle')}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Pas encore de compte ? </Text>
+            <Text style={styles.footerText}>{t('login.noAccount')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Signup' as never)}>
-              <Text style={styles.footerLink}>S'inscrire</Text>
+              <Text style={styles.footerLink}>{t('login.signup')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -134,7 +137,7 @@ const LoginScreen = () => {
             style={styles.guestButton}
             onPress={() => navigation.navigate('MainTabs' as never)}>
             <Text style={styles.guestButtonText}>
-              Continuer sans compte
+              {t('login.continueAsGuest')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -146,29 +149,42 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoContainer: {
-    alignItems: 'center',
+    marginBottom: 28,
   },
   brandLogo: {
-    width: 220,
-    height: 72,
-    marginBottom: 20,
+    width: 140,
+    height: 46,
+    marginBottom: 24,
+  },
+  eyebrow: {
+    fontSize: 12.5,
+    fontFamily: fontHeading,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: Colors.terracotta,
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 34,
+    fontFamily: fontDisplay,
+    color: Colors.text,
+    lineHeight: 38,
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.textLight,
+    lineHeight: 22,
   },
   form: {
     width: '100%',
@@ -176,12 +192,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray[50],
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
     marginBottom: 16,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
+    paddingHorizontal: 20,
     height: 56,
   },
   inputIcon: {
@@ -190,11 +204,12 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.text,
   },
   button: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
@@ -206,19 +221,17 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 16.5,
+    fontFamily: fontButton,
   },
   googleButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.gray[200],
   },
   googleIcon: {
     marginRight: 10,
@@ -226,7 +239,7 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: Colors.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fontButton,
   },
   footer: {
     flexDirection: 'row',
@@ -236,10 +249,11 @@ const styles = StyleSheet.create({
   footerText: {
     color: Colors.textLight,
     fontSize: 14,
+    fontFamily: fontUI,
   },
   footerLink: {
     color: Colors.primary,
-    fontWeight: 'bold',
+    fontFamily: fontHeading,
     fontSize: 14,
   },
   guestButton: {
@@ -249,7 +263,7 @@ const styles = StyleSheet.create({
   guestButtonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: fontHeading,
   },
 });
 

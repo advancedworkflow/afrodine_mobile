@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "restaurants": "Cuisiniers",
+    "catering": "Traiteur",
+    "cart": "Panier",
+    "profile": "Profil",
+    "dashboard": "Tableau de bord",
+    "orders": "Commandes",
+    "menu": "Menu",
+    "analytics": "Statistiques",
+    "popularDishes": "Plats populaires"
+  },
+  "login": {
+    "eyebrow": "Connexion",
+    "title": "Content de vous revoir",
+    "subtitle": "Connectez-vous à votre compte",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Mot de passe",
+    "connecting": "Connexion...",
+    "submit": "Se connecter",
+    "continueWithGoogle": "Continuer avec Google",
+    "noAccount": "Pas encore de compte ? ",
+    "signup": "S'inscrire",
+    "continueAsGuest": "Continuer sans compte",
+    "errorTitle": "Erreur",
+    "fillAllFields": "Veuillez remplir tous les champs",
+    "loginErrorTitle": "Erreur de connexion"
+  }
+}

@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius} from '../../utils/colors';
+import {fontButton, fontDisplay, fontHeading, fontUI} from '../../utils/fonts';
 import {getAbsoluteImageUrl} from '../../utils/api';
 
 const namkeFallback = require('../../assets/namke-fallback.png');
@@ -75,11 +76,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: Radius.pill,
   },
   discountBadgeText: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: fontHeading,
     color: Colors.primary,
   },
   gradient: {
@@ -92,13 +93,14 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontFamily: fontDisplay,
     color: Colors.white,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
+    fontFamily: fontUI,
     color: Colors.white,
     marginBottom: 12,
     lineHeight: 20,
@@ -107,13 +109,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: Radius.pill,
     alignSelf: 'flex-start',
   },
   buttonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fontButton,
   },
 });
 

@@ -90,6 +90,12 @@ module.exports = {
     hot: true,
     open: true,
     historyApiFallback: true,
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
     // Proxy API vers le backend (URL lue depuis REACT_APP_API_URL, défaut port 8000)
     proxy: {
       '/favoris': { target: API_BACKEND_URL, changeOrigin: true },
