@@ -6,11 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
@@ -59,15 +59,15 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
 
   const handleSubmit = async () => {
     if (!email.trim() || !firstName.trim() || !lastName.trim()) {
-      Alert.alert('Champs requis', 'Renseignez au minimum l’email, le prénom et le nom.');
+      alert('Champs requis', 'Renseignez au minimum l’email, le prénom et le nom.');
       return;
     }
     if (!isEdit && !password.trim()) {
-      Alert.alert('Champ requis', 'Un mot de passe est requis pour créer un employé.');
+      alert('Champ requis', 'Un mot de passe est requis pour créer un employé.');
       return;
     }
     if (!isEdit && !hireDate.trim()) {
-      Alert.alert('Champ requis', 'Saisissez la date d’embauche (AAAA-MM-JJ).');
+      alert('Champ requis', 'Saisissez la date d’embauche (AAAA-MM-JJ).');
       return;
     }
 
@@ -83,7 +83,7 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
           hire_date: hireDate.trim() || undefined,
           salary: salary.trim() ? parseFloat(salary.replace(',', '.')) : undefined,
         });
-        Alert.alert('Succès', 'Employé mis à jour.', [{text: 'OK', onPress: () => navigation.goBack()}]);
+        alert('Succès', 'Employé mis à jour.', [{text: 'OK', onPress: () => navigation.goBack()}]);
       } else {
         await createEmployee({
           email: email.trim(),
@@ -95,10 +95,10 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
           hire_date: hireDate.trim(),
           salary: salary.trim() ? parseFloat(salary.replace(',', '.')) : undefined,
         });
-        Alert.alert('Succès', 'Employé créé.', [{text: 'OK', onPress: () => navigation.goBack()}]);
+        alert('Succès', 'Employé créé.', [{text: 'OK', onPress: () => navigation.goBack()}]);
       }
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Erreur lors de l\'enregistrement'));
+      alert('Erreur', formatAxiosError(e, 'Erreur lors de l\'enregistrement'));
     } finally {
       setSubmitting(false);
     }
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     marginTop: 20,
     marginBottom: 12,
     fontFamily: secondaryFont,
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 8,
     fontFamily: secondaryFont,
   },
@@ -276,8 +276,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionBtnActive: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight + '30',
+    borderColor: Colors.darkGreen,
+    backgroundColor: Colors.olive + '30',
   },
   optionBtnText: {
     fontSize: 14,
@@ -286,10 +286,10 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   optionBtnTextActive: {
-    color: Colors.primary,
+    color: Colors.darkGreen,
   },
   submitBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

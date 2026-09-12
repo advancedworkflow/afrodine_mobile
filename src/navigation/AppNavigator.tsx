@@ -2,17 +2,25 @@ import React, {useEffect, useRef, useState} from 'react';
 import {View, Text, StyleSheet, Animated, TouchableOpacity, Platform} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import IconWrapper from '../components/IconWrapper';
+import CustomIcon, {type CustomIconName} from '../components/CustomIcon';
 import {useAuth} from '../contexts/AuthContext';
 import {useNotificationBadges} from '../hooks/useNotificationBadges';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
+import {useTranslation} from 'react-i18next';
 
-const modalScreenOptions = (title: string, showOptions = false) => ({
-  presentation: 'modal' as const,
+const modalScreenOptions = (
+  title: string,
+  showOptions = false,
+  headerBackgroundColor: string = Colors.darkGreen,
+) => ({
+  // 'card' (au lieu de 'modal') garantit un bouton retour natif visible sur iOS et Android ;
+  // la présentation modale masque ce chevron par défaut (attendu en swipe-to-dismiss).
   headerShown: true,
   title,
-  headerStyle: {backgroundColor: Colors.primary},
+  headerStyle: {backgroundColor: headerBackgroundColor},
   headerTintColor: Colors.white,
   headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
   headerRight: showOptions
@@ -29,12 +37,15 @@ const modalScreenOptions = (title: string, showOptions = false) => ({
 
 // Screens
 import SplashScreen from '../screens/SplashScreen';
+import OnboardingScreen, {ONBOARDING_SEEN_KEY} from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RestaurantsScreen from '../screens/RestaurantsScreen';
 import RestaurantDetailsScreen from '../screens/RestaurantDetailsScreen';
 import GroceryShopDetailsScreen from '../screens/GroceryShopDetailsScreen';
+import GroceryShopsScreen from '../screens/GroceryShopsScreen';
+import GroceryProductDetailScreen from '../screens/GroceryProductDetailScreen';
 import DishDetailsScreen from '../screens/DishDetailsScreen';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import CartScreen from '../screens/CartScreen';
@@ -42,6 +53,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import NotificationDetailScreen from '../screens/NotificationDetailScreen';
 import RestaurantDashboardScreen from '../screens/restaurant/DashboardScreen';
 import RestaurantOrdersScreen from '../screens/restaurant/OrdersScreen';
 import RestaurantMenuScreen from '../screens/restaurant/MenuScreen';
@@ -49,6 +61,9 @@ import RestaurantAnalyticsScreen from '../screens/restaurant/AnalyticsScreen';
 import RestaurantProfileScreen from '../screens/restaurant/ProfileScreen';
 import RestaurantReviewsScreen from '../screens/restaurant/ReviewsScreen';
 import RestaurantAnnouncementsScreen from '../screens/restaurant/AnnouncementsScreen';
+import RestaurantWalletScreen from '../screens/restaurant/WalletScreen';
+import GroceryManagementScreen from '../screens/restaurant/GroceryManagementScreen';
+import GroceryProductFormScreen from '../screens/restaurant/GroceryProductFormScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import OrderHistoryScreen from '../screens/OrderHistoryScreen';
 import OrderDetailsScreen from '../screens/OrderDetailsScreen';
@@ -56,6 +71,7 @@ import OrderStatsScreen from '../screens/OrderStatsScreen';
 import CateringScreen from '../screens/CateringScreen';
 import CateringDetailsScreen from '../screens/CateringDetailsScreen';
 import CateringServiceDetailScreen from '../screens/CateringServiceDetailScreen';
+import CateringFormulaDetailScreen from '../screens/CateringFormulaDetailScreen';
 import PopularDishesScreen from '../screens/PopularDishesScreen';
 import CateringManagementScreen from '../screens/restaurant/CateringManagementScreen';
 import CateringOfferDetailScreen from '../screens/restaurant/CateringOfferDetailScreen';
@@ -68,17 +84,17 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const SHOULD_USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
-const ACTIVE_ICON_BG = 'rgba(114, 183, 68, 0.45)'; // olive
-
 const TabBarIconWithHighlight = ({
   focused,
   name,
+  customIcon,
   size,
   color,
   title,
 }: {
   focused: boolean;
   name: string;
+  customIcon?: CustomIconName;
   size: number;
   color: string;
   title: string;
@@ -105,10 +121,13 @@ const TabBarIconWithHighlight = ({
     <Animated.View
       style={[
         styles.tabIconWrapper,
-        focused && styles.tabIconWrapperActive,
         { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
       ]}>
-      <IconWrapper name={name} size={size} color={color} />
+      {customIcon ? (
+        <CustomIcon name={customIcon} fallbackName={name} size={size} color={color} />
+      ) : (
+        <IconWrapper name={name} size={size} color={color} />
+      )}
       <Text
         style={focused ? [styles.tabTitleActive, { color }] : styles.tabTitleInactive}
         numberOfLines={1}>
@@ -120,15 +139,16 @@ const TabBarIconWithHighlight = ({
 
 // Main Tab Navigator for regular users (badge sur Profil = total notifications non lues)
 const MainTabs = () => {
+  const {t} = useTranslation();
   const {unreadCount} = useNotificationBadges();
   const profileBadge = unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount) : undefined;
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: Colors.darkGreen,
         tabBarInactiveTintColor: Colors.textLight,
         tabBarStyle: {
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.background,
           borderTopColor: Colors.border,
           borderTopWidth: 1,
           height: 64,
@@ -143,9 +163,9 @@ const MainTabs = () => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="home-outline" size={size} color={color} title="Accueil" />
+            <TabBarIconWithHighlight focused={focused} name="home-outline" customIcon="home" size={size} color={color} title={t('nav.home')} />
           ),
-          title: 'Accueil',
+          title: t('nav.home'),
         }}
       />
       <Tab.Screen
@@ -153,9 +173,19 @@ const MainTabs = () => {
         component={RestaurantsScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="restaurant-outline" size={size} color={color} title="Restaurants" />
+            <TabBarIconWithHighlight focused={focused} name="restaurant-outline" customIcon="cook" size={size} color={color} title={t('nav.restaurants')} />
           ),
-          title: 'Restaurants',
+          title: t('nav.restaurants'),
+        }}
+      />
+      <Tab.Screen
+        name="Catering"
+        component={CateringScreen}
+        options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <TabBarIconWithHighlight focused={focused} name="calendar-outline" customIcon="catering" size={size} color={color} title={t('nav.catering')} />
+          ),
+          title: t('nav.catering'),
         }}
       />
       <Tab.Screen
@@ -163,9 +193,9 @@ const MainTabs = () => {
         component={CartScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="cart-outline" size={size} color={color} title="Panier" />
+            <TabBarIconWithHighlight focused={focused} name="cart-outline" customIcon="cart" size={size} color={color} title={t('nav.cart')} />
           ),
-          title: 'Panier',
+          title: t('nav.cart'),
         }}
       />
       <Tab.Screen
@@ -173,9 +203,9 @@ const MainTabs = () => {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="person-outline" size={size} color={color} title="Profil" />
+            <TabBarIconWithHighlight focused={focused} name="person-outline" customIcon="profile" size={size} color={color} title={t('nav.profile')} />
           ),
-          title: 'Profil',
+          title: t('nav.profile'),
           tabBarBadge: profileBadge,
         }}
       />
@@ -185,6 +215,7 @@ const MainTabs = () => {
 
 // Restaurant Tab Navigator for restaurant owners (badges selon contexte: commandes, tableau de bord)
 const RestaurantTabs = () => {
+  const {t} = useTranslation();
   const {byCategory} = useNotificationBadges();
   const dashboardBadgeCount =
     (byCategory.general ?? 0) + (byCategory.complaint ?? 0) + (byCategory.favorite ?? 0);
@@ -194,10 +225,10 @@ const RestaurantTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: Colors.darkGreen,
         tabBarInactiveTintColor: Colors.textLight,
         tabBarStyle: {
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.background,
           borderTopColor: Colors.border,
           borderTopWidth: 1,
           height: 64,
@@ -212,9 +243,9 @@ const RestaurantTabs = () => {
         component={RestaurantDashboardScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="grid-outline" size={size} color={color} title="Tableau de bord" />
+            <TabBarIconWithHighlight focused={focused} name="grid-outline" size={size} color={color} title={t('nav.dashboard')} />
           ),
-          title: 'Tableau de bord',
+          title: t('nav.dashboard'),
           tabBarBadge: dashboardBadge,
         }}
       />
@@ -223,9 +254,9 @@ const RestaurantTabs = () => {
         component={RestaurantOrdersScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="receipt-outline" size={size} color={color} title="Commandes" />
+            <TabBarIconWithHighlight focused={focused} name="receipt-outline" size={size} color={color} title={t('nav.orders')} />
           ),
-          title: 'Commandes',
+          title: t('nav.orders'),
           tabBarBadge: ordersBadge,
         }}
       />
@@ -234,9 +265,9 @@ const RestaurantTabs = () => {
         component={RestaurantMenuScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="restaurant-outline" size={size} color={color} title="Menu" />
+            <TabBarIconWithHighlight focused={focused} name="restaurant-outline" size={size} color={color} title={t('nav.menu')} />
           ),
-          title: 'Menu',
+          title: t('nav.menu'),
         }}
       />
       <Tab.Screen
@@ -244,9 +275,9 @@ const RestaurantTabs = () => {
         component={RestaurantAnalyticsScreen}
         options={{
           tabBarIcon: ({focused, color, size}) => (
-            <TabBarIconWithHighlight focused={focused} name="stats-chart-outline" size={size} color={color} title="Statistiques" />
+            <TabBarIconWithHighlight focused={focused} name="stats-chart-outline" size={size} color={color} title={t('nav.analytics')} />
           ),
-          title: 'Statistiques',
+          title: t('nav.analytics'),
         }}
       />
     </Tab.Navigator>
@@ -262,10 +293,17 @@ const AppNavigator = () => {
   const [splashMinReached, setSplashMinReached] = useState(false);
   // Timeout de sécurité pour éviter le chargement infini
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
     const minTimer = setTimeout(() => setSplashMinReached(true), SPLASH_MIN_DURATION_MS);
     return () => clearTimeout(minTimer);
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem(ONBOARDING_SEEN_KEY)
+      .then(value => setHasSeenOnboarding(value === '1'))
+      .catch(() => setHasSeenOnboarding(true));
   }, []);
 
   useEffect(() => {
@@ -280,7 +318,7 @@ const AppNavigator = () => {
   }, [isLoading]);
 
   const authReady = !isLoading || hasTimedOut;
-  const showSplash = !splashMinReached || !authReady;
+  const showSplash = !splashMinReached || !authReady || hasSeenOnboarding === null;
   const authNavigatorKey = !isAuthenticated
     ? 'guest'
     : isRestaurant
@@ -295,18 +333,25 @@ const AppNavigator = () => {
     <Stack.Navigator
       key={authNavigatorKey}
       screenOptions={{headerShown: false}}
-      initialRouteName={!isAuthenticated ? "Login" : isRestaurant ? "RestaurantTabs" : "MainTabs"}>
+      initialRouteName={
+        !isAuthenticated
+          ? hasSeenOnboarding
+            ? 'Login'
+            : 'Onboarding'
+          : isRestaurant
+            ? 'RestaurantTabs'
+            : 'MainTabs'
+      }>
       {!isAuthenticated ? (
         <>
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="MainTabs" component={MainTabs} />
           <Stack.Screen
             name="RestaurantDetails"
             component={RestaurantDetailsScreen}
-            options={({route}: any) => ({
-              ...modalScreenOptions(route.params?.restaurantName || 'Restaurant', false),
-            })}
+            options={{headerShown: false}}
           />
           <Stack.Screen
             name="GroceryShopDetails"
@@ -314,6 +359,16 @@ const AppNavigator = () => {
             options={({route}: any) => ({
               ...modalScreenOptions(route.params?.groceryShopName || 'Épicerie', false),
             })}
+          />
+          <Stack.Screen
+            name="GroceryProductDetail"
+            component={GroceryProductDetailScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="GroceryShops"
+            component={GroceryShopsScreen}
+            options={modalScreenOptions('Épicerie', false)}
           />
           <Stack.Screen
             name="DishDetails"
@@ -333,7 +388,7 @@ const AppNavigator = () => {
             options={{
               headerShown: true,
               title: 'Plats populaires',
-              headerStyle: {backgroundColor: Colors.primary},
+              headerStyle: {backgroundColor: Colors.darkGreen},
               headerTintColor: Colors.white,
               headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
             }}
@@ -353,6 +408,11 @@ const AppNavigator = () => {
             component={CateringServiceDetailScreen}
             options={{headerShown: false}}
           />
+          <Stack.Screen
+            name="CateringFormulaDetail"
+            component={CateringFormulaDetailScreen}
+            options={{headerShown: false}}
+          />
         </>
       ) : isRestaurant ? (
         <>
@@ -370,7 +430,12 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Notifications"
             component={NotificationsScreen}
-            options={modalScreenOptions('Notifications', false)}
+            options={modalScreenOptions('Notifications', false, Colors.darkGreen)}
+          />
+          <Stack.Screen
+            name="NotificationDetail"
+            component={NotificationDetailScreen}
+            options={modalScreenOptions('Détail', false, Colors.darkGreen)}
           />
           <Stack.Screen
             name="RestaurantReviews"
@@ -380,6 +445,21 @@ const AppNavigator = () => {
           <Stack.Screen
             name="RestaurantAnnouncements"
             component={RestaurantAnnouncementsScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="RestaurantWallet"
+            component={RestaurantWalletScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="GroceryManagement"
+            component={GroceryManagementScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="GroceryProductForm"
+            component={GroceryProductFormScreen}
             options={{headerShown: false}}
           />
           <Stack.Screen
@@ -424,9 +504,7 @@ const AppNavigator = () => {
           <Stack.Screen
             name="RestaurantDetails"
             component={RestaurantDetailsScreen}
-            options={({route}: any) => ({
-              ...modalScreenOptions(route.params?.restaurantName || 'Restaurant', false),
-            })}
+            options={{headerShown: false}}
           />
           <Stack.Screen
             name="GroceryShopDetails"
@@ -434,6 +512,16 @@ const AppNavigator = () => {
             options={({route}: any) => ({
               ...modalScreenOptions(route.params?.groceryShopName || 'Épicerie', false),
             })}
+          />
+          <Stack.Screen
+            name="GroceryProductDetail"
+            component={GroceryProductDetailScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="GroceryShops"
+            component={GroceryShopsScreen}
+            options={modalScreenOptions('Épicerie', false)}
           />
           <Stack.Screen
             name="DishDetails"
@@ -453,7 +541,7 @@ const AppNavigator = () => {
             options={{
               headerShown: true,
               title: 'Plats populaires',
-              headerStyle: {backgroundColor: Colors.primary},
+              headerStyle: {backgroundColor: Colors.darkGreen},
               headerTintColor: Colors.white,
               headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
             }}
@@ -481,7 +569,12 @@ const AppNavigator = () => {
           <Stack.Screen
             name="Notifications"
             component={NotificationsScreen}
-            options={modalScreenOptions('Notifications', false)}
+            options={modalScreenOptions('Notifications', false, Colors.darkGreen)}
+          />
+          <Stack.Screen
+            name="NotificationDetail"
+            component={NotificationDetailScreen}
+            options={modalScreenOptions('Détail', false, Colors.darkGreen)}
           />
           <Stack.Screen
             name="Favorites"
@@ -489,7 +582,7 @@ const AppNavigator = () => {
             options={({navigation}) => ({
               headerShown: true,
               title: 'Favoris',
-              headerStyle: {backgroundColor: Colors.primary},
+              headerStyle: {backgroundColor: Colors.darkGreen},
               headerTintColor: Colors.white,
               headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
               headerRight: () => (
@@ -508,7 +601,7 @@ const AppNavigator = () => {
             options={({navigation}) => ({
               headerShown: true,
               title: 'Historique des commandes',
-              headerStyle: {backgroundColor: Colors.primary},
+              headerStyle: {backgroundColor: Colors.darkGreen},
               headerTintColor: Colors.white,
               headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
               headerRight: () => (
@@ -527,7 +620,7 @@ const AppNavigator = () => {
             options={{
               headerShown: true,
               title: 'Détail de la commande',
-              headerStyle: {backgroundColor: Colors.primary},
+              headerStyle: {backgroundColor: Colors.darkGreen},
               headerTintColor: Colors.white,
               headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
             }}
@@ -538,7 +631,7 @@ const AppNavigator = () => {
             options={{
               headerShown: true,
               title: 'Statistiques commandes',
-              headerStyle: {backgroundColor: Colors.primary},
+              headerStyle: {backgroundColor: Colors.darkGreen},
               headerTintColor: Colors.white,
               headerTitleStyle: {fontWeight: 'bold' as const, fontFamily: secondaryFont},
             }}
@@ -558,6 +651,11 @@ const AppNavigator = () => {
             component={CateringServiceDetailScreen}
             options={{headerShown: false}}
           />
+          <Stack.Screen
+            name="CateringFormulaDetail"
+            component={CateringFormulaDetailScreen}
+            options={{headerShown: false}}
+          />
         </>
       )}
     </Stack.Navigator>
@@ -570,20 +668,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
-    gap: 2,
-  },
-  tabIconWrapperActive: {
-    backgroundColor: ACTIVE_ICON_BG,
+    paddingVertical: 2,
+    gap: 4,
   },
   tabTitleActive: {
     fontSize: 11,
+    fontFamily: secondaryFont,
     fontWeight: '600',
     maxWidth: 72,
   },
   tabTitleInactive: {
-    fontSize: 10,
+    fontSize: 11,
+    fontFamily: secondaryFont,
     color: Colors.textLight,
     maxWidth: 64,
   },

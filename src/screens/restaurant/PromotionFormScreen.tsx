@@ -6,11 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -189,23 +189,23 @@ const PromotionFormScreen = ({navigation, route}: any) => {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert('Champ requis', 'Saisissez un titre.');
+      alert('Champ requis', 'Saisissez un titre.');
       return;
     }
     if (targetType === 'dish' && dishIds.length === 0) {
-      Alert.alert('Champ requis', 'Sélectionnez un plat.');
+      alert('Champ requis', 'Sélectionnez un plat.');
       return;
     }
     if (targetType === 'menu' && menuIds.length === 0) {
-      Alert.alert('Champ requis', 'Sélectionnez un menu.');
+      alert('Champ requis', 'Sélectionnez un menu.');
       return;
     }
     if (effectiveMediaType === 'image' && !imageUrl.trim()) {
-      Alert.alert('Champ requis', 'Saisissez l’URL de l’image ou uploadez une image depuis le tableau de bord web.');
+      alert('Champ requis', 'Saisissez l’URL de l’image ou uploadez une image depuis le tableau de bord web.');
       return;
     }
     if (effectiveMediaType === 'video' && !videoUrl.trim()) {
-      Alert.alert('Champ requis', 'Saisissez l’URL de la vidéo ou uploadez depuis le tableau de bord web.');
+      alert('Champ requis', 'Saisissez l’URL de la vidéo ou uploadez depuis le tableau de bord web.');
       return;
     }
 
@@ -214,17 +214,17 @@ const PromotionFormScreen = ({navigation, route}: any) => {
     try {
       if (isEdit && promotion?.id) {
         await updateManagementPromotion(promotion.id, payload);
-        Alert.alert('Succès', 'Promotion mise à jour.', [
+        alert('Succès', 'Promotion mise à jour.', [
           {text: 'OK', onPress: () => navigation.goBack()},
         ]);
       } else {
         await createManagementPromotion(payload);
-        Alert.alert('Succès', 'Promotion créée. Paiement requis pour activation.', [
+        alert('Succès', 'Promotion créée. Paiement requis pour activation.', [
           {text: 'OK', onPress: () => navigation.goBack()},
         ]);
       }
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Erreur lors de l\'enregistrement'));
+      alert('Erreur', formatAxiosError(e, 'Erreur lors de l\'enregistrement'));
     } finally {
       setSubmitting(false);
     }
@@ -332,7 +332,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
                       <IconWrapper
                         name={dishIds.includes(d.id) ? 'radio-button-on' : 'radio-button-off'}
                         size={20}
-                        color={dishIds.includes(d.id) ? Colors.primary : Colors.textLight}
+                        color={dishIds.includes(d.id) ? Colors.darkGreen : Colors.textLight}
                       />
                       <Text style={styles.checkLabel}>{d.name}</Text>
                       <Text style={styles.checkPrice}>{d.price?.toFixed(2)}€</Text>
@@ -359,7 +359,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
                       <IconWrapper
                         name={menuIds.includes(m.id) ? 'radio-button-on' : 'radio-button-off'}
                         size={20}
-                        color={menuIds.includes(m.id) ? Colors.primary : Colors.textLight}
+                        color={menuIds.includes(m.id) ? Colors.darkGreen : Colors.textLight}
                       />
                       <Text style={styles.checkLabel}>{m.name}</Text>
                     </TouchableOpacity>
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     marginTop: 20,
     marginBottom: 12,
     fontFamily: secondaryFont,
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 8,
     fontFamily: secondaryFont,
   },
@@ -650,8 +650,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionBtnActive: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight + '30',
+    borderColor: Colors.darkGreen,
+    backgroundColor: Colors.olive + '30',
   },
   optionBtnDisabled: {
     opacity: 0.5,
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   optionBtnTextActive: {
-    color: Colors.primary,
+    color: Colors.darkGreen,
   },
   optionBtnTextDisabled: {
     color: Colors.textLight,
@@ -710,8 +710,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   formatBtnActive: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight + '30',
+    borderColor: Colors.darkGreen,
+    backgroundColor: Colors.olive + '30',
   },
   formatBtnText: {
     fontSize: 12,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formatBtnTextActive: {
-    color: Colors.primary,
+    color: Colors.darkGreen,
   },
   formatPrice: {
     fontSize: 10,
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[100],
   },
   durationBtnActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
   },
   durationBtnText: {
     fontSize: 13,
@@ -766,9 +766,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   estimatorBox: {
-    backgroundColor: Colors.primaryLight + '20',
+    backgroundColor: Colors.olive + '20',
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: Colors.darkGreen,
     borderRadius: 12,
     padding: 16,
     marginTop: 16,
@@ -777,14 +777,14 @@ const styles = StyleSheet.create({
   estimatorTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     marginBottom: 4,
     fontFamily: secondaryFont,
   },
   estimatorPrice: {
     fontSize: 22,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   estimatorDetail: {
@@ -794,7 +794,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   submitBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

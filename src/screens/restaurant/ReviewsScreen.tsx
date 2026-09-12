@@ -6,17 +6,24 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
-import {getManagementReviews, type ManagementReview} from '../../services/restaurantManagement';
+import {formatAxiosError} from '../../utils/formatApiError';
+import {getManagementReviews, replyToReview, type ManagementReview} from '../../services/restaurantManagement';
 
 const RestaurantReviewsScreen = ({navigation}: any) => {
   const [reviews, setReviews] = useState<ManagementReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [replyingId, setReplyingId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
 
   const load = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -36,12 +43,43 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
     load();
   }, []);
 
+  const openReply = (review: ManagementReview) => {
+    setReplyingId(review.id);
+    setReplyText('');
+  };
+
+  const cancelReply = () => {
+    setReplyingId(null);
+    setReplyText('');
+  };
+
+  const submitReply = async (review: ManagementReview) => {
+    if (!replyText.trim()) return;
+    setSubmittingReply(true);
+    try {
+      const result = await replyToReview(review.id, replyText.trim());
+      if (!result) {
+        alert('Réponse impossible', "Cet avis ne peut pas recevoir de réponse pour le moment.");
+        return;
+      }
+      setReviews(prev =>
+        prev.map(r => (r.id === review.id ? {...r, reply: replyText.trim()} : r)),
+      );
+      setReplyingId(null);
+      setReplyText('');
+    } catch (e) {
+      alert('Erreur', formatAxiosError(e, "Impossible d'envoyer la réponse."));
+    } finally {
+      setSubmittingReply(false);
+    }
+  };
+
   if (loading && reviews.length === 0) {
     return (
       <View style={styles.container}>
         <TopBar navigation={navigation} title="Avis" showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -54,7 +92,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
         style={styles.content}
         contentContainerStyle={styles.contentInner}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[Colors.primary]} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[Colors.darkGreen]} />
         }>
         {reviews.length === 0 ? (
           <View style={styles.empty}>
@@ -67,7 +105,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
             <View key={review.id ?? index} style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.ratingRow}>
-                  <IconWrapper name="star" size={16} color={Colors.primary} />
+                  <IconWrapper name="star" size={16} color={Colors.darkGreen} />
                   <Text style={styles.ratingText}>{review.rating ?? review.score ?? '–'}</Text>
                 </View>
                 <Text style={styles.clientName}>{review.client_name ?? review.user_name ?? 'Client'}</Text>
@@ -80,7 +118,43 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
                   <Text style={styles.replyLabel}>Réponse :</Text>
                   <Text style={styles.replyText}>{review.reply}</Text>
                 </View>
-              ) : null}
+              ) : replyingId === review.id ? (
+                <View style={styles.replyForm}>
+                  <TextInput
+                    style={styles.replyInput}
+                    value={replyText}
+                    onChangeText={setReplyText}
+                    placeholder="Votre réponse..."
+                    placeholderTextColor={Colors.textLight}
+                    multiline
+                    numberOfLines={3}
+                    editable={!submittingReply}
+                  />
+                  <View style={styles.replyFormActions}>
+                    <TouchableOpacity
+                      style={styles.replyCancelBtn}
+                      onPress={cancelReply}
+                      disabled={submittingReply}>
+                      <Text style={styles.replyCancelText}>Annuler</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.replySubmitBtn, (!replyText.trim() || submittingReply) && styles.replySubmitBtnDisabled]}
+                      onPress={() => submitReply(review)}
+                      disabled={!replyText.trim() || submittingReply}>
+                      {submittingReply ? (
+                        <ActivityIndicator size="small" color={Colors.white} />
+                      ) : (
+                        <Text style={styles.replySubmitText}>Envoyer</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.replyPromptBtn} onPress={() => openReply(review)}>
+                  <IconWrapper name="arrow-undo-outline" size={16} color={Colors.darkGreen} />
+                  <Text style={styles.replyPromptText}>Répondre</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ))
         )}
@@ -144,7 +218,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   clientName: {
@@ -173,6 +247,71 @@ const styles = StyleSheet.create({
   replyText: {
     fontSize: 14,
     color: Colors.text,
+    fontFamily: secondaryFont,
+  },
+  replyPromptBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  replyPromptText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.darkGreen,
+    fontFamily: secondaryFont,
+  },
+  replyForm: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  replyInput: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 14,
+    color: Colors.text,
+    fontFamily: secondaryFont,
+    minHeight: 70,
+    textAlignVertical: 'top',
+  },
+  replyFormActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 10,
+  },
+  replyCancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: Colors.gray[100],
+  },
+  replyCancelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    fontFamily: secondaryFont,
+  },
+  replySubmitBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: Colors.darkGreen,
+    minWidth: 84,
+    alignItems: 'center',
+  },
+  replySubmitBtnDisabled: {
+    opacity: 0.5,
+  },
+  replySubmitText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.white,
     fontFamily: secondaryFont,
   },
 });

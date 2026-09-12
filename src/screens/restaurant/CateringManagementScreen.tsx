@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -20,7 +21,6 @@ import {
   type CateringBookingItem,
 } from '../../services/restaurantManagement';
 import ConfirmModal from '../../components/ConfirmModal';
-import {Alert} from 'react-native';
 import {formatAxiosError} from '../../utils/formatApiError';
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
@@ -76,9 +76,9 @@ const CateringManagementScreen = ({navigation}: any) => {
     try {
       await deleteManagementCateringService(id);
       setServices((prev) => prev.filter((s) => s.id !== id));
-      Alert.alert('Succès', 'Offre supprimée.');
+      alert('Succès', 'Offre supprimée.');
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
     }
   };
 
@@ -107,7 +107,7 @@ const CateringManagementScreen = ({navigation}: any) => {
           onBackPress={() => navigation.goBack()}
         />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -125,7 +125,7 @@ const CateringManagementScreen = ({navigation}: any) => {
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
         }>
         <TouchableOpacity
           style={styles.addButton}
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     borderRadius: 12,
     marginBottom: 20,
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   cardType: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   cardPriceValue: {
     fontSize: 22,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   cardGuests: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginTop: 16,
     fontFamily: secondaryFont,
   },
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   emptyBookings: {
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   tableCellAmount: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
   },
   tableCellStatusWrap: {
     justifyContent: 'center',
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.category?.yellow?.bg ?? '#FEF3C7',
   },
   bookingStatusConfirmed: {
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: Colors.darkGreen + '20',
   },
   bookingStatusCancelled: {
     backgroundColor: Colors.error + '20',
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   bookingStatusTextConfirmed: {
-    color: Colors.primary,
+    color: Colors.darkGreen,
   },
   bookingStatusTextCancelled: {
     color: Colors.error,

@@ -73,7 +73,7 @@ const AnnouncementsScreen = ({ navigation }: any) => {
       <TopBar navigation={navigation} title="Annonces" showBackButton onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[Colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[Colors.darkGreen]} />}
       >
         <View style={styles.tabsRow}>
           <TabBtn label={`Actives (${activeCount})`} active={view === 'active'} onPress={() => setView('active')} />
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   tabBtnActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     color: Colors.white,
   },
   tabBtnInactive: {
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginRight: 8,
   },

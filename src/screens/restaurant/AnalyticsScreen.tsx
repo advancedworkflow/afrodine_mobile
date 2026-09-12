@@ -41,7 +41,7 @@ function BarChart<T extends { date: string }>({
   data,
   valueKey,
   labelFormat,
-  color = Colors.primary,
+  color = Colors.darkGreen,
   title,
 }: {
   data: T[];
@@ -96,7 +96,7 @@ function TopDishesChart({
   valueKey,
   title,
   labelFormat,
-  barColor = Colors.primaryLight,
+  barColor = Colors.olive,
 }: {
   items: { id: number; name: string; orders?: number; revenue?: number }[];
   valueKey: 'orders' | 'revenue';
@@ -148,7 +148,7 @@ function RevenueShareChart({
           <View key={item.id} style={styles.topDishesRow}>
             <Text style={styles.topDishesLabel} numberOfLines={1}>{item.name}</Text>
             <View style={styles.topDishesBarBg}>
-              <View style={[styles.topDishesBar, { width: w, backgroundColor: Colors.primary }]} />
+              <View style={[styles.topDishesBar, { width: w, backgroundColor: Colors.darkGreen }]} />
             </View>
             <Text style={styles.topDishesValue}>{pct.toFixed(0)}%</Text>
           </View>
@@ -179,9 +179,9 @@ function CombinedBarChart({
     <View style={styles.chartCard}>
       <Text style={styles.chartTitle}>Revenus et commandes (7 derniers jours)</Text>
       <View style={styles.legendRow}>
-        <View style={[styles.legendDot, { backgroundColor: Colors.primary }]} />
+        <View style={[styles.legendDot, { backgroundColor: Colors.darkGreen }]} />
         <Text style={styles.legendText}>Revenus (€)</Text>
-        <View style={[styles.legendDot, { backgroundColor: Colors.primaryLight }]} />
+        <View style={[styles.legendDot, { backgroundColor: Colors.olive }]} />
         <Text style={styles.legendText}>Commandes</Text>
       </View>
       <View style={[styles.chartContainer, { height: CHART_HEIGHT }]}>
@@ -195,7 +195,7 @@ function CombinedBarChart({
                     {
                       width: barW,
                       height: Math.max((revenues[i] / maxR) * BAR_MAX_HEIGHT, 4),
-                      backgroundColor: Colors.primary,
+                      backgroundColor: Colors.darkGreen,
                     },
                   ]}
                 />
@@ -205,7 +205,7 @@ function CombinedBarChart({
                     {
                       width: barW,
                       height: Math.max((orders[i] / maxO) * BAR_MAX_HEIGHT, 4),
-                      backgroundColor: Colors.primaryLight,
+                      backgroundColor: Colors.olive,
                     },
                   ]}
                 />
@@ -266,7 +266,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar navigation={navigation} title="Statistiques" />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -305,11 +305,11 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
       <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
         }>
         <View style={styles.card}>
           <View style={styles.cardRow}>
-            <IconWrapper name="receipt-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="receipt-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
               <Text style={styles.cardLabel}>Commandes aujourd'hui</Text>
               <Text style={styles.cardValue}>{todayOrders}</Text>
@@ -319,7 +319,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
         </View>
         <View style={styles.card}>
           <View style={styles.cardRow}>
-            <IconWrapper name="cash-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="cash-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
               <Text style={styles.cardLabel}>Revenus aujourd'hui (API)</Text>
               <Text style={styles.cardValue}>{todayRevenue.toFixed(2)} €</Text>
@@ -329,7 +329,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
         </View>
         <View style={styles.card}>
           <View style={styles.cardRow}>
-            <IconWrapper name="people-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="people-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
               <Text style={styles.cardLabel}>Clients uniques</Text>
               <Text style={styles.cardValue}>{uniqueCustomers}</Text>
@@ -339,7 +339,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
         </View>
         <View style={styles.card}>
           <View style={styles.cardRow}>
-            <IconWrapper name="pricetag-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="pricetag-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
               <Text style={styles.cardLabel}>Panier moyen</Text>
               <Text style={styles.cardValue}>{averageOrder.toFixed(2)} €</Text>
@@ -353,7 +353,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
           data={revenueChartData}
           valueKey="revenue"
           labelFormat={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k€` : `${v.toFixed(0)} €`)}
-          color={Colors.primary}
+          color={Colors.darkGreen}
         />
 
         <BarChart
@@ -361,7 +361,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
           data={ordersChartData}
           valueKey="orders"
           labelFormat={(v) => `${v}`}
-          color={Colors.primaryLight}
+          color={Colors.olive}
         />
 
         <CombinedBarChart revenueData={revenueChartData} ordersData={ordersChartData} />
@@ -373,14 +373,14 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
               valueKey="orders"
               title="Top plats (commandes) — API"
               labelFormat={(v) => `${v}`}
-              barColor={Colors.primaryLight}
+              barColor={Colors.olive}
             />
             <TopDishesChart
               items={topDishes}
               valueKey="revenue"
               title="Top plats (revenus) — API"
               labelFormat={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k €` : `${v.toFixed(0)} €`)}
-              barColor={Colors.primary}
+              barColor={Colors.darkGreen}
             />
             <RevenueShareChart items={topDishes} />
           </>
@@ -428,12 +428,12 @@ const styles = StyleSheet.create({
   cardValue: {
     fontSize: 22,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   cardChange: {
     fontSize: 13,
-    color: Colors.primary,
+    color: Colors.darkGreen,
     marginTop: 4,
     fontWeight: '600',
   },
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginBottom: 16,
   },
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   barValue: {
     fontSize: 10,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginTop: 4,
     maxWidth: 48,
     textAlign: 'center',
@@ -541,14 +541,14 @@ const styles = StyleSheet.create({
   topDishesBar: {
     height: '100%',
     borderRadius: 8,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.olive,
     minWidth: 6,
   },
   topDishesValue: {
     width: 36,
     fontSize: 13,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     textAlign: 'right',
   },
 });

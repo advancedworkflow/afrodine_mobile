@@ -11,12 +11,11 @@ import {
 } from 'react-native';
 import TopBar from '../components/TopBar';
 import IconWrapper from '../components/IconWrapper';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
+import {Colors, Radius, Shadows} from '../utils/colors';
+import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import * as restaurantsApi from '../services/restaurants';
 import {
   getCateringServicesByRestaurant,
-  getCateringPackagesByRestaurant,
   type CateringServiceApi,
 } from '../services/catering';
 
@@ -24,8 +23,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
   const restaurantId = route.params?.restaurantId ?? route.params?.restaurant_id;
   const [restaurant, setRestaurant] = useState<any>(null);
   const [services, setServices] = useState<CateringServiceApi[]>([]);
-  const [packages, setPackages] = useState<CateringServiceApi[]>([]);
-  const [dishes, setDishes] = useState<DishForList[]>([]);
+  const [dishes, setDishes] = useState<restaurantsApi.DishForList[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +38,10 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
       if (!isRefresh) setLoading(true);
       setError(null);
       const id = Number(restaurantId) || restaurantId;
-      const [restData, servicesData, packagesData, dishesData] = await Promise.all([
+      const [restData, servicesData, dishesData] = await Promise.all([
         restaurantsApi.getRestaurantById(id),
         getCateringServicesByRestaurant(id),
-        getCateringPackagesByRestaurant(id),
-        restaurantsApi.getRestaurantDishes(id).catch(() => [] as DishForList[]),
+        restaurantsApi.getRestaurantDishes(id).catch(() => [] as restaurantsApi.DishForList[]),
       ]);
       if (restData) {
         setRestaurant({
@@ -60,12 +57,10 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
         setRestaurant(null);
       }
       setServices(Array.isArray(servicesData) ? servicesData : []);
-      setPackages(Array.isArray(packagesData) ? packagesData : []);
       setDishes(Array.isArray(dishesData) ? dishesData : []);
     } catch (e: any) {
       setError(e?.message || 'Erreur chargement');
       setServices([]);
-      setPackages([]);
       setDishes([]);
     } finally {
       setLoading(false);
@@ -155,7 +150,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
     );
   }
 
-  const hasOffers = services.length > 0 || packages.length > 0;
+  const hasOffers = services.length > 0;
 
   const heroImageUri =
     services.find((s) => s.image_url)?.image_url ||
@@ -223,48 +218,6 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
                     <View style={styles.cardBody}>
                       <Text style={styles.cardName}>{s.service_name}</Text>
                       <Text style={styles.cardType}>{typeLabel(s.service_type)}</Text>
-                      {s.service_description ? (
-                        <Text style={styles.cardDesc} numberOfLines={3}>
-                          {s.service_description}
-                        </Text>
-                      ) : null}
-                      <View style={styles.cardMeta}>
-                        <Text style={styles.cardPrice}>
-                          À partir de {Number(s.base_price).toFixed(0)} €
-                        </Text>
-                        <Text style={styles.cardGuests}>
-                          {s.min_guests}–{s.max_guests ?? '+'} pers.
-                        </Text>
-                      </View>
-                      {renderCommodités(s)}
-                    </View>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-
-            {packages.length > 0 ? (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Packages</Text>
-                {packages.map((s) => (
-                  <View key={s.id} style={styles.card}>
-                    {s.image_url ? (
-                      <Image
-                        source={{uri: s.image_url}}
-                        style={styles.cardCover}
-                        resizeMode="cover"
-                      />
-                    ) : null}
-                    <View style={styles.cardRow}>
-                    <View style={styles.cardIcon}>
-                      <IconWrapper name="layers-outline" size={24} color={Colors.primary} />
-                    </View>
-                    <View style={styles.cardBody}>
-                      <Text style={styles.cardName}>{s.service_name}</Text>
-                      {s.service_type ? (
-                        <Text style={styles.cardType}>{typeLabel(s.service_type)}</Text>
-                      ) : null}
                       {s.service_description ? (
                         <Text style={styles.cardDesc} numberOfLines={3}>
                           {s.service_description}
@@ -355,6 +308,7 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 12,
     fontSize: 16,
+    fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
   },
@@ -362,28 +316,27 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   heroTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: Colors.primaryDark,
-    fontFamily: secondaryFont,
+    fontSize: 24,
+    color: Colors.text,
+    fontFamily: fontDisplay,
   },
   heroSubtitle: {
     fontSize: 15,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 4,
-    fontFamily: secondaryFont,
   },
   description: {
     fontSize: 14,
+    fontFamily: fontUI,
     color: Colors.text,
     marginTop: 8,
     lineHeight: 20,
-    fontFamily: secondaryFont,
   },
   heroImage: {
     width: '100%',
     height: 200,
-    borderRadius: 14,
+    borderRadius: Radius.lg,
     marginBottom: 16,
     backgroundColor: Colors.gray[100],
   },
@@ -391,19 +344,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
+    fontSize: 20,
+    color: Colors.text,
     marginBottom: 12,
-    fontFamily: secondaryFont,
+    fontFamily: fontDisplay,
   },
   card: {
-    backgroundColor: Colors.white,
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
     overflow: 'hidden',
+    ...Shadows.sm,
   },
   cardCover: {
     width: '100%',
@@ -418,8 +369,8 @@ const styles = StyleSheet.create({
   cardIcon: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: Colors.category?.green?.bg ?? Colors.primaryLight + '30',
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.category?.green?.bg ?? Colors.cream,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -428,24 +379,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.primaryDark,
-    fontFamily: secondaryFont,
+    fontSize: 17,
+    color: Colors.text,
+    fontFamily: fontDisplayMedium,
   },
   cardType: {
     fontSize: 12,
     color: Colors.primary,
-    fontWeight: '600',
     marginTop: 2,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   cardDesc: {
     fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 6,
     lineHeight: 18,
-    fontFamily: secondaryFont,
   },
   cardMeta: {
     flexDirection: 'row',
@@ -455,14 +404,13 @@ const styles = StyleSheet.create({
   },
   cardPrice: {
     fontSize: 14,
-    fontWeight: '600',
     color: Colors.primary,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   cardGuests: {
     fontSize: 13,
+    fontFamily: fontUI,
     color: Colors.textLight,
-    fontFamily: secondaryFont,
   },
   commoditesWrap: {
     marginTop: 10,
@@ -472,10 +420,9 @@ const styles = StyleSheet.create({
   },
   commoditesTitle: {
     fontSize: 12,
-    fontWeight: '600',
     color: Colors.textLight,
     marginBottom: 6,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
   commoditesRow: {
     flexDirection: 'row',
@@ -485,16 +432,16 @@ const styles = StyleSheet.create({
   commoditeChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryLight + '25',
+    backgroundColor: Colors.cream,
     paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    paddingHorizontal: 10,
+    borderRadius: Radius.pill,
     gap: 4,
   },
   commoditeText: {
     fontSize: 12,
-    color: Colors.primaryDark,
-    fontFamily: secondaryFont,
+    color: Colors.text,
+    fontFamily: fontUI,
   },
   empty: {
     alignItems: 'center',
@@ -502,50 +449,46 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
     color: Colors.text,
     marginTop: 16,
-    fontFamily: secondaryFont,
+    fontFamily: fontDisplayMedium,
   },
   emptyText: {
     fontSize: 14,
+    fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 8,
-    fontFamily: secondaryFont,
   },
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: Radius.pill,
     gap: 8,
     marginTop: 8,
   },
   ctaButtonText: {
-    color: Colors.white,
+    color: Colors.cream,
     fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: secondaryFont,
+    fontFamily: fontButton,
   },
   dishRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
     gap: 12,
   },
   dishThumb: {
     width: 64,
     height: 64,
-    borderRadius: 10,
+    borderRadius: Radius.md,
     backgroundColor: Colors.gray[100],
   },
   dishThumbPlaceholder: {
@@ -557,16 +500,14 @@ const styles = StyleSheet.create({
   },
   dishRowName: {
     fontSize: 15,
-    fontWeight: '600',
-    color: Colors.primaryDark,
-    fontFamily: secondaryFont,
+    color: Colors.text,
+    fontFamily: fontDisplayMedium,
   },
   dishRowPrice: {
     fontSize: 14,
-    fontWeight: '600',
     color: Colors.primary,
     marginTop: 4,
-    fontFamily: secondaryFont,
+    fontFamily: fontHeading,
   },
 });
 

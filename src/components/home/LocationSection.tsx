@@ -1,32 +1,36 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import IconWrapper from '../IconWrapper';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius} from '../../utils/colors';
+import {fontButton, fontHeading} from '../../utils/fonts';
 
 interface LocationSectionProps {
   address?: string;
   onPress?: () => void;
+  onNotificationsPress?: () => void;
+  hasUnreadNotifications?: boolean;
 }
 
 const LocationSection: React.FC<LocationSectionProps> = ({
   address = 'Adresse non renseignée',
   onPress,
+  onNotificationsPress,
+  hasUnreadNotifications = true,
 }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <IconWrapper name="location-outline" size={20} color={Colors.primaryLight} />
-        </View>
-        <View style={styles.textContainer}>
-          <Text style={styles.label}>Livrer à</Text>
-          <Text style={styles.address} numberOfLines={1}>
-            {address}
-          </Text>
-        </View>
-      </View>
-      <TouchableOpacity onPress={onPress} style={styles.chevronButton}>
-        <IconWrapper name="chevron-down-outline" size={20} color={Colors.primaryLight} />
+      <TouchableOpacity style={styles.textContainer} onPress={onPress} activeOpacity={0.7}>
+        <Text style={styles.label}>Livrer à</Text>
+        <Text style={styles.address} numberOfLines={1}>
+          {address} ▾
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.notificationButton}
+        onPress={onNotificationsPress}
+        activeOpacity={0.8}>
+        <IconWrapper name="notifications-outline" size={20} color={Colors.white} />
+        {hasUnreadNotifications && <View style={styles.notificationBadge} />}
       </TouchableOpacity>
     </View>
   );
@@ -36,45 +40,47 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.white,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[100],
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    backgroundColor: Colors.primaryLight + '1A', // 10% opacity
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    paddingHorizontal: 18,
+    paddingTop: 4,
+    paddingBottom: 16,
+    backgroundColor: Colors.darkGreen,
+    borderBottomLeftRadius: Radius.lg,
+    borderBottomRightRadius: Radius.lg,
   },
   textContainer: {
     flex: 1,
   },
   label: {
     fontSize: 12,
-    color: Colors.textLight,
+    fontFamily: fontHeading,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: 'rgba(251,249,217,0.7)',
     marginBottom: 2,
   },
   address: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
+    fontSize: 16.5,
+    fontFamily: fontButton,
+    color: Colors.white,
   },
-  chevronButton: {
-    padding: 4,
+  notificationButton: {
+    width: 48,
+    height: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 9,
+    width: 10,
+    height: 10,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.terracotta,
   },
 });
 
 export default LocationSection;
-

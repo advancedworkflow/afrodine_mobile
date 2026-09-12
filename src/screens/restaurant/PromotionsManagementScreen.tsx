@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -70,9 +70,9 @@ const PromotionsManagementScreen = ({navigation}: any) => {
     try {
       await deleteManagementPromotion(id);
       setPromotions((prev) => prev.filter((p) => p.id !== id));
-      Alert.alert('Succès', 'Promotion supprimée.');
+      alert('Succès', 'Promotion supprimée.');
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
     }
   };
 
@@ -88,7 +88,7 @@ const PromotionsManagementScreen = ({navigation}: any) => {
           onBackPress={() => navigation.goBack()}
         />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -106,7 +106,7 @@ const PromotionsManagementScreen = ({navigation}: any) => {
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
         }>
         {stats && (stats.total_promotions != null || stats.active_promotions != null) && (
           <View style={styles.statsRow}>
@@ -183,7 +183,7 @@ const PromotionsManagementScreen = ({navigation}: any) => {
         confirmLabel="Supprimer"
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
-        danger
+        variant="danger"
       />
     </View>
   );
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   statLabel: {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   cardDesc: {
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     fontSize: 12,
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontWeight: '600',
   },
   cardPrice: {

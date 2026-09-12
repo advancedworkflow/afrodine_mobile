@@ -10,9 +10,9 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  Alert,
   Linking,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -71,7 +71,7 @@ function last7DaysOrders(): OrdersDataPoint[] {
 function MiniBarChart({
   data,
   valueKey,
-  color = Colors.primary,
+  color = Colors.darkGreen,
 }: {
   data: RevenueDataPoint[] | OrdersDataPoint[];
   valueKey: 'revenue' | 'orders';
@@ -134,7 +134,7 @@ function HorizontalBarChart({
           <View key={item.id} style={dashboardStyles.hChartRow}>
             <Text style={dashboardStyles.hChartLabel} numberOfLines={1}>{item.name}</Text>
             <View style={dashboardStyles.hChartBarBg}>
-              <View style={[dashboardStyles.hChartBar, { width: Math.max(w, 4), backgroundColor: Colors.primaryLight }]} />
+              <View style={[dashboardStyles.hChartBar, { width: Math.max(w, 4), backgroundColor: Colors.olive }]} />
             </View>
             <Text style={dashboardStyles.hChartValue}>{labelFormat(v)}</Text>
           </View>
@@ -198,7 +198,7 @@ const dashboardStyles = StyleSheet.create({
   hChartValue: {
     width: 44,
     fontSize: 11,
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontWeight: '600',
     textAlign: 'right',
   },
@@ -354,11 +354,11 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
   const onConfirmPayout = async () => {
     const amount = parseFloat(payoutAmount.replace(',', '.'));
     if (!Number.isFinite(amount) || amount <= 0) {
-      Alert.alert('Montant invalide', 'Saisissez un montant positif.');
+      alert('Montant invalide', 'Saisissez un montant positif.');
       return;
     }
     if (amount > walletBalance) {
-      Alert.alert('Solde insuffisant', `Solde disponible : ${walletBalance.toFixed(2)} €`);
+      alert('Solde insuffisant', `Solde disponible : ${walletBalance.toFixed(2)} €`);
       return;
     }
     setPayoutLoading(true);
@@ -368,12 +368,12 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         setPayoutModalVisible(false);
         setPayoutAmount('');
         setWalletBalance(result?.new_balance ?? walletBalance - amount);
-        Alert.alert('Succès', `Payout de ${amount.toFixed(2)} € demandé. Arrivée sous 1-3 jours ouvrés.`);
+        alert('Succès', `Payout de ${amount.toFixed(2)} € demandé. Arrivée sous 1-3 jours ouvrés.`);
       } else {
-        Alert.alert('Erreur', (result as any)?.message ?? 'Impossible d\'effectuer le retrait.');
+        alert('Erreur', (result as any)?.message ?? 'Impossible d\'effectuer le retrait.');
       }
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible d\'effectuer le retrait.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible d\'effectuer le retrait.'));
     } finally {
       setPayoutLoading(false);
     }
@@ -382,18 +382,18 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
   const onOpenConnectOnboarding = async () => {
     const link = await createStripeConnectOnboardingLink();
     if (!link?.url) {
-      Alert.alert('Stripe Connect', 'Impossible de generer le lien onboarding pour le moment.');
+      alert('Stripe Connect', 'Impossible de generer le lien onboarding pour le moment.');
       return;
     }
     try {
       const canOpen = await Linking.canOpenURL(link.url);
       if (!canOpen) {
-        Alert.alert('Stripe Connect', 'Impossible d’ouvrir le navigateur sur cet appareil.');
+        alert('Stripe Connect', 'Impossible d’ouvrir le navigateur sur cet appareil.');
         return;
       }
       await Linking.openURL(link.url);
     } catch {
-      Alert.alert('Stripe Connect', 'Impossible d’ouvrir le lien onboarding. Reessayez.');
+      alert('Stripe Connect', 'Impossible d’ouvrir le lien onboarding. Reessayez.');
     }
   };
 
@@ -411,7 +411,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
           ]}
         />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -439,7 +439,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
       <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
         }>
         <View style={styles.cardsRow}>
           <View style={[styles.card, styles.cardPrimary]}>
@@ -448,19 +448,19 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             <Text style={styles.cardLabelWhite}>En attente</Text>
           </View>
           <View style={styles.card}>
-            <IconWrapper name="cash-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="cash-outline" size={28} color={Colors.darkGreen} />
             <Text style={styles.cardValue}>{todayRev.toFixed(0)} €</Text>
             <Text style={styles.cardLabel}>Aujourd'hui</Text>
           </View>
         </View>
         <View style={styles.cardsRow}>
           <View style={styles.card}>
-            <IconWrapper name="restaurant-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="restaurant-outline" size={28} color={Colors.darkGreen} />
             <Text style={styles.cardValue}>{totalOrders}</Text>
             <Text style={styles.cardLabel}>Commandes</Text>
           </View>
           <View style={styles.card}>
-            <IconWrapper name="pricetag-outline" size={28} color={Colors.primary} />
+            <IconWrapper name="pricetag-outline" size={28} color={Colors.darkGreen} />
             <Text style={styles.cardValue}>{totalDishes}</Text>
             <Text style={styles.cardLabel}>Plats</Text>
           </View>
@@ -479,7 +479,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
               <IconWrapper
                 name={periodDropdownOpen ? 'chevron-up' : 'chevron-down'}
                 size={20}
-                color={Colors.primary}
+                color={Colors.darkGreen}
               />
             </TouchableOpacity>
             {periodDropdownOpen && (
@@ -506,7 +506,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         <LineChartCard
           data={revenueData.length > 0 ? revenueData : last7DaysRevenue()}
           valueKey="revenue"
-          color={Colors.primary}
+          color={Colors.darkGreen}
           title="Revenus"
           valueLabel={PERIOD_OPTIONS.find((p) => p.value === chartPeriod)?.label ?? `Total ${chartPeriod}`}
           formatValue={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k €` : `${v.toFixed(0)} €`)}
@@ -514,7 +514,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         <LineChartCard
           data={ordersData.length > 0 ? ordersData : last7DaysOrders()}
           valueKey="orders"
-          color={Colors.primaryLight}
+          color={Colors.olive}
           title="Commandes"
           valueLabel={PERIOD_OPTIONS.find((p) => p.value === chartPeriod)?.label ?? `Total ${chartPeriod}`}
           formatValue={(v) => `${v}`}
@@ -526,7 +526,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="wallet-outline" size={22} color={Colors.primary} />
+            <IconWrapper name="wallet-outline" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>Portefeuille</Text>
           </View>
           <Text style={styles.walletBalance}>{walletBalance.toFixed(2)} € disponibles</Text>
@@ -538,10 +538,17 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             <IconWrapper name="card-outline" size={20} color={Colors.white} />
             <Text style={styles.payoutButtonText}>Effectuer un payout</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.linkButton}
+            onPress={() => navigation.navigate('RestaurantWallet')}
+            activeOpacity={0.7}>
+            <Text style={styles.linkButtonText}>Voir le portefeuille</Text>
+            <IconWrapper name="chevron-forward" size={18} color={Colors.darkGreen} />
+          </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="card-outline" size={22} color={Colors.primary} />
+            <IconWrapper name="card-outline" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>Stripe Connect</Text>
           </View>
           <View style={styles.connectRow}>
@@ -601,7 +608,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             recentReviews.map((review, index) => (
               <View key={review.id ?? index} style={styles.reviewRow}>
                 <View style={styles.reviewRatingRow}>
-                  <IconWrapper name="star" size={14} color={Colors.primary} />
+                  <IconWrapper name="star" size={14} color={Colors.darkGreen} />
                   <Text style={styles.reviewRating}>{review.rating ?? review.score ?? '–'}</Text>
                 </View>
                 <Text style={styles.reviewComment} numberOfLines={2}>{review.comment || review.comment_text || '—'}</Text>
@@ -614,12 +621,12 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             onPress={() => navigation.navigate('RestaurantReviews')}
             activeOpacity={0.7}>
             <Text style={styles.linkButtonText}>Voir avis</Text>
-            <IconWrapper name="chevron-forward" size={18} color={Colors.primary} />
+            <IconWrapper name="chevron-forward" size={18} color={Colors.darkGreen} />
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="megaphone-outline" size={22} color={Colors.primary} />
+            <IconWrapper name="megaphone-outline" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>Annonces</Text>
           </View>
           <Text style={styles.mutedText}>Consultez les annonces de l'administration.</Text>
@@ -632,7 +639,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="restaurant" size={22} color={Colors.primary} />
+            <IconWrapper name="restaurant" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>Service traiteur</Text>
           </View>
           <Text style={styles.mutedText}>Gérez vos demandes traiteur et formules pour événements.</Text>
@@ -645,7 +652,20 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="pricetag-outline" size={22} color={Colors.primary} />
+            <IconWrapper name="storefront-outline" size={22} color={Colors.darkGreen} />
+            <Text style={styles.sectionTitle}>Grocery shop</Text>
+          </View>
+          <Text style={styles.mutedText}>Gérez votre magasin d'épicerie et son catalogue de produits.</Text>
+          <TouchableOpacity
+            style={styles.traiteurButton}
+            onPress={() => navigation.navigate('GroceryManagement')}
+            activeOpacity={0.8}>
+            <Text style={styles.traiteurButtonText}>Gérer le grocery shop</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <IconWrapper name="pricetag-outline" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>Promotions</Text>
           </View>
           <Text style={styles.mutedText}>Créez et gérez vos offres promotionnelles.</Text>
@@ -658,7 +678,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="people-outline" size={22} color={Colors.primary} />
+            <IconWrapper name="people-outline" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>Employés</Text>
           </View>
           <Text style={styles.mutedText}>Gérez les membres de votre équipe et leurs rôles.</Text>
@@ -743,13 +763,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardPrimary: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
+    borderColor: Colors.darkGreen,
   },
   cardValue: {
     fontSize: 22,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginTop: 8,
     textAlign: 'center',
@@ -807,7 +827,7 @@ const styles = StyleSheet.create({
   periodDropdownButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   periodDropdownMenu: {
@@ -834,7 +854,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.gray[100],
   },
   periodDropdownItemActive: {
-    backgroundColor: Colors.primaryLight + '20',
+    backgroundColor: Colors.olive + '20',
   },
   periodDropdownItemText: {
     fontSize: 15,
@@ -842,7 +862,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   periodDropdownItemTextActive: {
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontWeight: '600',
   },
   section: {
@@ -856,14 +876,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginBottom: 12,
   },
   revenueTotal: {
     fontSize: 28,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     textAlign: 'center',
   },
@@ -877,7 +897,7 @@ const styles = StyleSheet.create({
   walletBalance: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginBottom: 12,
   },
@@ -886,7 +906,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -915,7 +935,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginBottom: 16,
     textAlign: 'center',
@@ -931,7 +951,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     fontSize: 18,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 8,
   },
   modalBalance: {
@@ -954,12 +974,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   modalBtnConfirm: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
   },
   modalBtnCancelText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   modalBtnConfirmText: {
@@ -1006,7 +1026,7 @@ const styles = StyleSheet.create({
   reviewRating: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
   },
   reviewComment: {
     fontSize: 14,
@@ -1029,7 +1049,7 @@ const styles = StyleSheet.create({
   linkButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   sectionHeaderRow: {
@@ -1039,7 +1059,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   traiteurButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -1066,13 +1086,13 @@ const styles = StyleSheet.create({
   },
   connectValue: {
     fontSize: 14,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
   connectButton: {
     marginTop: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 10,
     borderRadius: 10,
     alignItems: 'center',

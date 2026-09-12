@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -65,7 +65,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
       const updated = await toggleEmployeeStatus(employee.id);
       setEmployees((prev) => prev.map((e) => (e.id === employee.id ? updated : e)));
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de changer le statut.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de changer le statut.'));
     } finally {
       setBusyId(null);
     }
@@ -78,9 +78,9 @@ const EmployeesManagementScreen = ({navigation}: any) => {
     try {
       await deleteEmployee(id);
       setEmployees((prev) => prev.filter((e) => e.id !== id));
-      Alert.alert('Succès', 'Employé supprimé.');
+      alert('Succès', 'Employé supprimé.');
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
     }
   };
 
@@ -91,7 +91,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar navigation={navigation} title="Employés" showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -103,7 +103,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />}>
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />}>
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{employees.length}</Text>
@@ -160,7 +160,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
                   disabled={busyId === employee.id}
                   hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                   {busyId === employee.id ? (
-                    <ActivityIndicator size="small" color={Colors.primary} />
+                    <ActivityIndicator size="small" color={Colors.darkGreen} />
                   ) : (
                     <IconWrapper
                       name={employee.is_active ? 'pause-circle-outline' : 'play-circle-outline'}
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   statLabel: {
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     flex: 1,
     marginRight: 8,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   roleBadge: {
-    backgroundColor: Colors.primaryLight + '30',
+    backgroundColor: Colors.olive + '30',
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   roleBadgeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   statusBadge: {

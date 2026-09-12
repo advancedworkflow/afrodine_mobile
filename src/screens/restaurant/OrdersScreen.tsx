@@ -8,8 +8,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   Modal,
-  Alert,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -80,7 +80,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
   };
 
   const handleUpdateStatus = (orderId: number, newStatus: string) => {
-    Alert.alert(
+    alert(
       'Changer le statut',
       `Passer la commande au statut « ${STATUS_LABELS[newStatus] || newStatus } » ?`,
       [
@@ -94,7 +94,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
               setSelectedOrder(null);
               load(true);
             } catch (e) {
-              Alert.alert('Erreur', 'Impossible de mettre à jour le statut.');
+              alert('Erreur', 'Impossible de mettre à jour le statut.');
             } finally {
               setUpdating(false);
             }
@@ -126,7 +126,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar navigation={navigation} title="Commandes" />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -160,7 +160,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
         renderItem={renderOrder}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -222,10 +222,10 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
 function statusColor(s: string): string {
   const map: Record<string, string> = {
     pending: Colors.warning,
-    confirmed: Colors.primaryLighter,
-    preparing: Colors.primaryLight,
+    confirmed: '#FBC7B4',
+    preparing: Colors.terracotta,
     ready: Colors.success,
-    delivered: Colors.primary,
+    delivered: Colors.darkGreen,
     paid: Colors.success,
     cancelled: Colors.error,
   };
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundLight,
   },
   filterChipActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
   },
   filterChipText: {
     fontSize: 13,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   orderNumber: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   statusBadge: {
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   orderTotal: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     marginTop: 4,
   },
   orderItems: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   modalLabel: {
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   modalTotal: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     marginTop: 12,
   },
   statusButtons: {
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   statusBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,

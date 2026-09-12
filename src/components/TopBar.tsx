@@ -10,8 +10,8 @@ import {
   Image,
 } from 'react-native';
 import IconWrapper from './IconWrapper';
-import {Colors} from '../utils/colors';
-import {secondaryFont} from '../utils/fonts';
+import {Colors, Radius} from '../utils/colors';
+import {fontDisplay, secondaryFont} from '../utils/fonts';
 import {useAuth} from '../contexts/AuthContext';
 
 export interface OptionsMenuItem {
@@ -62,8 +62,8 @@ const TopBar: React.FC<TopBarProps> = ({
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle="dark-content"
-        backgroundColor={Colors.white}
+        barStyle="light-content"
+        backgroundColor={Colors.darkGreen}
       />
       <View style={styles.content}>
         <View style={styles.leftSection}>
@@ -71,12 +71,12 @@ const TopBar: React.FC<TopBarProps> = ({
             <TouchableOpacity
               style={styles.backButton}
               onPress={onBackPress || (() => navigation.goBack())}>
-              <IconWrapper name="arrow-back-outline" size={24} color={Colors.primary} />
+              <IconWrapper name="arrow-back-outline" size={22} color={Colors.white} />
             </TouchableOpacity>
           )}
           <View style={styles.titleContainer}>
             {title === 'namke' ? (
-              <Image source={require('../assets/namke-logo-header.png')} style={styles.logo} resizeMode="contain" />
+              <Image source={require('../assets/namke-logo-white.png')} style={styles.logo} resizeMode="contain" />
             ) : (
               <Text style={styles.title}>{title}</Text>
             )}
@@ -93,7 +93,7 @@ const TopBar: React.FC<TopBarProps> = ({
                   navigation.navigate('Login');
                 }
               }}>
-              <IconWrapper name="notifications-outline" size={24} color={Colors.primary} />
+              <IconWrapper name="notifications-outline" size={22} color={Colors.white} />
               <View style={styles.notificationBadge} />
             </TouchableOpacity>
           )}
@@ -101,7 +101,7 @@ const TopBar: React.FC<TopBarProps> = ({
             <TouchableOpacity
               style={styles.optionsButton}
               onPress={handleOptionsPress}>
-              <IconWrapper name="ellipsis-vertical" size={24} color={Colors.primary} />
+              <IconWrapper name="ellipsis-vertical" size={22} color={Colors.white} />
             </TouchableOpacity>
           )}
         </View>
@@ -141,17 +141,12 @@ const TopBar: React.FC<TopBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkGreen,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     paddingBottom: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray[200],
-    elevation: 0,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    paddingHorizontal: 18,
+    borderBottomLeftRadius: Radius.lg,
+    borderBottomRightRadius: Radius.lg,
   },
   content: {
     flexDirection: 'row',
@@ -164,11 +159,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.16)',
     marginRight: 12,
   },
   rightSection: {
@@ -176,12 +172,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionsButton: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
-    marginLeft: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    marginLeft: 8,
   },
   menuBackdrop: {
     flex: 1,
@@ -191,12 +188,13 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   menuBox: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
     minWidth: 180,
-    shadowColor: Colors.black,
+    overflow: 'hidden',
+    shadowColor: '#2e2b25',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.18,
     shadowRadius: 12,
     elevation: 8,
   },
@@ -221,21 +219,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    fontFamily: secondaryFont,
+    fontSize: 22,
+    color: Colors.white,
+    fontFamily: fontDisplay,
   },
   logo: {
     width: 132,
     height: 34,
   },
   notificationButton: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.16)',
     position: 'relative',
   },
   notificationBadge: {
@@ -244,7 +242,7 @@ const styles = StyleSheet.create({
     right: 4,
     width: 8,
     height: 8,
-    backgroundColor: Colors.error,
+    backgroundColor: Colors.terracotta,
     borderRadius: 4,
   },
 });

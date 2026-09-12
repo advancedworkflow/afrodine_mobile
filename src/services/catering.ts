@@ -28,6 +28,9 @@ export interface CateringServiceApi {
   featured?: boolean;
   /** Photo CDN de l’offre traiteur */
   image_url?: string | null;
+  restaurant_name?: string;
+  restaurant_logo_url?: string;
+  restaurant_banner_url?: string;
 }
 
 export interface CateringServiceForList {
@@ -40,6 +43,7 @@ export interface CateringServiceForList {
   minGuests: number;
   maxGuests?: number;
   restaurantId: string;
+  restaurantName?: string;
   rating?: number;
   reviewCount?: number;
   imageUrl?: string;
@@ -56,10 +60,89 @@ function toCateringForList(s: CateringServiceApi): CateringServiceForList {
     minGuests: s.min_guests ?? 1,
     maxGuests: s.max_guests != null ? s.max_guests : undefined,
     restaurantId: String(s.restaurant_id),
+    restaurantName: s.restaurant_name ?? undefined,
     rating: s.rating != null ? Number(s.rating) : undefined,
     reviewCount: s.review_count ?? 0,
-    imageUrl: s.image_url ?? undefined,
+    imageUrl: s.image_url ?? s.restaurant_banner_url ?? s.restaurant_logo_url ?? undefined,
   };
+}
+
+export interface CateringBookingCreatePayload {
+  service_id?: number;
+  formula_id?: number;
+  event_date: string;
+  event_time: string;
+  guest_count: number;
+  customer_id?: number;
+  contact_email: string;
+  contact_phone?: string;
+  special_requests?: string;
+  selected_dishes?: string[];
+}
+
+export interface CateringFormulaMenuOption {
+  key: string;
+  category: 'entree' | 'plat' | 'dessert' | 'boisson' | string;
+  name: string;
+  description?: string;
+  selectable: boolean;
+}
+
+export interface CateringFormulaApi {
+  id: number;
+  slug: string;
+  name: string;
+  tagline?: string;
+  description?: string;
+  price_per_person: number;
+  is_custom_price: boolean;
+  min_guests: number;
+  max_guests: number;
+  includes?: string[];
+  image_url?: string | null;
+  is_featured: boolean;
+  display_order: number;
+  menu_options?: CateringFormulaMenuOption[];
+  menu_choice_count?: number;
+}
+
+export interface CateringFormulaCookApi {
+  id: number;
+  name: string;
+  city?: string;
+  cuisine_type?: string;
+  rating?: number;
+  review_count: number;
+  image_url?: string | null;
+}
+
+export async function getCateringFormulas(): Promise<CateringFormulaApi[]> {
+  const {data} = await api.get<CateringFormulaApi[]>(`${BASE}/formulas`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getCateringFormulaBySlug(slug: string): Promise<CateringFormulaApi | null> {
+  try {
+    const {data} = await api.get<CateringFormulaApi>(`${BASE}/formulas/${slug}`);
+    return data;
+  } catch (e: any) {
+    if (e.response?.status === 404) return null;
+    throw e;
+  }
+}
+
+export async function getCateringFormulaCooks(slug: string): Promise<CateringFormulaCookApi[]> {
+  try {
+    const {data} = await api.get<CateringFormulaCookApi[]>(`${BASE}/formulas/${slug}/cooks`);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createCateringBooking(payload: CateringBookingCreatePayload) {
+  const {data} = await api.post(`${BASE}/bookings`, payload);
+  return data;
 }
 
 export async function getCateringServices(params?: {
@@ -106,18 +189,3 @@ export async function getCateringServicesByRestaurant(
   }
 }
 
-/** Packages / offres traiteur d’un restaurant — GET /catering/packages?restaurant_id= */
-export async function getCateringPackagesByRestaurant(
-  restaurantId: number | string,
-): Promise<CateringServiceApi[]> {
-  const id = toPositiveInt(restaurantId);
-  if (id == null) return [];
-  try {
-    const { data } = await api.get<CateringServiceApi[]>(`${BASE}/packages`, {
-      params: { restaurant_id: id },
-    });
-    return Array.isArray(data) ? data : [];
-  } catch (e: any) {
-    return [];
-  }
-}

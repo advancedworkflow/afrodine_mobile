@@ -318,6 +318,7 @@ export async function updateRestaurantProfile(
 // --- Avis (reviews) ---
 export interface ManagementReview {
   id: number;
+  type?: string;
   rating?: number;
   score?: number;
   comment?: string;
@@ -325,6 +326,7 @@ export interface ManagementReview {
   client_name?: string;
   user_name?: string;
   reply?: string;
+  dish_name?: string;
   created_at?: string;
   [key: string]: unknown;
 }
@@ -332,6 +334,16 @@ export interface ManagementReview {
 export async function getManagementReviews(): Promise<ManagementReview[]> {
   const { data } = await api.get<ManagementReview[]>(`${BASE}/reviews`);
   return Array.isArray(data) ? data : [];
+}
+
+/**
+ * Répond à un avis. Ne fonctionne que pour les avis de type `restaurant_review`
+ * (backend : `reply_to_review` ne met à jour que la table `Review`) — pour les autres
+ * types (avis/commentaires sur un plat), l'API renvoie `null` sans erreur.
+ */
+export async function replyToReview(reviewId: number, reply: string): Promise<ManagementReview | null> {
+  const { data } = await api.post<ManagementReview | null>(`${BASE}/reviews/${reviewId}/reply`, {reply});
+  return data ?? null;
 }
 
 export interface ManagementAnnouncement {
@@ -468,7 +480,6 @@ export interface CateringBookingItem {
   id: number;
   restaurant_id: number;
   service_id?: number;
-  package_id?: number;
   event_date: string;
   event_time: string;
   guest_count: number;
@@ -737,6 +748,103 @@ export async function uploadManagementImageFile(
     formData,
   );
   return { image_url: data?.image_url ?? '' };
+}
+
+// --- Grocery Shop (magasin dédié au restaurant, un seul autorisé) ---
+export interface ManagementGroceryShop {
+  id: number;
+  name: string;
+  description?: string | null;
+  restaurant_id?: number | null;
+  is_active: boolean;
+  image_url?: string | null;
+  banner_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  products_count?: number;
+}
+
+export interface GroceryShopPayload {
+  name: string;
+  description?: string;
+  is_active?: boolean;
+  image_url?: string;
+  banner_url?: string;
+}
+
+export type GroceryShopUpdatePayload = Partial<GroceryShopPayload>;
+
+export async function getManagementGroceryShop(): Promise<ManagementGroceryShop | null> {
+  const { data } = await api.get<ManagementGroceryShop | null>(`${BASE}/grocery-shop`);
+  return data ?? null;
+}
+
+export async function createManagementGroceryShop(payload: GroceryShopPayload): Promise<ManagementGroceryShop> {
+  const { data } = await api.post<ManagementGroceryShop>(`${BASE}/grocery-shop`, payload);
+  return data!;
+}
+
+export async function updateManagementGroceryShop(payload: GroceryShopUpdatePayload): Promise<ManagementGroceryShop> {
+  const { data } = await api.put<ManagementGroceryShop>(`${BASE}/grocery-shop`, payload);
+  return data!;
+}
+
+export interface ManagementGroceryProduct {
+  id: number;
+  grocery_shop_id: number;
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  origin_country?: string | null;
+  origin_region?: string | null;
+  is_african: boolean;
+  price: number;
+  stock_quantity: number;
+  unit: string;
+  image_url?: string | null;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GroceryProductPayload {
+  name: string;
+  description?: string;
+  category?: string;
+  origin_country?: string;
+  origin_region?: string;
+  is_african?: boolean;
+  price: number;
+  stock_quantity?: number;
+  unit?: string;
+  image_url?: string;
+  is_active?: boolean;
+}
+
+export type GroceryProductUpdatePayload = Partial<GroceryProductPayload>;
+
+export async function listManagementGroceryProducts(): Promise<ManagementGroceryProduct[]> {
+  const { data } = await api.get<ManagementGroceryProduct[]>(`${BASE}/grocery-shop/products`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createManagementGroceryProduct(
+  payload: GroceryProductPayload,
+): Promise<ManagementGroceryProduct> {
+  const { data } = await api.post<ManagementGroceryProduct>(`${BASE}/grocery-shop/products`, payload);
+  return data!;
+}
+
+export async function updateManagementGroceryProduct(
+  productId: number,
+  payload: GroceryProductUpdatePayload,
+): Promise<ManagementGroceryProduct> {
+  const { data } = await api.put<ManagementGroceryProduct>(`${BASE}/grocery-shop/products/${productId}`, payload);
+  return data!;
+}
+
+export async function deleteManagementGroceryProduct(productId: number): Promise<void> {
+  await api.delete(`${BASE}/grocery-shop/products/${productId}`);
 }
 
 // --- Wallet & Payout ---

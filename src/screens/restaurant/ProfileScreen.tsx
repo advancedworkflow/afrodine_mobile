@@ -7,11 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -95,12 +95,12 @@ const RestaurantProfileScreen = ({navigation}: any) => {
       const updated = await updateRestaurantProfile(payload);
       if (updated) {
         setProfile(updated);
-        Alert.alert('Profil enregistré', 'Les modifications ont bien été enregistrées.');
+        alert('Profil enregistré', 'Les modifications ont bien été enregistrées.');
       } else {
-        Alert.alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+        alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
       }
     } catch {
-      Alert.alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+      alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
     } finally {
       setSaving(false);
     }
@@ -111,7 +111,7 @@ const RestaurantProfileScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar navigation={navigation} title="Profil restaurant" showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -123,7 +123,7 @@ const RestaurantProfileScreen = ({navigation}: any) => {
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => loadProfile(true)} colors={[Colors.primary]} />
+        <RefreshControl refreshing={refreshing} onRefresh={() => loadProfile(true)} colors={[Colors.darkGreen]} />
       }>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Informations générales</Text>
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
     textTransform: 'uppercase',
     marginBottom: 12,
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 16,
     borderRadius: 12,
     marginTop: 8,

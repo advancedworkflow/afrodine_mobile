@@ -10,12 +10,12 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Image,
   Switch,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -170,7 +170,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         const { image_url } = await uploadManagementImageFile(file, 'dishes');
         setDishImageUrl(image_url || '');
       } catch {
-        Alert.alert('Erreur', 'Impossible d\'uploader l\'image.');
+        alert('Erreur', 'Impossible d\'uploader l\'image.');
       } finally {
         setUploadingImage(false);
         if (target) target.value = '';
@@ -203,7 +203,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         const { image_url } = await uploadManagementImageFile(file, 'menus');
         setMenuImageUrl(image_url || '');
       } catch {
-        Alert.alert('Erreur', 'Impossible d\'uploader l\'image.');
+        alert('Erreur', 'Impossible d\'uploader l\'image.');
       } finally {
         setUploadingMenuImage(false);
         if (target) target.value = '';
@@ -232,7 +232,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       menuFileInputRef.current?.click();
       return;
     }
-    Alert.alert(
+    alert(
       'Image du menu',
       'Sur l\'app mobile, saisissez l\'URL de l\'image dans le champ ci-dessus. L\'upload de fichier est disponible sur le tableau de bord web.',
     );
@@ -253,9 +253,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       });
       setModalDish(false);
       load();
-      Alert.alert('Succès', 'Plat créé.');
+      alert('Succès', 'Plat créé.');
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de créer le plat.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de créer le plat.'));
     } finally {
       setSubmitting(false);
     }
@@ -265,11 +265,11 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     const name = dishName.trim();
     const price = parseFloat(dishPrice.replace(',', '.'));
     if (!name) {
-      Alert.alert('Erreur', 'Nom du plat requis.');
+      alert('Erreur', 'Nom du plat requis.');
       return;
     }
     if (isNaN(price) || price < 0) {
-      Alert.alert('Erreur', 'Prix invalide.');
+      alert('Erreur', 'Prix invalide.');
       return;
     }
     setConfirmCreateDish(true);
@@ -289,9 +289,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       });
       setModalMenu(false);
       load();
-      Alert.alert('Succès', 'Menu créé.');
+      alert('Succès', 'Menu créé.');
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de créer le menu.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de créer le menu.'));
     } finally {
       setSubmitting(false);
     }
@@ -300,7 +300,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   const handleCreateMenu = () => {
     const name = menuName.trim();
     if (!name) {
-      Alert.alert('Erreur', 'Nom du menu requis.');
+      alert('Erreur', 'Nom du menu requis.');
       return;
     }
     setConfirmCreateMenu(true);
@@ -313,14 +313,14 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     try {
       if (target.type === 'dish') {
         await deleteDish(target.id);
-        Alert.alert('Succès', 'Plat supprimé.');
+        alert('Succès', 'Plat supprimé.');
       } else {
         await deleteMenu(target.id);
-        Alert.alert('Succès', 'Menu supprimé.');
+        alert('Succès', 'Menu supprimé.');
       }
       load();
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
     }
   };
 
@@ -353,7 +353,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     return (
       <View style={styles.sectionHeader}>
         <View style={styles.sectionHeaderLeft}>
-          <IconWrapper name="restaurant-outline" size={22} color={Colors.primary} />
+          <IconWrapper name="restaurant-outline" size={22} color={Colors.darkGreen} />
           <Text style={styles.sectionTitle}>{section.title}</Text>
         </View>
         {menu != null && (
@@ -413,7 +413,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={() => setAddDishToMenuTarget({ dishId: item.id, dishName: item.name })}
               style={styles.addToMenuBtn}>
-              <IconWrapper name="add-outline" size={20} color={Colors.primary} />
+              <IconWrapper name="add-outline" size={20} color={Colors.darkGreen} />
             </TouchableOpacity>
           )}
         </View>
@@ -432,15 +432,15 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     const name = supplementName.trim();
     const price = parseFloat(supplementPrice.replace(',', '.'));
     if (!name) {
-      Alert.alert('Erreur', 'Nom du supplément requis.');
+      alert('Erreur', 'Nom du supplément requis.');
       return;
     }
     if (!Number.isFinite(price) || price < 0) {
-      Alert.alert('Erreur', 'Prix invalide.');
+      alert('Erreur', 'Prix invalide.');
       return;
     }
     if (supplementDishId == null) {
-      Alert.alert('Erreur', 'Choisissez un plat.');
+      alert('Erreur', 'Choisissez un plat.');
       return;
     }
     setSupplementSubmitting(true);
@@ -448,9 +448,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       await createManagementSupplement({ name, price, dish_id: supplementDishId });
       setModalSupplement(false);
       load();
-      Alert.alert('Succès', `Supplément « ${name} » créé et assigné au plat.`);
+      alert('Succès', `Supplément « ${name} » créé et assigné au plat.`);
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible de créer le supplément.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible de créer le supplément.'));
     } finally {
       setSupplementSubmitting(false);
     }
@@ -497,7 +497,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar navigation={navigation} title="Menu" />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -511,7 +511,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           style={styles.content}
           contentContainerStyle={styles.emptyScroll}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
           }>
           {ListHeader}
           <View style={styles.empty}>
@@ -530,7 +530,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           stickySectionHeadersEnabled
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
           }
           ListFooterComponent={<View style={{ height: 24 }} />}
         />
@@ -617,7 +617,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               <Switch
                 value={dishCateringOnly}
                 onValueChange={setDishCateringOnly}
-                trackColor={{ false: Colors.gray[300], true: Colors.primary }}
+                trackColor={{ false: Colors.gray[300], true: Colors.darkGreen }}
                 thumbColor={Colors.white}
               />
             </View>
@@ -771,7 +771,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
                     onPress={() => setSupplementDishId(d.id)}>
                     <Text style={styles.dishPickName}>{d.name}</Text>
                     {supplementDishId === d.id ? (
-                      <IconWrapper name="checkmark-circle" size={22} color={Colors.primary} />
+                      <IconWrapper name="checkmark-circle" size={22} color={Colors.darkGreen} />
                     ) : null}
                   </TouchableOpacity>
                 ))}
@@ -827,13 +827,13 @@ const RestaurantMenuScreen = ({navigation}: any) => {
                       await addDishesToMenu(menu.id, [addDishToMenuTarget.dishId]);
                       setAddDishToMenuTarget(null);
                       load();
-                      Alert.alert('Succès', `Plat ajouté au menu « ${menu.name} ».`);
+                      alert('Succès', `Plat ajouté au menu « ${menu.name} ».`);
                     } catch (e: any) {
-                      Alert.alert('Erreur', formatAxiosError(e, 'Impossible d\'ajouter au menu.'));
+                      alert('Erreur', formatAxiosError(e, 'Impossible d\'ajouter au menu.'));
                     }
                   }}>
                   <Text style={styles.menuPickName}>{menu.name}</Text>
-                  <IconWrapper name="add-circle-outline" size={22} color={Colors.primary} />
+                  <IconWrapper name="add-circle-outline" size={22} color={Colors.darkGreen} />
                 </TouchableOpacity>
               ))
             )}
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -899,7 +899,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primaryDark,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -926,13 +926,13 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     paddingVertical: 4,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 8,
   },
   dishPickList: {
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
   },
   dishPickName: {
     fontSize: 16,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     flex: 1,
   },
   modalActions: {
@@ -977,13 +977,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 10,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     alignItems: 'center',
   },
   modalBtnCancelText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
   },
   modalBtnConfirmText: {
     fontSize: 16,
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginTop: 16,
@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
   dishName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   dishDesc: {
@@ -1067,7 +1067,7 @@ const styles = StyleSheet.create({
   dishPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.darkGreen,
   },
   empty: {
     alignItems: 'center',
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
   },
   modalFullScreen: {
     flex: 1,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
   },
   modalFullHeader: {
     flexDirection: 'row',
@@ -1146,7 +1146,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   input: {
@@ -1190,7 +1190,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   submitBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
   imageUploadLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 8,
     fontFamily: secondaryFont,
   },
@@ -1229,7 +1229,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
   },
   changeImageBtnText: {
     fontSize: 14,
@@ -1244,9 +1244,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: Colors.darkGreen,
   },
   uploadImageBtnText: {
     fontSize: 14,

@@ -6,12 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Switch,
   ActivityIndicator,
 } from 'react-native';
+import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
@@ -75,7 +75,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
         setFeatured(s.featured ?? false);
       }
     } catch {
-      Alert.alert('Erreur', 'Impossible de charger l\'offre.');
+      alert('Erreur', 'Impossible de charger l\'offre.');
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -108,34 +108,34 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
 
   const handleSave = async () => {
     if (!service_name.trim()) {
-      Alert.alert('Erreur', 'Nom de l\'offre requis.');
+      alert('Erreur', 'Nom de l\'offre requis.');
       return;
     }
     const base = parseFloat(base_price.replace(',', '.'));
     if (!Number.isFinite(base) || base < 0) {
-      Alert.alert('Erreur', 'Prix de base invalide.');
+      alert('Erreur', 'Prix de base invalide.');
       return;
     }
     const min = parseInt(min_guests, 10);
     if (!Number.isInteger(min) || min < 1) {
-      Alert.alert('Erreur', 'Nombre min. de convives invalide (≥ 1).');
+      alert('Erreur', 'Nombre min. de convives invalide (≥ 1).');
       return;
     }
     setSubmitting(true);
     try {
       if (isEdit && serviceId) {
         await updateManagementCateringService(serviceId, buildPayload());
-        Alert.alert('Succès', 'Offre mise à jour.', [
+        alert('Succès', 'Offre mise à jour.', [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       } else {
         await createManagementCateringService(buildPayload());
-        Alert.alert('Succès', 'Offre créée.', [
+        alert('Succès', 'Offre créée.', [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       }
     } catch (e: any) {
-      Alert.alert('Erreur', formatAxiosError(e, 'Impossible d\'enregistrer.'));
+      alert('Erreur', formatAxiosError(e, 'Impossible d\'enregistrer.'));
     } finally {
       setSubmitting(false);
     }
@@ -151,7 +151,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
           onBackPress={() => navigation.goBack()}
         />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
       </View>
     );
@@ -274,8 +274,8 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             <Switch
               value={delivery_available}
               onValueChange={setDeliveryAvailable}
-              trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-              thumbColor={delivery_available ? Colors.primary : Colors.textLight}
+              trackColor={{ false: Colors.border, true: Colors.olive }}
+              thumbColor={delivery_available ? Colors.darkGreen : Colors.textLight}
             />
           </View>
           <View style={styles.switchRow}>
@@ -283,8 +283,8 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             <Switch
               value={setup_available}
               onValueChange={setSetupAvailable}
-              trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-              thumbColor={setup_available ? Colors.primary : Colors.textLight}
+              trackColor={{ false: Colors.border, true: Colors.olive }}
+              thumbColor={setup_available ? Colors.darkGreen : Colors.textLight}
             />
           </View>
           <View style={styles.switchRow}>
@@ -292,8 +292,8 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             <Switch
               value={staff_available}
               onValueChange={setStaffAvailable}
-              trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-              thumbColor={staff_available ? Colors.primary : Colors.textLight}
+              trackColor={{ false: Colors.border, true: Colors.olive }}
+              thumbColor={staff_available ? Colors.darkGreen : Colors.textLight}
             />
           </View>
           <View style={styles.switchRow}>
@@ -301,8 +301,8 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             <Switch
               value={equipment_rental}
               onValueChange={setEquipmentRental}
-              trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-              thumbColor={equipment_rental ? Colors.primary : Colors.textLight}
+              trackColor={{ false: Colors.border, true: Colors.olive }}
+              thumbColor={equipment_rental ? Colors.darkGreen : Colors.textLight}
             />
           </View>
           <View style={styles.switchRow}>
@@ -310,8 +310,8 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             <Switch
               value={is_active}
               onValueChange={setIsActive}
-              trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-              thumbColor={is_active ? Colors.primary : Colors.textLight}
+              trackColor={{ false: Colors.border, true: Colors.olive }}
+              thumbColor={is_active ? Colors.darkGreen : Colors.textLight}
             />
           </View>
           <View style={styles.switchRow}>
@@ -319,8 +319,8 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             <Switch
               value={featured}
               onValueChange={setFeatured}
-              trackColor={{ false: Colors.border, true: Colors.primaryLight }}
-              thumbColor={featured ? Colors.primary : Colors.textLight}
+              trackColor={{ false: Colors.border, true: Colors.olive }}
+              thumbColor={featured ? Colors.darkGreen : Colors.textLight}
             />
           </View>
           <TouchableOpacity
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 8,
     fontFamily: secondaryFont,
   },
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     marginBottom: 16,
     backgroundColor: Colors.white,
   },
@@ -401,12 +401,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   typeChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
+    borderColor: Colors.darkGreen,
   },
   typeChipText: {
     fontSize: 14,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   typeChipTextActive: {
@@ -423,11 +423,11 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     fontSize: 16,
-    color: Colors.primaryDark,
+    color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   saveBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
