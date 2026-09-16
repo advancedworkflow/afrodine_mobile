@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
 import {fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
@@ -29,6 +30,7 @@ interface ShopWithInfo extends groceryShopApi.GroceryShopApi {
 }
 
 const GroceryShopsScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [shops, setShops] = useState<ShopWithInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -106,9 +108,9 @@ const GroceryShopsScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Épiceries</Text>
+        <Text style={styles.pageTitle}>{t('groceryShops.title')}</Text>
         <Text style={styles.pageSubtitle}>
-          {loading ? 'Chargement…' : `${filteredShops.length} épicerie${filteredShops.length > 1 ? 's' : ''} disponible${filteredShops.length > 1 ? 's' : ''}`}
+          {loading ? t('groceryShops.loading') : t('groceryShops.availableCount', {count: filteredShops.length})}
         </Text>
 
         <View style={styles.searchBar}>
@@ -116,7 +118,7 @@ const GroceryShopsScreen = ({navigation}: any) => {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Une boutique, un produit, un rayon…"
+            placeholder={t('groceryShops.searchPlaceholder')}
             placeholderTextColor={Colors.textLight}
             style={styles.searchInput}
           />
@@ -127,13 +129,13 @@ const GroceryShopsScreen = ({navigation}: any) => {
             style={[styles.chip, !onlyOpen && styles.chipActive]}
             onPress={() => setOnlyOpen(false)}
             activeOpacity={0.85}>
-            <Text style={[styles.chipText, !onlyOpen && styles.chipTextActive]}>Toutes</Text>
+            <Text style={[styles.chipText, !onlyOpen && styles.chipTextActive]}>{t('groceryShops.allFilter')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.chip, onlyOpen && styles.chipActive]}
             onPress={() => setOnlyOpen(true)}
             activeOpacity={0.85}>
-            <Text style={[styles.chipText, onlyOpen && styles.chipTextActive]}>Ouvertes</Text>
+            <Text style={[styles.chipText, onlyOpen && styles.chipTextActive]}>{t('groceryShops.openFilter')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -166,7 +168,7 @@ const GroceryShopsScreen = ({navigation}: any) => {
         ) : filteredShops.length === 0 ? (
           <View style={styles.emptyState}>
             <IconWrapper name="storefront-outline" size={44} color={Colors.gray[300]} />
-            <Text style={styles.emptyText}>Aucune épicerie ne correspond à votre recherche</Text>
+            <Text style={styles.emptyText}>{t('groceryShops.noMatch')}</Text>
           </View>
         ) : (
           <>
@@ -179,7 +181,7 @@ const GroceryShopsScreen = ({navigation}: any) => {
                     resizeMode="cover"
                   />
                   <View style={[styles.statusBadge, !featured.isOpen && styles.statusBadgeClosed]}>
-                    <Text style={styles.statusBadgeText}>{featured.isOpen ? 'Ouverte' : 'Fermée'}</Text>
+                    <Text style={styles.statusBadgeText}>{featured.isOpen ? t('groceryShops.open') : t('groceryShops.closed')}</Text>
                   </View>
                 </View>
                 <View style={styles.featuredBody}>
@@ -188,18 +190,18 @@ const GroceryShopsScreen = ({navigation}: any) => {
                     {featured.rating != null && <Text style={styles.rating}>★ {featured.rating.toFixed(1)}</Text>}
                   </View>
                   <Text style={styles.meta} numberOfLines={1}>
-                    {[featured.cuisine_type, featured.city].filter(Boolean).join(' · ') || `${featured.products_count ?? ''} produits`.trim()}
+                    {[featured.cuisine_type, featured.city].filter(Boolean).join(' · ') || t('groceryShops.productsCount', {count: featured.products_count ?? 0})}
                   </Text>
                   <View style={styles.footerRow}>
                     {(featured.minimum_order != null || featured.delivery_fee != null) && (
                       <Text style={styles.footerText}>
-                        {featured.minimum_order != null ? `Min. ${featured.minimum_order.toFixed(0)} €` : ''}
+                        {featured.minimum_order != null ? t('groceryShops.minOrder', {amount: featured.minimum_order.toFixed(0)}) : ''}
                         {featured.minimum_order != null && featured.delivery_fee != null ? ' · ' : ''}
-                        {featured.delivery_fee != null ? `frais ${featured.delivery_fee.toFixed(2)} €` : ''}
+                        {featured.delivery_fee != null ? t('groceryShops.deliveryFeeAmount', {amount: featured.delivery_fee.toFixed(2)}) : ''}
                       </Text>
                     )}
                     <View style={styles.visitButton}>
-                      <Text style={styles.visitButtonText}>Visiter</Text>
+                      <Text style={styles.visitButtonText}>{t('groceryShops.visit')}</Text>
                     </View>
                   </View>
                 </View>
@@ -216,7 +218,7 @@ const GroceryShopsScreen = ({navigation}: any) => {
                 <View style={styles.compactInfo}>
                   <Text style={styles.compactName} numberOfLines={1}>{shop.name}</Text>
                   <Text style={styles.compactMeta} numberOfLines={1}>
-                    {[shop.cuisine_type, shop.city].filter(Boolean).join(' · ') || (shop.isOpen ? 'Ouverte' : 'Fermée')}
+                    {[shop.cuisine_type, shop.city].filter(Boolean).join(' · ') || (shop.isOpen ? t('groceryShops.open') : t('groceryShops.closed'))}
                   </Text>
                 </View>
                 {shop.rating != null && <Text style={styles.rating}>★ {shop.rating.toFixed(1)}</Text>}
@@ -235,7 +237,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundLight,
   },
   header: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     paddingHorizontal: 22,
     paddingTop: 16,
     paddingBottom: 14,
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: Radius.pill,
     paddingHorizontal: 18,
     height: 48,
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: Radius.pill,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
   },
   chipActive: {
     backgroundColor: Colors.darkGreen,

@@ -9,21 +9,13 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../utils/alert';
 import IconWrapper from './IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
 import {createComplaint, ComplaintReason} from '../services/complaints';
 import {formatAxiosError} from '../utils/formatApiError';
-
-const REASONS: {value: ComplaintReason; label: string}[] = [
-  {value: 'inappropriate_content', label: 'Contenu inapproprié'},
-  {value: 'fake_information', label: 'Fausses informations'},
-  {value: 'spam', label: 'Spam'},
-  {value: 'harassment', label: 'Harcèlement'},
-  {value: 'illegal_activity', label: 'Activité illégale'},
-  {value: 'other', label: 'Autre'},
-];
 
 export interface ReportModalProps {
   visible: boolean;
@@ -36,8 +28,17 @@ const ReportModal: React.FC<ReportModalProps> = ({
   visible,
   onClose,
   restaurantId,
-  title = 'Signaler ce restaurant',
+  title,
 }) => {
+  const {t} = useTranslation();
+  const REASONS: {value: ComplaintReason; label: string}[] = [
+    {value: 'inappropriate_content', label: t('reportModal.reasons.inappropriateContent')},
+    {value: 'fake_information', label: t('reportModal.reasons.fakeInformation')},
+    {value: 'spam', label: t('reportModal.reasons.spam')},
+    {value: 'harassment', label: t('reportModal.reasons.harassment')},
+    {value: 'illegal_activity', label: t('reportModal.reasons.illegalActivity')},
+    {value: 'other', label: t('reportModal.reasons.other')},
+  ];
   const [reason, setReason] = useState<ComplaintReason | null>(null);
   const [message, setMessage] = useState('');
   const [contact, setContact] = useState('');
@@ -57,11 +58,11 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
   const handleSubmit = async () => {
     if (!reason) {
-      alert('Motif requis', 'Sélectionnez un motif de signalement.');
+      alert(t('reportModal.reasonRequiredTitle'), t('reportModal.reasonRequiredMessage'));
       return;
     }
     if (message.trim().length < 10) {
-      alert('Description trop courte', 'Décrivez le problème en au moins 10 caractères.');
+      alert(t('reportModal.descriptionTooShortTitle'), t('reportModal.descriptionTooShortMessage'));
       return;
     }
     setSubmitting(true);
@@ -72,11 +73,11 @@ const ReportModal: React.FC<ReportModalProps> = ({
         message: message.trim(),
         contact: contact.trim() || undefined,
       });
-      alert('Signalement envoyé', 'Merci, notre équipe va examiner votre signalement.');
+      alert(t('reportModal.sentTitle'), t('reportModal.sentMessage'));
       reset();
       onClose();
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, "Impossible d'envoyer le signalement."));
+      alert(t('reportModal.errorTitle'), formatAxiosError(e, t('reportModal.sendFailed')));
     } finally {
       setSubmitting(false);
     }
@@ -97,7 +98,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
               <View style={styles.iconCircle}>
                 <IconWrapper name="flag-outline" size={18} color={Colors.error} />
               </View>
-              <Text style={styles.title}>{title}</Text>
+              <Text style={styles.title}>{title || t('reportModal.defaultTitle')}</Text>
             </View>
             <TouchableOpacity onPress={handleClose} hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
               <IconWrapper name="close" size={22} color={Colors.textLight} />
@@ -105,7 +106,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
           </View>
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-            <Text style={styles.label}>Motif du signalement *</Text>
+            <Text style={styles.label}>{t('reportModal.reasonLabel')}</Text>
             <View style={styles.reasonGrid}>
               {REASONS.map(r => (
                 <TouchableOpacity
@@ -119,36 +120,36 @@ const ReportModal: React.FC<ReportModalProps> = ({
               ))}
             </View>
 
-            <Text style={styles.label}>Description détaillée *</Text>
+            <Text style={styles.label}>{t('reportModal.descriptionLabel')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={message}
               onChangeText={setMessage}
-              placeholder="Décrivez le problème en détail..."
+              placeholder={t('reportModal.descriptionPlaceholder')}
               placeholderTextColor={Colors.textLight}
               multiline
               numberOfLines={4}
             />
 
-            <Text style={styles.label}>Contact (optionnel)</Text>
+            <Text style={styles.label}>{t('reportModal.contactLabel')}</Text>
             <TextInput
               style={styles.input}
               value={contact}
               onChangeText={setContact}
-              placeholder="Email ou téléphone pour vous recontacter"
+              placeholder={t('reportModal.contactPlaceholder')}
               placeholderTextColor={Colors.textLight}
             />
           </ScrollView>
 
           <View style={styles.actions}>
             <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleClose} disabled={submitting}>
-              <Text style={styles.cancelText}>Annuler</Text>
+              <Text style={styles.cancelText}>{t('reportModal.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.submitButton, submitting && styles.submitButtonDisabled]}
               onPress={handleSubmit}
               disabled={submitting}>
-              <Text style={styles.submitText}>{submitting ? 'Envoi...' : 'Envoyer'}</Text>
+              <Text style={styles.submitText}>{submitting ? t('reportModal.sending') : t('reportModal.send')}</Text>
             </TouchableOpacity>
           </View>
         </View>

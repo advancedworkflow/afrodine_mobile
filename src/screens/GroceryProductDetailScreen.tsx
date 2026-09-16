@@ -8,8 +8,10 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import {getGroceryShopProductById, type GroceryShopProductApi} from '../services/groceryShop';
 import {getAbsoluteImageUrl} from '../utils/api';
@@ -24,6 +26,7 @@ const formatPrice = (p: number | string) => {
 };
 
 const GroceryProductDetailScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
   const {productId} = route.params || {};
   const {addItem} = useCart();
   const [product, setProduct] = useState<GroceryShopProductApi | null>(null);
@@ -60,7 +63,7 @@ const GroceryProductDetailScreen = ({navigation, route}: any) => {
     return (
       <View style={styles.container}>
         <View style={styles.centered}>
-          <Text style={styles.loadingText}>Produit introuvable</Text>
+          <Text style={styles.loadingText}>{t('groceryProductDetails.notFound')}</Text>
         </View>
       </View>
     );
@@ -104,25 +107,25 @@ const GroceryProductDetailScreen = ({navigation, route}: any) => {
             <Text style={styles.headerPrice}>{formatPrice(product.price)}</Text>
           </View>
           <Text style={styles.metaLine}>
-            {[product.unit ? `au ${product.unit}` : null, origin || null].filter(Boolean).join(' · ')}
+            {[product.unit ? t('groceryProductDetails.perUnit', {unit: product.unit}) : null, origin || null].filter(Boolean).join(' · ')}
           </Text>
           {product.description ? <Text style={styles.description}>{product.description}</Text> : null}
 
           <View style={styles.infoBox}>
             {origin ? (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Origine</Text>
+                <Text style={styles.infoLabel}>{t('groceryProductDetails.origin')}</Text>
                 <Text style={styles.infoValue}>{origin}</Text>
               </View>
             ) : null}
             {product.category ? (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Catégorie</Text>
+                <Text style={styles.infoLabel}>{t('groceryProductDetails.category')}</Text>
                 <Text style={styles.infoValue}>{product.category}</Text>
               </View>
             ) : null}
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Stock restant</Text>
+              <Text style={styles.infoLabel}>{t('groceryProductDetails.remainingStock')}</Text>
               <Text style={[styles.infoValue, styles.infoValueAccent]}>
                 {product.stock_quantity} {product.unit || ''}
               </Text>
@@ -146,7 +149,7 @@ const GroceryProductDetailScreen = ({navigation, route}: any) => {
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart} activeOpacity={0.85}>
-          <Text style={styles.addToCartText}>Ajouter · {formatPrice(total)}</Text>
+          <Text style={styles.addToCartText}>{t('groceryProductDetails.addToCartWithPrice', {price: formatPrice(total)})}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -251,6 +254,7 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 22,
     paddingTop: 12,
+    marginBottom: GLOBAL_TAB_BAR_HEIGHT,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     backgroundColor: Colors.background,

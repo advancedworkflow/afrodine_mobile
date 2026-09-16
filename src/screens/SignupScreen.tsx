@@ -18,6 +18,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {Colors, Radius, Shadows} from '../utils/colors';
 import {fontButton, fontDisplay, fontHeading, fontUI} from '../utils/fonts';
 import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 import type {SignupType} from '../contexts/AuthContext';
 import {getReferenceCountries, GeoCountry} from '../services/reference';
 
@@ -26,9 +27,15 @@ type Step = 'type' | 'form';
 const strengthScore = (pw: string) => (pw.length >= 12 ? 3 : pw.length >= 8 ? 2 : pw.length > 0 ? 1 : 0);
 const strengthColor = (score: number) =>
   score === 1 ? Colors.terracotta : score === 2 ? Colors.mustard : Colors.olive;
-const strengthLabels = ['À compléter', 'Trop court', 'Correct', 'Solide'];
 
 const SignupScreen = () => {
+  const {t} = useTranslation();
+  const strengthLabels = [
+    t('signup.strength.empty'),
+    t('signup.strength.tooShort'),
+    t('signup.strength.ok'),
+    t('signup.strength.strong'),
+  ];
   const [step, setStep] = useState<Step>('type');
   const [accountType, setAccountType] = useState<SignupType>('client');
 
@@ -83,15 +90,15 @@ const SignupScreen = () => {
 
   const handleSignupClient = async () => {
     if (!firstName.trim() || !lastName.trim() || !email || !password) {
-      alert('Erreur', 'Veuillez remplir les champs obligatoires (prénom, nom, email, mot de passe).');
+      alert(t('signup.errorTitle'), t('signup.missingClientFields'));
       return;
     }
     if (password.length < 6) {
-      alert('Erreur', 'Le mot de passe doit contenir au moins 6 caractères');
+      alert(t('signup.errorTitle'), t('signup.passwordTooShort'));
       return;
     }
     if (!acceptedTerms) {
-      alert('Erreur', 'Veuillez accepter les conditions d\'utilisation.');
+      alert(t('signup.errorTitle'), t('signup.mustAcceptTerms'));
       return;
     }
     setLoading(true);
@@ -99,7 +106,7 @@ const SignupScreen = () => {
       const fullPhone = phone.trim() ? buildFullPhone(phone) : undefined;
       await signupClient(email, password, firstName.trim(), lastName.trim(), fullPhone, address.trim() || undefined);
     } catch (error: any) {
-      alert('Erreur d\'inscription', error.message);
+      alert(t('signup.signupErrorTitle'), error.message);
     } finally {
       setLoading(false);
     }
@@ -107,15 +114,15 @@ const SignupScreen = () => {
 
   const handleSignupRestaurant = async () => {
     if (!name.trim() || !address.trim() || !phone.trim() || !city.trim() || !email || !password) {
-      alert('Erreur', 'Veuillez remplir les champs obligatoires (nom, adresse, téléphone, ville, email, mot de passe).');
+      alert(t('signup.errorTitle'), t('signup.missingRestaurantFields'));
       return;
     }
     if (password.length < 6) {
-      alert('Erreur', 'Le mot de passe doit contenir au moins 6 caractères');
+      alert(t('signup.errorTitle'), t('signup.passwordTooShort'));
       return;
     }
     if (!acceptedTerms) {
-      alert('Erreur', 'Veuillez accepter les conditions d\'utilisation.');
+      alert(t('signup.errorTitle'), t('signup.mustAcceptTerms'));
       return;
     }
     setLoading(true);
@@ -131,7 +138,7 @@ const SignupScreen = () => {
         cuisineType.trim() || undefined,
       );
     } catch (error: any) {
-      alert('Erreur d\'inscription', error.message);
+      alert(t('signup.signupErrorTitle'), error.message);
     } finally {
       setLoading(false);
     }
@@ -163,9 +170,9 @@ const SignupScreen = () => {
 
   const renderTypeStep = () => (
     <View style={styles.stepBlock}>
-      <Text style={styles.eyebrow}>Inscription</Text>
-      <Text style={styles.title}>Vous venez pour manger ou pour cuisiner ?</Text>
-      <Text style={styles.subtitle}>Vous pourrez basculer plus tard depuis vos réglages.</Text>
+      <Text style={styles.eyebrow}>{t('signup.eyebrow')}</Text>
+      <Text style={styles.title}>{t('signup.typeStep.title')}</Text>
+      <Text style={styles.subtitle}>{t('signup.typeStep.subtitle')}</Text>
 
       <View style={styles.roleCards}>
         <TouchableOpacity
@@ -176,8 +183,8 @@ const SignupScreen = () => {
             <CustomIcon name="catering" fallbackName="restaurant-outline" size={24} color={Colors.namkeWhite} />
           </View>
           <View style={styles.roleLabels}>
-            <Text style={styles.roleTitle}>Je commande</Text>
-            <Text style={styles.roleHint}>Parcourir les marmites du quartier, commander, faire livrer.</Text>
+            <Text style={styles.roleTitle}>{t('signup.typeStep.clientTitle')}</Text>
+            <Text style={styles.roleHint}>{t('signup.typeStep.clientHint')}</Text>
           </View>
           {accountType === 'client' && (
             <View style={styles.roleMark}>
@@ -194,8 +201,8 @@ const SignupScreen = () => {
             <CustomIcon name="cook" fallbackName="briefcase-outline" size={24} color={Colors.darkGreen} />
           </View>
           <View style={styles.roleLabels}>
-            <Text style={styles.roleTitle}>Je cuisine</Text>
-            <Text style={styles.roleHint}>Ouvrir ma boutique, publier mes plats du jour, suivre mes versements.</Text>
+            <Text style={styles.roleTitle}>{t('signup.typeStep.restaurantTitle')}</Text>
+            <Text style={styles.roleHint}>{t('signup.typeStep.restaurantHint')}</Text>
           </View>
           {accountType === 'restaurant' && (
             <View style={styles.roleMark}>
@@ -211,65 +218,65 @@ const SignupScreen = () => {
         </View>
         <Text style={styles.infoText}>
           {isRestaurant
-            ? 'Devenir cuisinier demande un certificat d\'hygiène — on vous accompagne.'
-            : 'Vous pourrez devenir cuisinier plus tard, sans recréer de compte.'}
+            ? t('signup.typeStep.restaurantInfo')
+            : t('signup.typeStep.clientInfo')}
         </Text>
       </View>
 
       <TouchableOpacity style={styles.primaryButton} onPress={goToForm} activeOpacity={0.85}>
-        <Text style={styles.primaryButtonText}>Continuer</Text>
+        <Text style={styles.primaryButtonText}>{t('signup.continue')}</Text>
       </TouchableOpacity>
     </View>
   );
 
   const renderFormStep = () => (
     <View style={styles.stepBlock}>
-      <Text style={styles.eyebrow}>Inscription</Text>
-      <Text style={styles.title}>{isRestaurant ? 'Ouvrez votre boutique' : 'Créer votre compte'}</Text>
+      <Text style={styles.eyebrow}>{t('signup.eyebrow')}</Text>
+      <Text style={styles.title}>{isRestaurant ? t('signup.formStep.restaurantTitle') : t('signup.formStep.clientTitle')}</Text>
       <Text style={styles.subtitle}>
         {isRestaurant
-          ? 'On vous demandera le certificat d\'hygiène à l\'étape suivante.'
-          : 'Vos préférences alimentaires seront notées juste après.'}
+          ? t('signup.formStep.restaurantSubtitle')
+          : t('signup.formStep.clientSubtitle')}
       </Text>
 
       <View style={styles.form}>
         {isRestaurant ? (
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>Nom du restaurant</Text>
+            <Text style={styles.fieldLabel}>{t('signup.fields.restaurantName')}</Text>
             <View style={styles.inputPill}>
-              <TextInput style={styles.input} placeholder="Chez Mariam" placeholderTextColor={Colors.textLight} value={name} onChangeText={setName} autoCapitalize="words" />
+              <TextInput style={styles.input} placeholder={t('signup.placeholders.restaurantName')} placeholderTextColor={Colors.textLight} value={name} onChangeText={setName} autoCapitalize="words" />
             </View>
           </View>
         ) : (
           <View style={styles.nameRow}>
             <View style={[styles.fieldGroup, styles.nameField]}>
-              <Text style={styles.fieldLabel}>Prénom</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.firstName')}</Text>
               <View style={styles.inputPill}>
-                <TextInput style={styles.input} placeholder="Awa" placeholderTextColor={Colors.textLight} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.firstName')} placeholderTextColor={Colors.textLight} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
               </View>
             </View>
             <View style={[styles.fieldGroup, styles.nameField]}>
-              <Text style={styles.fieldLabel}>Nom</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.lastName')}</Text>
               <View style={styles.inputPill}>
-                <TextInput style={styles.input} placeholder="Diallo" placeholderTextColor={Colors.textLight} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.lastName')} placeholderTextColor={Colors.textLight} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
               </View>
             </View>
           </View>
         )}
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>E-mail</Text>
+          <Text style={styles.fieldLabel}>{t('signup.fields.email')}</Text>
           <View style={styles.inputPill}>
-            <TextInput style={styles.input} placeholder="vous@exemple.com" placeholderTextColor={Colors.textLight} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
+            <TextInput style={styles.input} placeholder={t('signup.placeholders.email')} placeholderTextColor={Colors.textLight} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
           </View>
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>Mot de passe</Text>
+          <Text style={styles.fieldLabel}>{t('signup.fields.password')}</Text>
           <View style={styles.inputPillRow}>
             <TextInput
               style={styles.input}
-              placeholder="8 caractères minimum"
+              placeholder={t('signup.placeholders.password')}
               placeholderTextColor={Colors.textLight}
               value={password}
               onChangeText={setPassword}
@@ -277,7 +284,7 @@ const SignupScreen = () => {
               autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.pwToggle}>
-              <Text style={styles.pwToggleText}>{showPassword ? 'Masquer' : 'Afficher'}</Text>
+              <Text style={styles.pwToggleText}>{showPassword ? t('signup.hide') : t('signup.show')}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.strengthRow}>
@@ -291,9 +298,9 @@ const SignupScreen = () => {
         {isRestaurant ? (
           <>
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Adresse</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.address')}</Text>
               <View style={styles.inputPill}>
-                <TextInput style={styles.input} placeholder="Adresse complète" placeholderTextColor={Colors.textLight} value={address} onChangeText={setAddress} autoCapitalize="words" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.fullAddress')} placeholderTextColor={Colors.textLight} value={address} onChangeText={setAddress} autoCapitalize="words" />
               </View>
             </View>
             <View style={styles.phoneRow}>
@@ -302,34 +309,34 @@ const SignupScreen = () => {
                 <IconWrapper name="chevron-down-outline" size={16} color={Colors.textLight} />
               </TouchableOpacity>
               <View style={[styles.inputPill, styles.phoneInputPill]}>
-                <TextInput style={styles.input} placeholder="Téléphone" placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+                <TextInput style={styles.input} placeholder={t('signup.fields.phone')} placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
               </View>
             </View>
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Ville</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.city')}</Text>
               <View style={styles.inputPill}>
-                <TextInput style={styles.input} placeholder="Berlin" placeholderTextColor={Colors.textLight} value={city} onChangeText={setCity} autoCapitalize="words" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.city')} placeholderTextColor={Colors.textLight} value={city} onChangeText={setCity} autoCapitalize="words" />
               </View>
             </View>
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Type de cuisine (optionnel)</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.cuisineType')}</Text>
               <View style={styles.inputPill}>
-                <TextInput style={styles.input} placeholder="Camerounaise, sénégalaise…" placeholderTextColor={Colors.textLight} value={cuisineType} onChangeText={setCuisineType} autoCapitalize="words" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.cuisineType')} placeholderTextColor={Colors.textLight} value={cuisineType} onChangeText={setCuisineType} autoCapitalize="words" />
               </View>
             </View>
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Description (optionnel)</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.description')}</Text>
               <View style={[styles.inputPill, styles.textAreaPill]}>
-                <TextInput style={[styles.input, styles.textArea]} placeholder="Présentez votre établissement…" placeholderTextColor={Colors.textLight} value={description} onChangeText={setDescription} multiline numberOfLines={3} />
+                <TextInput style={[styles.input, styles.textArea]} placeholder={t('signup.placeholders.description')} placeholderTextColor={Colors.textLight} value={description} onChangeText={setDescription} multiline numberOfLines={3} />
               </View>
             </View>
           </>
         ) : (
           <>
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Quartier</Text>
+              <Text style={styles.fieldLabel}>{t('signup.fields.neighborhood')}</Text>
               <View style={styles.inputPill}>
-                <TextInput style={styles.input} placeholder="Neukölln" placeholderTextColor={Colors.textLight} value={address} onChangeText={setAddress} autoCapitalize="words" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.neighborhood')} placeholderTextColor={Colors.textLight} value={address} onChangeText={setAddress} autoCapitalize="words" />
               </View>
             </View>
             <View style={styles.phoneRow}>
@@ -338,7 +345,7 @@ const SignupScreen = () => {
                 <IconWrapper name="chevron-down-outline" size={16} color={Colors.textLight} />
               </TouchableOpacity>
               <View style={[styles.inputPill, styles.phoneInputPill]}>
-                <TextInput style={styles.input} placeholder="Téléphone (optionnel)" placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.phoneOptional')} placeholderTextColor={Colors.textLight} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
               </View>
             </View>
           </>
@@ -348,7 +355,7 @@ const SignupScreen = () => {
           <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
             {acceptedTerms && <IconWrapper name="checkmark" size={14} color={Colors.namkeBlack} />}
           </View>
-          <Text style={styles.termsText}>J'accepte les conditions d'utilisation et la politique de confidentialité de namke.</Text>
+          <Text style={styles.termsText}>{t('signup.termsText')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -356,7 +363,7 @@ const SignupScreen = () => {
           onPress={handleSubmit}
           disabled={loading}
           activeOpacity={0.85}>
-          <Text style={styles.primaryButtonText}>{loading ? 'Création…' : 'Créer mon compte'}</Text>
+          <Text style={styles.primaryButtonText}>{loading ? t('signup.creating') : t('signup.createAccount')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -366,7 +373,7 @@ const SignupScreen = () => {
     <Modal visible={showCountryPicker} transparent animationType="fade" onRequestClose={() => setShowCountryPicker(false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.countryModalBox}>
-          <Text style={styles.modalTitle}>Choisissez votre pays</Text>
+          <Text style={styles.modalTitle}>{t('signup.chooseCountry')}</Text>
           <FlatList
             data={countryList}
             keyExtractor={item => String(item.id)}
@@ -384,7 +391,7 @@ const SignupScreen = () => {
             )}
           />
           <TouchableOpacity onPress={() => setShowCountryPicker(false)} style={styles.modalCancel}>
-            <Text style={styles.modalCancelText}>Fermer</Text>
+            <Text style={styles.modalCancelText}>{t('signup.close')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -399,9 +406,9 @@ const SignupScreen = () => {
         {renderProgressHeader()}
         {step === 'type' ? renderTypeStep() : renderFormStep()}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Déjà inscrit·e ? </Text>
+          <Text style={styles.footerText}>{t('signup.alreadyRegistered')}</Text>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.footerLink}>Se connecter</Text>
+            <Text style={styles.footerLink}>{t('signup.login')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

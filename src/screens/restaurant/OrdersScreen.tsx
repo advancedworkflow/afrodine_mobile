@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -20,19 +21,19 @@ import {
   type RestaurantOrder,
 } from '../../services/restaurantManagement';
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente',
-  confirmed: 'Confirmée',
-  preparing: 'En préparation',
-  ready: 'Prête',
-  delivered: 'Livrée',
-  paid: 'Payée',
-  cancelled: 'Annulée',
-};
-
 const STATUS_OPTIONS = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
 const RestaurantOrdersScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+  const statusLabels: Record<string, string> = {
+    pending: t('restaurantOrders.status.pending'),
+    confirmed: t('restaurantOrders.status.confirmed'),
+    preparing: t('restaurantOrders.status.preparing'),
+    ready: t('restaurantOrders.status.ready'),
+    delivered: t('restaurantOrders.status.delivered'),
+    paid: t('restaurantOrders.status.paid'),
+    cancelled: t('restaurantOrders.status.cancelled'),
+  };
   const [orders, setOrders] = useState<RestaurantOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -81,10 +82,10 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
 
   const handleUpdateStatus = (orderId: number, newStatus: string) => {
     alert(
-      'Changer le statut',
-      `Passer la commande au statut « ${STATUS_LABELS[newStatus] || newStatus } » ?`,
+      t('restaurantOrders.changeStatusTitle'),
+      t('restaurantOrders.changeStatusMessage', {status: statusLabels[newStatus] || newStatus}),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('restaurantOrders.cancel'), style: 'cancel' },
         {
           text: 'OK',
           onPress: async () => {
@@ -94,7 +95,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
               setSelectedOrder(null);
               load(true);
             } catch (e) {
-              alert('Erreur', 'Impossible de mettre à jour le statut.');
+              alert(t('restaurantOrders.errorTitle'), t('restaurantOrders.updateStatusError'));
             } finally {
               setUpdating(false);
             }
@@ -112,19 +113,19 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
       <View style={styles.orderHeader}>
         <Text style={styles.orderNumber}>{item.orderNumber}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) }]}>
-          <Text style={styles.statusText}>{STATUS_LABELS[item.status] ?? item.status}</Text>
+          <Text style={styles.statusText}>{statusLabels[item.status] ?? item.status}</Text>
         </View>
       </View>
       <Text style={styles.orderDate}>{item.orderDate ?? item.created_at}</Text>
       <Text style={styles.orderTotal}>{item.total?.toFixed(2) ?? item.restaurant_total?.toFixed(2)} €</Text>
-      <Text style={styles.orderItems}>{item.items_count} article(s)</Text>
+      <Text style={styles.orderItems}>{t('restaurantOrders.itemsCount', {count: item.items_count})}</Text>
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Commandes" />
+        <TopBar navigation={navigation} title={t('restaurantOrders.title')} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -134,13 +135,13 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Commandes" />
+      <TopBar navigation={navigation} title={t('restaurantOrders.title')} />
       <View style={styles.filters}>
         <TouchableOpacity
           style={[styles.filterChip, !statusFilter && styles.filterChipActive]}
           onPress={() => setStatusFilter('')}>
           <Text style={[styles.filterChipText, !statusFilter && styles.filterChipTextActive]}>
-            Toutes
+            {t('restaurantOrders.all')}
           </Text>
         </TouchableOpacity>
         {(['pending', 'confirmed', 'preparing', 'ready'] as const).map((s) => (
@@ -149,7 +150,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
             style={[styles.filterChip, statusFilter === s && styles.filterChipActive]}
             onPress={() => setStatusFilter(s)}>
             <Text style={[styles.filterChipText, statusFilter === s && styles.filterChipTextActive]}>
-              {STATUS_LABELS[s]}
+              {statusLabels[s]}
             </Text>
           </TouchableOpacity>
         ))}
@@ -165,7 +166,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
         ListEmptyComponent={
           <View style={styles.empty}>
             <IconWrapper name="receipt-outline" size={48} color={Colors.textLight} />
-            <Text style={styles.emptyText}>Aucune commande</Text>
+            <Text style={styles.emptyText}>{t('restaurantOrders.noOrders')}</Text>
           </View>
         }
       />
@@ -187,18 +188,18 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
                     <IconWrapper name="close-outline" size={28} color={Colors.text} />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalLabel}>Client</Text>
+                <Text style={styles.modalLabel}>{t('restaurantOrders.customer')}</Text>
                 <Text style={styles.modalText}>{selectedOrder.customer?.name ?? '—'}</Text>
                 <Text style={styles.modalText}>{selectedOrder.phone}</Text>
                 <Text style={styles.modalText}>{selectedOrder.address}</Text>
-                <Text style={styles.modalLabel}>Articles</Text>
+                <Text style={styles.modalLabel}>{t('restaurantOrders.items')}</Text>
                 {selectedOrder.items?.map((i) => (
                   <Text key={i.id} style={styles.modalText}>
                     {i.quantity}× {i.name} — {i.price.toFixed(2)} €
                   </Text>
                 ))}
-                <Text style={styles.modalTotal}>Total: {selectedOrder.total?.toFixed(2) ?? selectedOrder.restaurant_total?.toFixed(2)} €</Text>
-                <Text style={styles.modalLabel}>Changer le statut</Text>
+                <Text style={styles.modalTotal}>{t('restaurantOrders.totalLabel', {amount: (selectedOrder.total?.toFixed(2) ?? selectedOrder.restaurant_total?.toFixed(2))})}</Text>
+                <Text style={styles.modalLabel}>{t('restaurantOrders.changeStatus')}</Text>
                 <View style={styles.statusButtons}>
                   {STATUS_OPTIONS.filter((s) => s !== selectedOrder.status).map((s) => (
                     <TouchableOpacity
@@ -206,7 +207,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
                       style={styles.statusBtn}
                       onPress={() => handleUpdateStatus(selectedOrder.id, s)}
                       disabled={updating}>
-                      <Text style={styles.statusBtnText}>{STATUS_LABELS[s]}</Text>
+                      <Text style={styles.statusBtnText}>{statusLabels[s]}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>

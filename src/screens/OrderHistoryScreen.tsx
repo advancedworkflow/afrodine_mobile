@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
@@ -17,17 +18,6 @@ import {formatAxiosError} from '../utils/formatApiError';
 
 type OrderForList = ordersApi.OrderForList;
 type OrderStatus = ordersApi.OrderStatus;
-
-const statusLabel: Record<string, string> = {
-  delivered: 'Livrée',
-  cancelled: 'Annulée',
-  pending: 'En attente',
-  confirmed: 'Confirmée',
-  preparing: 'En préparation',
-  ready: 'Prête',
-  paid: 'Payée',
-  payment_failed: 'Paiement échoué',
-};
 
 const statusColor: Record<string, string> = {
   delivered: Colors.success,
@@ -40,14 +30,32 @@ const statusColor: Record<string, string> = {
   payment_failed: Colors.error,
 };
 
-function getStatusDisplay(status: string): {label: string; color: string} {
+const KNOWN_STATUSES = [
+  'delivered',
+  'cancelled',
+  'pending',
+  'confirmed',
+  'preparing',
+  'ready',
+  'paid',
+  'payment_failed',
+];
+
+function getStatusDisplay(
+  status: string,
+  t: (key: string) => string,
+): {label: string; color: string} {
   return {
-    label: statusLabel[status] ?? 'En cours',
+    label: KNOWN_STATUSES.includes(status)
+      ? t(`orderHistory.status.${status}`)
+      : t('orderHistory.status.inProgress'),
     color: statusColor[status] ?? Colors.textLight,
   };
 }
 
 const OrderHistoryScreen = ({navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const [orders, setOrders] = useState<OrderForList[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,7 +71,7 @@ const OrderHistoryScreen = ({navigation}: any) => {
       setOrders(list);
     } catch (e: any) {
       if (getIsCancelled?.()) return;
-      setError(formatAxiosError(e, 'Erreur de chargement'));
+      setError(formatAxiosError(e, t('orderHistory.loadError')));
       setOrders([]);
     } finally {
       if (!getIsCancelled?.()) {
@@ -71,7 +79,7 @@ const OrderHistoryScreen = ({navigation}: any) => {
         setRefreshing(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,7 +91,7 @@ const OrderHistoryScreen = ({navigation}: any) => {
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
-    return d.toLocaleDateString('fr-FR', {
+    return d.toLocaleDateString(dateLocale, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -93,7 +101,7 @@ const OrderHistoryScreen = ({navigation}: any) => {
   };
 
   const renderOrder = ({item}: {item: OrderForList}) => {
-    const {label, color} = getStatusDisplay(item.status);
+    const {label, color} = getStatusDisplay(item.status, t);
     return (
       <TouchableOpacity
         style={styles.orderCard}
@@ -108,17 +116,17 @@ const OrderHistoryScreen = ({navigation}: any) => {
         <View style={styles.orderMeta}>
           <Text style={styles.orderDate}>{formatDate(item.date)}</Text>
           <Text style={styles.orderItems}>
-            {item.itemsCount} article{item.itemsCount > 1 ? 's' : ''}
+            {t('orderHistory.itemsCount', {count: item.itemsCount})}
           </Text>
         </View>
         <View style={styles.orderFooter}>
-          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalLabel}>{t('orderHistory.total')}</Text>
           <Text style={styles.totalValue}>{item.total.toFixed(2)}€</Text>
         </View>
         <TouchableOpacity
           style={styles.detailButton}
           onPress={() => navigation.navigate('OrderDetails', {orderId: item.id})}>
-          <Text style={styles.detailButtonText}>Détail de la commande</Text>
+          <Text style={styles.detailButtonText}>{t('orderHistory.orderDetailButton')}</Text>
         </TouchableOpacity>
       </TouchableOpacity>
     );
@@ -129,28 +137,28 @@ const OrderHistoryScreen = ({navigation}: any) => {
       {loading && !refreshing ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('orderHistory.loading')}</Text>
         </View>
       ) : error ? (
         <View style={styles.emptyContainer}>
           <IconWrapper name="alert-circle-outline" size={64} color={Colors.error} />
-          <Text style={styles.emptyTitle}>Erreur</Text>
+          <Text style={styles.emptyTitle}>{t('orderHistory.errorTitle')}</Text>
           <Text style={styles.emptyText}>{error}</Text>
           <TouchableOpacity style={styles.browseButton} onPress={() => loadOrders()}>
-            <Text style={styles.browseButtonText}>Réessayer</Text>
+            <Text style={styles.browseButtonText}>{t('orderHistory.retry')}</Text>
           </TouchableOpacity>
         </View>
       ) : orders.length === 0 ? (
         <View style={styles.emptyContainer}>
           <IconWrapper name="receipt-outline" size={80} color={Colors.textLight} />
-          <Text style={styles.emptyTitle}>Aucune commande</Text>
+          <Text style={styles.emptyTitle}>{t('orderHistory.emptyTitle')}</Text>
           <Text style={styles.emptyText}>
-            Vos commandes passées apparaîtront ici.
+            {t('orderHistory.emptyText')}
           </Text>
           <TouchableOpacity
             style={styles.browseButton}
             onPress={() => navigation.navigate('Restaurants')}>
-            <Text style={styles.browseButtonText}>Découvrir les restaurants</Text>
+            <Text style={styles.browseButtonText}>{t('orderHistory.discoverRestaurants')}</Text>
           </TouchableOpacity>
         </View>
       ) : (

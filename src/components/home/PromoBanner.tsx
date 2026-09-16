@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
-import {Colors, Radius} from '../../utils/colors';
-import {fontButton, fontDisplay, fontHeading, fontUI} from '../../utils/fonts';
+import {useTranslation} from 'react-i18next';
+import {Colors, Radius, Shadows} from '../../utils/colors';
+import {fontButton, fontDisplayMedium, fontHeading, fontSub} from '../../utils/fonts';
 import {getAbsoluteImageUrl} from '../../utils/api';
 
 const namkeFallback = require('../../assets/namke-fallback.png');
@@ -18,103 +19,100 @@ interface PromoBannerProps {
 
 const PromoBanner: React.FC<PromoBannerProps> = ({
   title = '30% OFF',
-  subtitle = 'Sur votre première\ncommande',
-  buttonText = 'Commander',
+  subtitle,
+  buttonText,
   imageUrl,
   backgroundColor,
   discountLabel,
   onPress,
 }) => {
+  const {t} = useTranslation();
+  const resolvedSubtitle = subtitle ?? t('promoBanner.defaultSubtitle');
+  const resolvedButtonText = buttonText ?? t('promoBanner.defaultButtonText');
   const [imgError, setImgError] = useState(false);
   const resolvedUri =
     imageUrl && !imgError ? (getAbsoluteImageUrl(imageUrl) ?? imageUrl) : null;
+  const accentColor = backgroundColor || Colors.terracotta;
   return (
-    <View style={styles.container}>
-      <Image
-        source={resolvedUri ? {uri: resolvedUri} : namkeFallback}
-        style={styles.image}
-        resizeMode="cover"
-        onError={() => setImgError(true)}
-      />
-      <View style={styles.overlay}>
-        <View style={[styles.gradient, backgroundColor ? {backgroundColor: backgroundColor + 'CC'} : null]} />
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
+      <View style={styles.imageWrap}>
+        <Image
+          source={resolvedUri ? {uri: resolvedUri} : namkeFallback}
+          style={styles.image}
+          resizeMode="cover"
+          onError={() => setImgError(true)}
+        />
         {discountLabel ? (
-          <View style={styles.discountBadge}>
+          <View style={[styles.discountBadge, {backgroundColor: accentColor}]}>
             <Text style={styles.discountBadgeText}>{discountLabel}</Text>
           </View>
         ) : null}
-        <View style={styles.content}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>{subtitle}</Text>
-          <TouchableOpacity style={styles.button} onPress={onPress}>
-            <Text style={styles.buttonText}>{buttonText}</Text>
-          </TouchableOpacity>
+      </View>
+      <View style={styles.content}>
+        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        <Text style={styles.subtitle} numberOfLines={2}>{resolvedSubtitle}</Text>
+        <View style={[styles.button, {backgroundColor: accentColor}]}>
+          <Text style={styles.buttonText}>{resolvedButtonText}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    height: 160,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
+    ...Shadows.sm,
+  },
+  imageWrap: {
     width: '100%',
-    marginVertical: 16,
+    height: 130,
   },
   image: {
     width: '100%',
     height: '100%',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Colors.gray[100],
   },
   discountBadge: {
     position: 'absolute',
     top: 12,
-    right: 12,
-    backgroundColor: Colors.white,
+    left: 12,
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderRadius: Radius.pill,
   },
   discountBadgeText: {
-    fontSize: 14,
+    fontSize: 12.5,
     fontFamily: fontHeading,
-    color: Colors.primary,
-  },
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.primary + 'CC', // 80% opacity
+    color: Colors.white,
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
+    padding: 16,
   },
   title: {
-    fontSize: 26,
-    fontFamily: fontDisplay,
-    color: Colors.white,
-    marginBottom: 8,
+    fontSize: 18,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
-    fontFamily: fontUI,
-    color: Colors.white,
+    fontSize: 13.5,
+    fontFamily: fontSub,
+    color: Colors.textLight,
     marginBottom: 12,
-    lineHeight: 20,
+    lineHeight: 19,
   },
   button: {
-    backgroundColor: Colors.white,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: Radius.pill,
     alignSelf: 'flex-start',
   },
   buttonText: {
-    color: Colors.primary,
-    fontSize: 14,
+    color: Colors.white,
+    fontSize: 13,
     fontFamily: fontButton,
   },
 });

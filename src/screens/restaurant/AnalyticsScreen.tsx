@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
@@ -24,12 +25,11 @@ import {
 
 const CHART_HEIGHT = 160;
 const BAR_MAX_HEIGHT = 120;
-const DAY_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
-function formatDateLabel(dateStr: string): string {
+function formatDateLabel(dateStr: string, dayLabels: string[]): string {
   try {
     const d = new Date(dateStr);
-    const day = DAY_LABELS[d.getDay()] ?? '?';
+    const day = dayLabels[d.getDay()] ?? '?';
     const num = d.getDate();
     return `${day} ${num}`;
   } catch {
@@ -43,12 +43,14 @@ function BarChart<T extends { date: string }>({
   labelFormat,
   color = Colors.darkGreen,
   title,
+  dayLabels,
 }: {
   data: T[];
   valueKey: keyof T & string;
   labelFormat: (v: number) => string;
   color?: string;
   title: string;
+  dayLabels: string[];
 }) {
   const values = data.map((d) => Number((d as Record<string, unknown>)[valueKey]) || 0);
   const max = Math.max(...values, 1);
@@ -80,7 +82,7 @@ function BarChart<T extends { date: string }>({
                   {labelFormat(v)}
                 </Text>
                 <Text style={styles.barLabel} numberOfLines={1}>
-                  {formatDateLabel(point.date)}
+                  {formatDateLabel(point.date, dayLabels)}
                 </Text>
               </View>
             );
@@ -130,8 +132,10 @@ function TopDishesChart({
 
 function RevenueShareChart({
   items,
+  title,
 }: {
   items: { id: number; name: string; revenue?: number }[];
+  title: string;
 }) {
   const total = items.reduce((s, i) => s + (i.revenue ?? 0), 0);
   const top5 = items.slice(0, 5).filter((i) => (i.revenue ?? 0) > 0);
@@ -139,7 +143,7 @@ function RevenueShareChart({
 
   return (
     <View style={styles.topDishesCard}>
-      <Text style={styles.chartTitle}>Répartition du CA (top 5 plats)</Text>
+      <Text style={styles.chartTitle}>{title}</Text>
       {top5.map((item) => {
         const v = item.revenue ?? 0;
         const pct = total > 0 ? (v / total) * 100 : 0;
@@ -161,9 +165,17 @@ function RevenueShareChart({
 function CombinedBarChart({
   revenueData,
   ordersData,
+  title,
+  revenueLegend,
+  ordersLegend,
+  dayLabels,
 }: {
   revenueData: RevenueDataPoint[];
   ordersData: OrdersDataPoint[];
+  title: string;
+  revenueLegend: string;
+  ordersLegend: string;
+  dayLabels: string[];
 }) {
   const days = revenueData.length > 0 ? revenueData.map((d) => d.date) : ordersData.map((d) => d.date);
   if (days.length === 0) return null;
@@ -177,12 +189,12 @@ function CombinedBarChart({
 
   return (
     <View style={styles.chartCard}>
-      <Text style={styles.chartTitle}>Revenus et commandes (7 derniers jours)</Text>
+      <Text style={styles.chartTitle}>{title}</Text>
       <View style={styles.legendRow}>
         <View style={[styles.legendDot, { backgroundColor: Colors.darkGreen }]} />
-        <Text style={styles.legendText}>Revenus (€)</Text>
+        <Text style={styles.legendText}>{revenueLegend}</Text>
         <View style={[styles.legendDot, { backgroundColor: Colors.olive }]} />
-        <Text style={styles.legendText}>Commandes</Text>
+        <Text style={styles.legendText}>{ordersLegend}</Text>
       </View>
       <View style={[styles.chartContainer, { height: CHART_HEIGHT }]}>
         <View style={styles.barRow}>
@@ -210,7 +222,7 @@ function CombinedBarChart({
                   ]}
                 />
               </View>
-              <Text style={styles.barLabel} numberOfLines={1}>{formatDateLabel(date)}</Text>
+              <Text style={styles.barLabel} numberOfLines={1}>{formatDateLabel(date, dayLabels)}</Text>
             </View>
           ))}
         </View>
@@ -220,6 +232,8 @@ function CombinedBarChart({
 }
 
 const RestaurantAnalyticsScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+  const dayLabels = t('restaurantAnalytics.dayLabels', {returnObjects: true}) as string[];
   const [analytics, setAnalytics] = useState<RestaurantAnalytics | null>(null);
   const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>([]);
   const [ordersData, setOrdersData] = useState<OrdersDataPoint[]>([]);
@@ -264,7 +278,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Statistiques" />
+        <TopBar navigation={navigation} title={t('restaurantAnalytics.title')} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -301,7 +315,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Statistiques" />
+      <TopBar navigation={navigation} title={t('restaurantAnalytics.title')} />
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -311,7 +325,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
           <View style={styles.cardRow}>
             <IconWrapper name="receipt-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
-              <Text style={styles.cardLabel}>Commandes aujourd'hui</Text>
+              <Text style={styles.cardLabel}>{t('restaurantAnalytics.ordersToday')}</Text>
               <Text style={styles.cardValue}>{todayOrders}</Text>
               <Text style={styles.cardChange}>{ordersChange}</Text>
             </View>
@@ -321,7 +335,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
           <View style={styles.cardRow}>
             <IconWrapper name="cash-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
-              <Text style={styles.cardLabel}>Revenus aujourd'hui (API)</Text>
+              <Text style={styles.cardLabel}>{t('restaurantAnalytics.revenueToday')}</Text>
               <Text style={styles.cardValue}>{todayRevenue.toFixed(2)} €</Text>
               <Text style={styles.cardChange}>{revenueChange}</Text>
             </View>
@@ -331,7 +345,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
           <View style={styles.cardRow}>
             <IconWrapper name="people-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
-              <Text style={styles.cardLabel}>Clients uniques</Text>
+              <Text style={styles.cardLabel}>{t('restaurantAnalytics.uniqueCustomers')}</Text>
               <Text style={styles.cardValue}>{uniqueCustomers}</Text>
               <Text style={styles.cardChange}>{customersChange}</Text>
             </View>
@@ -341,7 +355,7 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
           <View style={styles.cardRow}>
             <IconWrapper name="pricetag-outline" size={28} color={Colors.darkGreen} />
             <View style={styles.cardBody}>
-              <Text style={styles.cardLabel}>Panier moyen</Text>
+              <Text style={styles.cardLabel}>{t('restaurantAnalytics.averageOrder')}</Text>
               <Text style={styles.cardValue}>{averageOrder.toFixed(2)} €</Text>
               <Text style={styles.cardChange}>{averageOrderChange}</Text>
             </View>
@@ -349,40 +363,49 @@ const RestaurantAnalyticsScreen = ({navigation}: any) => {
         </View>
 
         <BarChart
-          title="Revenus (7 derniers jours)"
+          title={t('restaurantAnalytics.revenueChartTitle')}
           data={revenueChartData}
           valueKey="revenue"
           labelFormat={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k€` : `${v.toFixed(0)} €`)}
           color={Colors.darkGreen}
+          dayLabels={dayLabels}
         />
 
         <BarChart
-          title="Commandes (7 derniers jours)"
+          title={t('restaurantAnalytics.ordersChartTitle')}
           data={ordersChartData}
           valueKey="orders"
           labelFormat={(v) => `${v}`}
           color={Colors.olive}
+          dayLabels={dayLabels}
         />
 
-        <CombinedBarChart revenueData={revenueChartData} ordersData={ordersChartData} />
+        <CombinedBarChart
+          revenueData={revenueChartData}
+          ordersData={ordersChartData}
+          title={t('restaurantAnalytics.combinedChartTitle')}
+          revenueLegend={t('restaurantAnalytics.revenueLegend')}
+          ordersLegend={t('restaurantAnalytics.ordersLegend')}
+          dayLabels={dayLabels}
+        />
 
         {topDishes.length > 0 && (
           <>
             <TopDishesChart
               items={topDishes}
               valueKey="orders"
-              title="Top plats (commandes) — API"
+              title={t('restaurantAnalytics.topDishesByOrders')}
               labelFormat={(v) => `${v}`}
               barColor={Colors.olive}
             />
             <TopDishesChart
               items={topDishes}
               valueKey="revenue"
-              title="Top plats (revenus) — API"
+              title={t('restaurantAnalytics.topDishesByRevenue')}
               labelFormat={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k €` : `${v.toFixed(0)} €`)}
               barColor={Colors.darkGreen}
             />
-            <RevenueShareChart items={topDishes} />
+            <RevenueShareChart items={topDishes} title={t('restaurantAnalytics.revenueShareTitle')} />
           </>
         )}
       </ScrollView>

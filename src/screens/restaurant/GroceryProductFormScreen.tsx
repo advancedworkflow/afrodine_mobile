@@ -12,6 +12,7 @@ import {
   Image,
   Switch,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -28,6 +29,8 @@ import {
 const UNITS = ['piece', 'kg', 'g', 'l', 'ml', 'paquet'];
 
 const GroceryProductFormScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
+  const unitLabel = (u: string) => t(`restaurantGroceryProductForm.units.${u}`, u);
   const product = route.params?.product as ManagementGroceryProduct | undefined;
   const isEdit = product != null;
 
@@ -83,7 +86,7 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
         const {image_url} = await uploadManagementImageFile(file, 'grocery');
         setImageUrl(image_url || '');
       } catch {
-        alert('Erreur', "Impossible d'uploader l'image.");
+        alert(t('restaurantGroceryProductForm.errorTitle'), t('restaurantGroceryProductForm.uploadError'));
       } finally {
         setUploadingImage(false);
         if (target) target.value = '';
@@ -105,11 +108,11 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
     const stockNum = parseInt(stockQuantity, 10);
 
     if (!trimmedName) {
-      alert('Champ requis', 'Le nom du produit est obligatoire.');
+      alert(t('restaurantGroceryProductForm.requiredFieldTitle'), t('restaurantGroceryProductForm.nameRequired'));
       return;
     }
     if (!Number.isFinite(priceNum) || priceNum < 0) {
-      alert('Prix invalide', 'Saisissez un prix positif.');
+      alert(t('restaurantGroceryProductForm.invalidPriceTitle'), t('restaurantGroceryProductForm.invalidPriceMessage'));
       return;
     }
 
@@ -130,13 +133,13 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
       };
       if (isEdit && product) {
         await updateManagementGroceryProduct(product.id, payload);
-        alert('Succès', 'Produit mis à jour.', [{text: 'OK', onPress: () => navigation.goBack()}]);
+        alert(t('restaurantGroceryProductForm.successTitle'), t('restaurantGroceryProductForm.productUpdated'), [{text: 'OK', onPress: () => navigation.goBack()}]);
       } else {
         await createManagementGroceryProduct(payload);
-        alert('Succès', 'Produit créé.', [{text: 'OK', onPress: () => navigation.goBack()}]);
+        alert(t('restaurantGroceryProductForm.successTitle'), t('restaurantGroceryProductForm.productCreated'), [{text: 'OK', onPress: () => navigation.goBack()}]);
       }
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, "Erreur lors de l'enregistrement"));
+      alert(t('restaurantGroceryProductForm.errorTitle'), formatAxiosError(e, t('restaurantGroceryProductForm.saveError')));
     } finally {
       setSubmitting(false);
     }
@@ -146,13 +149,13 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title={isEdit ? 'Modifier le produit' : 'Nouveau produit'}
+        title={isEdit ? t('restaurantGroceryProductForm.editTitle') : t('restaurantGroceryProductForm.newTitle')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={styles.sectionTitle}>Image</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantGroceryProductForm.image')}</Text>
           <TouchableOpacity style={styles.imagePicker} onPress={handleImagePick} activeOpacity={0.8}>
             {uploadingImage ? (
               <ActivityIndicator size="small" color={Colors.darkGreen} />
@@ -162,64 +165,64 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
               <>
                 <IconWrapper name="image-outline" size={28} color={Colors.textLight} />
                 <Text style={styles.imagePickerText}>
-                  {Platform.OS === 'web' ? 'Choisir une image' : 'Non disponible sur mobile'}
+                  {Platform.OS === 'web' ? t('restaurantGroceryProductForm.chooseImage') : t('restaurantGroceryProductForm.notAvailableMobile')}
                 </Text>
               </>
             )}
           </TouchableOpacity>
 
-          <Text style={styles.sectionTitle}>Informations</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantGroceryProductForm.infoSection')}</Text>
 
-          <Text style={styles.label}>Nom *</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.nameLabel')}</Text>
           <TextInput
             style={styles.input}
             value={name}
             onChangeText={setName}
-            placeholder="Nom du produit"
+            placeholder={t('restaurantGroceryProductForm.namePlaceholder')}
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.description')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={description}
             onChangeText={setDescription}
-            placeholder="Description (optionnel)"
+            placeholder={t('restaurantGroceryProductForm.descriptionPlaceholder')}
             placeholderTextColor={Colors.textLight}
             multiline
             numberOfLines={3}
           />
 
-          <Text style={styles.label}>Catégorie</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.category')}</Text>
           <TextInput
             style={styles.input}
             value={category}
             onChangeText={setCategory}
-            placeholder="Ex : Épices, Boissons..."
+            placeholder={t('restaurantGroceryProductForm.categoryPlaceholder')}
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.sectionTitle}>Origine</Text>
-          <Text style={styles.label}>Pays d'origine</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantGroceryProductForm.origin')}</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.originCountry')}</Text>
           <TextInput
             style={styles.input}
             value={originCountry}
             onChangeText={setOriginCountry}
-            placeholder="Ex : Sénégal"
+            placeholder={t('restaurantGroceryProductForm.originCountryPlaceholder')}
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.label}>Région d'origine</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.originRegion')}</Text>
           <TextInput
             style={styles.input}
             value={originRegion}
             onChangeText={setOriginRegion}
-            placeholder="Optionnel"
+            placeholder={t('restaurantGroceryProductForm.optional')}
             placeholderTextColor={Colors.textLight}
           />
 
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Produit africain</Text>
+            <Text style={styles.toggleLabel}>{t('restaurantGroceryProductForm.africanProduct')}</Text>
             <Switch
               value={isAfrican}
               onValueChange={setIsAfrican}
@@ -228,8 +231,8 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>Prix et stock</Text>
-          <Text style={styles.label}>Prix (€) *</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantGroceryProductForm.priceAndStock')}</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.priceLabel')}</Text>
           <TextInput
             style={styles.input}
             value={price}
@@ -239,7 +242,7 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
             keyboardType="decimal-pad"
           />
 
-          <Text style={styles.label}>Quantité en stock</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.stockQuantity')}</Text>
           <TextInput
             style={styles.input}
             value={stockQuantity}
@@ -249,20 +252,20 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
             keyboardType="number-pad"
           />
 
-          <Text style={styles.label}>Unité</Text>
+          <Text style={styles.label}>{t('restaurantGroceryProductForm.unit')}</Text>
           <View style={styles.unitGrid}>
             {UNITS.map(u => (
               <TouchableOpacity
                 key={u}
                 style={[styles.optionBtn, unit === u && styles.optionBtnActive]}
                 onPress={() => setUnit(u)}>
-                <Text style={[styles.optionBtnText, unit === u && styles.optionBtnTextActive]}>{u}</Text>
+                <Text style={[styles.optionBtnText, unit === u && styles.optionBtnTextActive]}>{unitLabel(u)}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Produit actif</Text>
+            <Text style={styles.toggleLabel}>{t('restaurantGroceryProductForm.activeProduct')}</Text>
             <Switch
               value={isActive}
               onValueChange={setIsActive}
@@ -278,7 +281,7 @@ const GroceryProductFormScreen = ({navigation, route}: any) => {
             {submitting ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
-              <Text style={styles.submitBtnText}>{isEdit ? 'Enregistrer' : 'Créer le produit'}</Text>
+              <Text style={styles.submitBtnText}>{isEdit ? t('restaurantGroceryProductForm.save') : t('restaurantGroceryProductForm.createProduct')}</Text>
             )}
           </TouchableOpacity>
         </ScrollView>

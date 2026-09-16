@@ -14,7 +14,9 @@ import {alert} from '../utils/alert';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IconWrapper from '../components/IconWrapper';
 import {useAuth} from '../contexts/AuthContext';
+import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI, secondaryFont} from '../utils/fonts';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import {getClientProfile, type ClientProfileRead} from '../services/clientProfile';
@@ -22,6 +24,7 @@ import {getMyOrders} from '../services/orders';
 import {getAbsoluteImageUrl} from '../utils/api';
 
 const ProfileScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const {user, isAuthenticated, logout, isRestaurant} = useAuth();
   const [clientProfile, setClientProfile] = useState<ClientProfileRead | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
@@ -151,7 +154,7 @@ const ProfileScreen = ({navigation}: any) => {
         await AsyncStorage.setItem(photoStorageKey, dataUrl);
         setProfilePhotoUrl(dataUrl);
       } catch {
-        alert('Erreur', 'Impossible de charger l’image sélectionnée.');
+        alert(t('profile.errorTitle'), t('profile.imageLoadFailed'));
       } finally {
         setUploadingPhoto(false);
         if (target) target.value = '';
@@ -178,29 +181,29 @@ const ProfileScreen = ({navigation}: any) => {
     if (Platform.OS === 'web') {
       const browserWindow = (globalThis as {window?: {confirm: (message?: string) => boolean}}).window;
       const ok = browserWindow
-        ? browserWindow.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')
+        ? browserWindow.confirm(t('profile.logoutConfirmMessage'))
         : true;
       if (!ok) return;
       logout().catch(() => {
-        alert('Erreur', 'Impossible de se déconnecter.');
+        alert(t('profile.errorTitle'), t('profile.logoutFailed'));
       });
       return;
     }
 
     alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
+      t('profile.logoutTitle'),
+      t('profile.logoutConfirmMessage'),
       [
-        {text: 'Annuler', style: 'cancel'},
+        {text: t('profile.cancel'), style: 'cancel'},
         {
-          text: 'Déconnexion',
+          text: t('profile.logoutTitle'),
           style: 'destructive',
           onPress: async () => {
             try {
               await logout();
               // L'écran Login s'affiche automatiquement quand user devient null
             } catch (e) {
-              alert('Erreur', 'Impossible de se déconnecter.');
+              alert(t('profile.errorTitle'), t('profile.logoutFailed'));
             }
           },
         },
@@ -215,8 +218,8 @@ const ProfileScreen = ({navigation}: any) => {
       return;
     }
     alert(
-      'Sélection image',
-      'La sélection de fichier locale nécessite une librairie native. Je peux l’ajouter ensuite si vous voulez.',
+      t('profile.imagePickerTitle'),
+      t('profile.imagePickerNativeOnly'),
     );
   };
 
@@ -225,15 +228,15 @@ const ProfileScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <View style={styles.unauthorizedContainer}>
           <View style={styles.iconContainer}>
-            <IconWrapper name="lock-closed-outline" size={56} color={Colors.textLight} />
+            <IconWrapper name="lock-closed-outline" size={56} color={Colors.text} />
           </View>
           <Text style={styles.unauthorizedText}>
-            Vous devez être connecté pour accéder à votre profil
+            {t('profile.mustBeLoggedIn')}
           </Text>
           <TouchableOpacity
             style={styles.loginButton}
             onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginButtonText}>Se connecter</Text>
+            <Text style={styles.loginButtonText}>{t('profile.login')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -241,10 +244,10 @@ const ProfileScreen = ({navigation}: any) => {
   }
 
   const roleLabel = isRestaurant
-    ? 'Cuisinier'
+    ? t('profile.roleCook')
     : orderCount != null
-      ? `Cliente · ${orderCount} commande${orderCount > 1 ? 's' : ''}`
-      : 'Cliente';
+      ? t('profile.roleClientWithOrders', {count: orderCount})
+      : t('profile.roleClient');
 
   return (
     <View style={styles.container}>
@@ -257,7 +260,7 @@ const ProfileScreen = ({navigation}: any) => {
             <RefreshControl refreshing={refreshing} onRefresh={() => loadClientProfile(true)} colors={[Colors.primary]} />
           ) : undefined
         }>
-        <Text style={styles.pageTitle}>Mon profil</Text>
+        <Text style={styles.pageTitle}>{t('profile.title')}</Text>
 
         <View style={styles.profileCard}>
           {profileImageSrc ? (
@@ -273,25 +276,25 @@ const ProfileScreen = ({navigation}: any) => {
             <Text style={styles.name} numberOfLines={1}>{user?.name}</Text>
             <Text style={styles.email} numberOfLines={1}>{user?.email}</Text>
             <Text style={styles.role}>
-              {uploadingPhoto ? 'Chargement de la photo…' : roleLabel}
+              {uploadingPhoto ? t('profile.uploadingPhoto') : roleLabel}
             </Text>
           </View>
           <TouchableOpacity onPress={handleOpenUpload}>
-            <Text style={styles.editLink}>Modifier</Text>
+            <Text style={styles.editLink}>{t('profile.edit')}</Text>
           </TouchableOpacity>
         </View>
 
         {!isRestaurant && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Commande</Text>
+            <Text style={styles.sectionLabel}>{t('profile.order')}</Text>
             <View style={styles.rowGroup}>
               <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('EditProfile')} activeOpacity={0.7}>
                 <View style={[styles.rowIcon, {backgroundColor: Colors.category.orange.bg}]}>
                   <IconWrapper name="location-outline" size={17} color={Colors.category.orange.icon} />
                 </View>
-                <Text style={styles.rowLabel}>Mes adresses</Text>
+                <Text style={styles.rowLabel}>{t('profile.myAddresses')}</Text>
                 <Text style={styles.rowValue} numberOfLines={1}>
-                  {loadingProfile ? '…' : clientProfile?.address ? '1 enregistrée' : 'Aucune'} ›
+                  {loadingProfile ? '…' : clientProfile?.address ? t('profile.oneSaved') : t('profile.none')} ›
                 </Text>
               </TouchableOpacity>
             </View>
@@ -299,13 +302,13 @@ const ProfileScreen = ({navigation}: any) => {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Commandes</Text>
+          <Text style={styles.sectionLabel}>{t('profile.orders')}</Text>
           <View style={styles.rowGroup}>
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('OrderHistory')} activeOpacity={0.7}>
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.green.bg}]}>
                 <IconWrapper name="receipt-outline" size={17} color={Colors.category.green.icon} />
               </View>
-              <Text style={styles.rowLabel}>Mes commandes</Text>
+              <Text style={styles.rowLabel}>{t('profile.myOrders')}</Text>
               <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
             <View style={styles.rowDivider} />
@@ -313,7 +316,7 @@ const ProfileScreen = ({navigation}: any) => {
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.blue.bg}]}>
                 <IconWrapper name="stats-chart-outline" size={17} color={Colors.category.blue.icon} />
               </View>
-              <Text style={styles.rowLabel}>Stats commandes</Text>
+              <Text style={styles.rowLabel}>{t('profile.orderStats')}</Text>
               <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
             <View style={styles.rowDivider} />
@@ -321,7 +324,7 @@ const ProfileScreen = ({navigation}: any) => {
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.pink.bg}]}>
                 <IconWrapper name="heart-outline" size={17} color={Colors.category.pink.icon} />
               </View>
-              <Text style={styles.rowLabel}>Favoris</Text>
+              <Text style={styles.rowLabel}>{t('profile.favorites')}</Text>
               <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
             <View style={styles.rowDivider} />
@@ -329,20 +332,20 @@ const ProfileScreen = ({navigation}: any) => {
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.yellow.bg}]}>
                 <IconWrapper name="basket-outline" size={17} color={Colors.category.yellow.icon} />
               </View>
-              <Text style={styles.rowLabel}>Épicerie</Text>
+              <Text style={styles.rowLabel}>{t('profile.grocery')}</Text>
               <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Réglages</Text>
+          <Text style={styles.sectionLabel}>{t('profile.settings')}</Text>
           <View style={styles.rowGroup}>
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Settings')} activeOpacity={0.7}>
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.purple.bg}]}>
                 <IconWrapper name="settings-outline" size={17} color={Colors.category.purple.icon} />
               </View>
-              <Text style={styles.rowLabel}>Paramètres</Text>
+              <Text style={styles.rowLabel}>{t('profile.settingsRow')}</Text>
               <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
             <View style={styles.rowDivider} />
@@ -350,7 +353,7 @@ const ProfileScreen = ({navigation}: any) => {
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.red.bg}]}>
                 <IconWrapper name="notifications-outline" size={17} color={Colors.category.red.icon} />
               </View>
-              <Text style={styles.rowLabel}>Notifications</Text>
+              <Text style={styles.rowLabel}>{t('profile.notifications')}</Text>
               <IconWrapper name="chevron-forward-outline" size={18} color={Colors.text} />
             </TouchableOpacity>
             <View style={styles.rowDivider} />
@@ -358,14 +361,14 @@ const ProfileScreen = ({navigation}: any) => {
               <View style={[styles.rowIcon, {backgroundColor: Colors.category.darkGreenWhite.bg}]}>
                 <IconWrapper name="language-outline" size={17} color={Colors.darkGreen} />
               </View>
-              <Text style={styles.rowLabel}>Langue</Text>
+              <Text style={styles.rowLabel}>{t('profile.language')}</Text>
               <LanguageSwitcher />
             </View>
           </View>
         </View>
 
         <TouchableOpacity style={styles.logoutRow} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Se déconnecter</Text>
+          <Text style={styles.logoutText}>{t('profile.logout')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -382,7 +385,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 22,
-    paddingBottom: 40,
+    paddingBottom: GLOBAL_TAB_BAR_HEIGHT + 40,
   },
   pageTitle: {
     fontSize: 28,

@@ -9,9 +9,11 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import {
   getCateringFormulaBySlug,
@@ -27,6 +29,7 @@ import {formatAxiosError} from '../utils/formatApiError';
 const namkeFallback = require('../assets/namke-fallback.png');
 
 const CateringFormulaDetailScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
   const {slug} = route.params || {};
   const {user, isAuthenticated} = useAuth();
   const [formula, setFormula] = useState<CateringFormulaApi | null>(null);
@@ -81,7 +84,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
     setSelectedDishes(prev => {
       if (prev.includes(key)) return prev.filter(k => k !== key);
       if (choiceCount > 0 && prev.length >= choiceCount) {
-        alert('Trois plats au maximum', `Choisissez ${choiceCount} plats — retirez-en un d'abord.`);
+        alert(t('catering.formula.maxDishesTitle'), t('catering.formula.maxDishesMessage', {count: choiceCount}));
         return prev;
       }
       return [...prev, key];
@@ -102,7 +105,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
     return (
       <View style={styles.container}>
         <View style={styles.centered}>
-          <Text style={styles.loadingText}>Formule introuvable</Text>
+          <Text style={styles.loadingText}>{t('catering.formula.notFound')}</Text>
         </View>
       </View>
     );
@@ -115,15 +118,15 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
 
   const handleSubmit = async () => {
     if (choiceCount > 0 && selectedDishes.length < choiceCount) {
-      alert('Menu incomplet', `Choisissez ${choiceCount} plats avant d'envoyer la demande.`);
+      alert(t('catering.formula.incompleteMenuTitle'), t('catering.formula.incompleteMenuMessage', {count: choiceCount}));
       return;
     }
     if (!eventDate.trim() || !eventTime.trim()) {
-      alert('Erreur', "Merci d'indiquer la date et l'heure de votre événement.");
+      alert(t('catering.formula.errorTitle'), t('catering.formula.missingDateTime'));
       return;
     }
     if (!contactEmail.trim()) {
-      alert('Erreur', "Merci d'indiquer un e-mail de contact.");
+      alert(t('catering.formula.errorTitle'), t('catering.formula.missingEmail'));
       return;
     }
     setSubmitting(true);
@@ -139,10 +142,10 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
         special_requests: specialRequests.trim() || undefined,
         selected_dishes: selectedDishes.length > 0 ? selectedDishes : undefined,
       });
-      alert('Demande envoyée', 'Un cuisinier proposant cette formule vous répondra sous 24 h avec un devis confirmé.');
+      alert(t('catering.formula.requestSentTitle'), t('catering.formula.requestSentMessage'));
       navigation.goBack();
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, "Impossible d'envoyer la demande. Vérifiez le format de la date (AAAA-MM-JJ) et de l'heure (HH:mm)."));
+      alert(t('catering.formula.errorTitle'), formatAxiosError(e, t('catering.formula.requestFailedFallback')));
     } finally {
       setSubmitting(false);
     }
@@ -171,17 +174,17 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
           <View style={styles.titleRow}>
             <Text style={styles.name}>{formula.name}</Text>
             <Text style={styles.headerPrice}>
-              {formula.is_custom_price ? 'Sur devis' : `${pricePerPerson.toFixed(0)} €`}
+              {formula.is_custom_price ? t('catering.onQuote') : `${pricePerPerson.toFixed(0)} €`}
             </Text>
           </View>
-          <Text style={styles.metaLine}>{minGuests} à {maxGuests} convives</Text>
+          <Text style={styles.metaLine}>{t('catering.guestsRangeFull', {min: minGuests, max: maxGuests})}</Text>
           {formula.description ? (
             <Text style={styles.description}>{formula.description}</Text>
           ) : null}
 
           {formula.includes && formula.includes.length > 0 && (
             <View style={styles.block}>
-              <Text style={styles.blockLabel}>Compris dans le prix</Text>
+              <Text style={styles.blockLabel}>{t('catering.formula.includedInPrice')}</Text>
               {formula.includes.map((item, idx) => (
                 <View key={idx} style={styles.includeRow}>
                   <IconWrapper name="checkmark" size={14} color={Colors.olive} />
@@ -194,13 +197,13 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
           {selectableDishes.length > 0 && (
             <View style={styles.block}>
               <View style={styles.menuHeaderRow}>
-                <Text style={styles.blockLabel}>Le menu, à composer</Text>
-                <Text style={styles.menuCount}>{selectedDishes.length} / {choiceCount} choisis</Text>
+                <Text style={styles.blockLabel}>{t('catering.formula.composeMenu')}</Text>
+                <Text style={styles.menuCount}>{t('catering.formula.chosenCount', {selected: selectedDishes.length, total: choiceCount})}</Text>
               </View>
               {includedItems.filter(i => i.category === 'entree').map(item => (
                 <View key={item.key} style={styles.includedDishRow}>
                   <Text style={styles.includedDishName}>{item.name}</Text>
-                  <Text style={styles.includedDishTag}>Entrée · incluse</Text>
+                  <Text style={styles.includedDishTag}>{t('catering.formula.starterIncluded')}</Text>
                 </View>
               ))}
               {selectableDishes.map(dish => {
@@ -232,7 +235,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
 
           {cooks.length > 0 && (
             <View style={styles.block}>
-              <Text style={styles.blockLabel}>Les cuisiniers de cette formule</Text>
+              <Text style={styles.blockLabel}>{t('catering.formula.cooksForFormula')}</Text>
               {cooks.map(cook => (
                 <TouchableOpacity
                   key={cook.id}
@@ -258,7 +261,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
 
           <View style={styles.block}>
             <View style={styles.guestsHeaderRow}>
-              <Text style={styles.blockLabel}>Convives</Text>
+              <Text style={styles.blockLabel}>{t('catering.formula.guestsLabel')}</Text>
               <Text style={styles.guestsValue}>{guestCount}</Text>
             </View>
             <View style={styles.guestsStepper}>
@@ -289,12 +292,12 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
           </View>
 
           <View style={styles.block}>
-            <Text style={styles.blockLabel}>Votre événement</Text>
+            <Text style={styles.blockLabel}>{t('catering.formula.yourEvent')}</Text>
             <View style={styles.fieldRow}>
               <View style={[styles.fieldPill, styles.fieldPillHalf]}>
                 <TextInput
                   style={styles.fieldInput}
-                  placeholder="Date (AAAA-MM-JJ)"
+                  placeholder={t('catering.formula.datePlaceholder')}
                   placeholderTextColor={Colors.textLight}
                   value={eventDate}
                   onChangeText={setEventDate}
@@ -303,7 +306,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
               <View style={[styles.fieldPill, styles.fieldPillHalf]}>
                 <TextInput
                   style={styles.fieldInput}
-                  placeholder="Heure (HH:mm)"
+                  placeholder={t('catering.formula.timePlaceholder')}
                   placeholderTextColor={Colors.textLight}
                   value={eventTime}
                   onChangeText={setEventTime}
@@ -313,7 +316,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
             <View style={styles.fieldPill}>
               <TextInput
                 style={styles.fieldInput}
-                placeholder="E-mail de contact"
+                placeholder={t('catering.formula.emailPlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 value={contactEmail}
                 onChangeText={setContactEmail}
@@ -324,7 +327,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
             <View style={styles.fieldPill}>
               <TextInput
                 style={styles.fieldInput}
-                placeholder="Téléphone (optionnel)"
+                placeholder={t('catering.formula.phonePlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 value={contactPhone}
                 onChangeText={setContactPhone}
@@ -334,7 +337,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
             <View style={[styles.fieldPill, styles.fieldPillArea]}>
               <TextInput
                 style={[styles.fieldInput, styles.fieldTextArea]}
-                placeholder="Demandes particulières (optionnel)"
+                placeholder={t('catering.formula.specialRequestsPlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 value={specialRequests}
                 onChangeText={setSpecialRequests}
@@ -347,12 +350,12 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
           <View style={styles.estimateBox}>
             <View style={styles.estimateRow}>
               <Text style={styles.estimateLabel}>
-                Repas · {guestCount} × {pricePerPerson.toFixed(2)} €
+                {t('catering.formula.mealLine', {count: guestCount, price: pricePerPerson.toFixed(2)})}
               </Text>
               <Text style={styles.estimateValue}>{estimatedTotal.toFixed(2)} €</Text>
             </View>
             <View style={[styles.estimateRow, styles.estimateTotalRow]}>
-              <Text style={styles.estimateTotalLabel}>Estimation</Text>
+              <Text style={styles.estimateTotalLabel}>{t('catering.formula.estimate')}</Text>
               <Text style={styles.estimateTotalValue}>{estimatedTotal.toFixed(2)} €</Text>
             </View>
           </View>
@@ -368,7 +371,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
           {submitting ? (
             <ActivityIndicator size="small" color={Colors.namkeWhite} />
           ) : (
-            <Text style={styles.submitButtonText}>Demander ce devis</Text>
+            <Text style={styles.submitButtonText}>{t('catering.formula.requestQuote')}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -685,6 +688,7 @@ const styles = StyleSheet.create({
   bottomBar: {
     padding: 22,
     paddingTop: 12,
+    marginBottom: GLOBAL_TAB_BAR_HEIGHT,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     backgroundColor: Colors.background,

@@ -11,6 +11,7 @@ import {
   Platform,
   PanResponder,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from './IconWrapper';
 import FilterDropdown from './FilterDropdown';
 import {Colors} from '../utils/colors';
@@ -86,6 +87,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   selectedFilters = {},
   onFilterChange = () => {},
 }) => {
+  const {t} = useTranslation();
   const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const dragY = React.useRef(new Animated.Value(0)).current;
   const backdropOpacity = React.useRef(new Animated.Value(0)).current;
@@ -208,11 +210,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
           {...panResponder.panHandlers}>
           <View style={styles.draggableArea}>
             <View style={styles.handleBar} />
-            <Text style={styles.slideHint}>Glissez vers le bas pour fermer</Text>
+            <Text style={styles.slideHint}>{t('filterModal.slideHint')}</Text>
             <View style={styles.header}>
-              <Text style={styles.title}>Filtrer par</Text>
+              <Text style={styles.title}>{t('filterModal.title')}</Text>
               <TouchableOpacity onPress={onReset} style={styles.resetButton} activeOpacity={0.7}>
-                <Text style={styles.resetText}>Réinitialiser</Text>
+                <Text style={styles.resetText}>{t('filterModal.reset')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -224,24 +226,24 @@ const FilterModal: React.FC<FilterModalProps> = ({
             scrollEventThrottle={16}>
             {/* Ville - dropdown */}
             <FilterDropdown<string | undefined>
-              label="Ville"
+              label={t('filterModal.city')}
               value={selectedFilters.city}
-              placeholder="Toutes"
+              placeholder={t('filterModal.all')}
               options={[
-                { value: undefined, label: 'Toutes' },
+                { value: undefined, label: t('filterModal.all') },
                 ...(filterOptions.cities || []).map(city => ({ value: city, label: city })),
               ]}
               onSelect={city => onFilterChange({city})}
             />
             {/* Type de cuisine */}
-            <Text style={styles.sectionLabel}>Type de cuisine</Text>
+            <Text style={styles.sectionLabel}>{t('filterModal.cuisineType')}</Text>
             <View style={styles.optionsRow}>
               <TouchableOpacity
                 style={[styles.optionChip, !selectedFilters.cuisine_type && styles.optionChipActive]}
                 onPress={() => onFilterChange({cuisine_type: undefined})}
                 activeOpacity={0.7}>
                 <Text style={[styles.optionChipText, !selectedFilters.cuisine_type && styles.optionChipTextActive]}>
-                  Tous
+                  {t('filterModal.all')}
                 </Text>
               </TouchableOpacity>
               {(filterOptions.cuisine_types || []).map(cuisine => (
@@ -259,14 +261,14 @@ const FilterModal: React.FC<FilterModalProps> = ({
             {/* Régime alimentaire */}
             {(filterOptions.diet_types?.length ?? 0) > 0 && (
               <>
-                <Text style={styles.sectionLabel}>Régime alimentaire</Text>
+                <Text style={styles.sectionLabel}>{t('filterModal.dietType')}</Text>
                 <View style={styles.optionsRow}>
                   <TouchableOpacity
                     style={[styles.optionChip, !selectedFilters.diet_type && styles.optionChipActive]}
                     onPress={() => onFilterChange({diet_type: undefined})}
                     activeOpacity={0.7}>
                     <Text style={[styles.optionChipText, !selectedFilters.diet_type && styles.optionChipTextActive]}>
-                      Tous
+                      {t('filterModal.all')}
                     </Text>
                   </TouchableOpacity>
                   {filterOptions.diet_types!.map(diet => (
@@ -286,14 +288,14 @@ const FilterModal: React.FC<FilterModalProps> = ({
             {/* Fourchette de prix */}
             {(filterOptions.price_ranges?.length ?? 0) > 0 && (
               <>
-                <Text style={styles.sectionLabel}>Fourchette de prix</Text>
+                <Text style={styles.sectionLabel}>{t('filterModal.priceRange')}</Text>
                 <View style={styles.optionsRow}>
                   <TouchableOpacity
                     style={[styles.optionChip, !selectedFilters.price_range && styles.optionChipActive]}
                     onPress={() => onFilterChange({price_range: undefined})}
                     activeOpacity={0.7}>
                     <Text style={[styles.optionChipText, !selectedFilters.price_range && styles.optionChipTextActive]}>
-                      Toutes
+                      {t('filterModal.all')}
                     </Text>
                   </TouchableOpacity>
                   {filterOptions.price_ranges!.map(pr => (
@@ -313,14 +315,14 @@ const FilterModal: React.FC<FilterModalProps> = ({
             {/* Frais de livraison max */}
             {(filterOptions.delivery_ranges?.length ?? 0) > 0 && (
               <>
-                <Text style={styles.sectionLabel}>Frais de livraison max</Text>
+                <Text style={styles.sectionLabel}>{t('filterModal.maxDeliveryFee')}</Text>
                 <View style={styles.optionsRow}>
                   <TouchableOpacity
                     style={[styles.optionChip, selectedFilters.max_delivery_fee == null && styles.optionChipActive]}
                     onPress={() => onFilterChange({max_delivery_fee: undefined})}
                     activeOpacity={0.7}>
                     <Text style={[styles.optionChipText, selectedFilters.max_delivery_fee == null && styles.optionChipTextActive]}>
-                      Tous
+                      {t('filterModal.all')}
                     </Text>
                   </TouchableOpacity>
                   {filterOptions.delivery_ranges!.map(dr => (
@@ -340,14 +342,14 @@ const FilterModal: React.FC<FilterModalProps> = ({
             {/* Note minimale */}
             {(filterOptions.rating_options?.length ?? 0) > 0 && (
               <>
-                <Text style={styles.sectionLabel}>Note minimale</Text>
+                <Text style={styles.sectionLabel}>{t('filterModal.minRating')}</Text>
                 <View style={styles.optionsRow}>
                   <TouchableOpacity
                     style={[styles.optionChip, selectedFilters.min_rating == null && styles.optionChipActive]}
                     onPress={() => onFilterChange({min_rating: undefined})}
                     activeOpacity={0.7}>
                     <Text style={[styles.optionChipText, selectedFilters.min_rating == null && styles.optionChipTextActive]}>
-                      Toutes
+                      {t('filterModal.all')}
                     </Text>
                   </TouchableOpacity>
                   {filterOptions.rating_options!.map(opt => (
@@ -370,7 +372,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               style={styles.applyButton}
               onPress={() => onApply(selectedFilters)}
               activeOpacity={0.8}>
-              <Text style={styles.applyButtonText}>Appliquer les filtres</Text>
+              <Text style={styles.applyButtonText}>{t('filterModal.apply')}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

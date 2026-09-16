@@ -1,4 +1,5 @@
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -16,6 +17,7 @@ import {secondaryFont} from '../utils/fonts';
 import {useFavorites} from '../contexts/FavoritesContext';
 
 const FavoritesScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const {favorites, removeFavorite, loading, refreshFavorites} = useFavorites();
   const [refreshing, setRefreshing] = React.useState(false);
   const onRefresh = React.useCallback(async () => {
@@ -29,19 +31,19 @@ const FavoritesScreen = ({navigation}: any) => {
       {loading && favorites.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('favorites.loading')}</Text>
         </View>
       ) : favorites.length === 0 ? (
         <View style={styles.emptyContainer}>
           <IconWrapper name="heart-outline" size={80} color={Colors.textLight} />
-          <Text style={styles.emptyTitle}>Aucun favori</Text>
+          <Text style={styles.emptyTitle}>{t('favorites.emptyTitle')}</Text>
           <Text style={styles.emptyText}>
-            Ajoutez des restaurants à vos favoris depuis leur fiche pour les retrouver ici.
+            {t('favorites.emptyText')}
           </Text>
           <TouchableOpacity
             style={styles.browseButton}
             onPress={() => navigation.navigate('Restaurants')}>
-            <Text style={styles.browseButtonText}>Parcourir les restaurants</Text>
+            <Text style={styles.browseButtonText}>{t('favorites.browseRestaurants')}</Text>
           </TouchableOpacity>
         </View>
       ) : (

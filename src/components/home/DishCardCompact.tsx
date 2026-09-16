@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../IconWrapper';
 import {Colors, Radius} from '../../utils/colors';
 import {fontButton, fontDisplayMedium, fontSub} from '../../utils/fonts';
@@ -13,6 +14,7 @@ interface DishCardCompactProps {
   rating?: number;
   restaurantName?: string;
   imageUrl?: string | null;
+  isPromo?: boolean;
   onPress?: () => void;
   onAddPress?: () => void;
 }
@@ -23,9 +25,11 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
   rating,
   restaurantName,
   imageUrl,
+  isPromo,
   onPress,
   onAddPress,
 }) => {
+  const {t} = useTranslation();
   const [imgError, setImgError] = useState(false);
   const [fallbackTried, setFallbackTried] = useState(false);
   const hasDbUrl = imageUrl != null && String(imageUrl).trim() !== '';
@@ -37,22 +41,29 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
-      {uri ? (
-        <Image
-          source={{uri}}
-          style={styles.image}
-          resizeMode="cover"
-          onError={() => {
-            if (!fallbackTried && fallbackUrl) {
-              setFallbackTried(true);
-              return;
-            }
-            setImgError(true);
-          }}
-        />
-      ) : (
-        <Image source={namkeFallback} style={styles.image} resizeMode="cover" />
-      )}
+      <View>
+        {uri ? (
+          <Image
+            source={{uri}}
+            style={styles.image}
+            resizeMode="cover"
+            onError={() => {
+              if (!fallbackTried && fallbackUrl) {
+                setFallbackTried(true);
+                return;
+              }
+              setImgError(true);
+            }}
+          />
+        ) : (
+          <Image source={namkeFallback} style={styles.image} resizeMode="cover" />
+        )}
+        {isPromo ? (
+          <View style={styles.promoBadge}>
+            <Text style={styles.promoBadgeText}>{t('dishCard.promoBadge')}</Text>
+          </View>
+        ) : null}
+      </View>
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={1}>
           {name}
@@ -94,6 +105,21 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 4 / 3,
     backgroundColor: Colors.gray[100],
+  },
+  promoBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: Colors.terracotta,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+  },
+  promoBadgeText: {
+    fontSize: 10.5,
+    fontFamily: fontButton,
+    color: Colors.white,
+    letterSpacing: 0.3,
   },
   body: {
     padding: 12,

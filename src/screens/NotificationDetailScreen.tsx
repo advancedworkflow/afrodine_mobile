@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
 import {fontDisplay, fontHeading, fontUI} from '../utils/fonts';
@@ -22,43 +23,41 @@ const TYPE_META: Record<string, {icon: string; color: string}> = {
   info: {icon: 'information-circle', color: Colors.darkGreen},
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  order: 'Commande',
-  review: 'Avis',
-  favorite: 'Favori',
-  catering: 'Traiteur',
-  promotion: 'Promotion',
-  complaint: 'Réclamation',
-  general: 'Général',
-};
-
-const formatDateTime = (iso: string) => {
-  try {
-    return new Date(iso).toLocaleString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return iso;
-  }
-};
+const KNOWN_CATEGORIES = ['order', 'review', 'favorite', 'catering', 'promotion', 'complaint', 'general'];
 
 const NotificationDetailScreen = ({route, navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const notification: NotificationDetail = route.params?.notification;
+
+  const formatDateTime = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleString(dateLocale, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return iso;
+    }
+  };
 
   if (!notification) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.emptyText}>Notification introuvable.</Text>
+        <Text style={styles.emptyText}>{t('notificationDetail.notFound')}</Text>
       </View>
     );
   }
 
   const meta = TYPE_META[notification.type ?? 'info'] ?? TYPE_META.info;
-  const categoryLabel = notification.category ? CATEGORY_LABELS[notification.category] ?? notification.category : null;
+  const categoryLabel = notification.category
+    ? KNOWN_CATEGORIES.includes(notification.category)
+      ? t(`notificationDetail.category.${notification.category}`)
+      : notification.category
+    : null;
   const orderId = notification.data?.order_id;
 
   return (
@@ -85,7 +84,7 @@ const NotificationDetailScreen = ({route, navigation}: any) => {
           style={styles.actionButton}
           activeOpacity={0.85}
           onPress={() => navigation.navigate('OrderDetails', {orderId})}>
-          <Text style={styles.actionButtonText}>Voir la commande</Text>
+          <Text style={styles.actionButtonText}>{t('notificationDetail.viewOrder')}</Text>
           <IconWrapper name="chevron-forward-outline" size={18} color={Colors.white} />
         </TouchableOpacity>
       )}

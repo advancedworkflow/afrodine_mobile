@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
 import type {RevenueDataPoint, OrdersDataPoint} from '../../services/restaurantManagement';
@@ -13,10 +14,15 @@ function getPointValue(
   return valueKey === 'revenue' ? (point as RevenueDataPoint).revenue ?? 0 : (point as OrdersDataPoint).orders ?? 0;
 }
 
-function formatShortDate(dateStr: string): string {
+function localeForLanguage(lang: string): string {
+  if (lang === 'en') return 'en-GB';
+  if (lang === 'de') return 'de-DE';
+  return 'fr-FR';
+}
+
+function formatShortDate(dateStr: string, locale: string): string {
   const d = new Date(dateStr);
-  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-  return `${d.getDate()} ${months[d.getMonth()]}`;
+  return new Intl.DateTimeFormat(locale, {day: 'numeric', month: 'short'}).format(d);
 }
 
 export interface LineChartCardProps {
@@ -36,6 +42,8 @@ export default function LineChartCard({
   valueLabel,
   formatValue,
 }: LineChartCardProps) {
+  const {i18n} = useTranslation();
+  const locale = localeForLanguage(i18n.language);
   const values = data.map((d) => getPointValue(d, valueKey));
   const total = values.reduce((a, b) => a + b, 0);
   const max = Math.max(...values, 1);
@@ -154,7 +162,7 @@ export default function LineChartCard({
                 },
               ]}>
               <Text style={[styles.xLabel, n > 14 && styles.xLabelSmall]} numberOfLines={1}>
-                {formatShortDate((point as { date: string }).date)}
+                {formatShortDate((point as { date: string }).date, locale)}
               </Text>
             </View>
           ) : null,

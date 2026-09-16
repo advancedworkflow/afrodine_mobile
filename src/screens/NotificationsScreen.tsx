@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
@@ -24,6 +25,8 @@ interface Notification {
 }
 
 const NotificationsScreen = ({navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -76,7 +79,7 @@ const NotificationsScreen = ({navigation}: any) => {
         <Text style={styles.notificationTitle}>{item.title}</Text>
         <Text style={styles.notificationMessage}>{item.message}</Text>
         <Text style={styles.notificationDate}>
-          {new Date(item.created_at).toLocaleDateString('fr-FR')}
+          {new Date(item.created_at).toLocaleDateString(dateLocale)}
         </Text>
       </View>
       {!item.is_read && <View style={styles.unreadDot} />}
@@ -99,7 +102,7 @@ const NotificationsScreen = ({navigation}: any) => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <IconWrapper name="notifications-off-outline" size={64} color={Colors.textLight} />
-            <Text style={styles.emptyText}>Aucune notification</Text>
+            <Text style={styles.emptyText}>{t('notifications.empty')}</Text>
           </View>
         }
       />

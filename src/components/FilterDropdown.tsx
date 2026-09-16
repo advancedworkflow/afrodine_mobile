@@ -8,6 +8,7 @@ import {
   FlatList,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from './IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
@@ -31,14 +32,16 @@ function FilterDropdown<T = string | number | undefined>({
   value,
   options,
   onSelect,
-  placeholder = 'Tous',
+  placeholder,
   getOptionLabel,
 }: FilterDropdownProps<T>) {
+  const {t} = useTranslation();
   const [open, setOpen] = useState(false);
+  const resolvedPlaceholder = placeholder ?? t('filterDropdown.all');
 
   const displayValue =
     value === undefined || value === null
-      ? placeholder
+      ? resolvedPlaceholder
       : getOptionLabel
         ? getOptionLabel(value)
         : (options.find(o => o.value === value)?.label ?? String(value));

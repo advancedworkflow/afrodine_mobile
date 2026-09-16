@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -18,6 +19,7 @@ import {formatAxiosError} from '../../utils/formatApiError';
 import {getManagementReviews, replyToReview, type ManagementReview} from '../../services/restaurantManagement';
 
 const RestaurantReviewsScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [reviews, setReviews] = useState<ManagementReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -59,7 +61,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
     try {
       const result = await replyToReview(review.id, replyText.trim());
       if (!result) {
-        alert('Réponse impossible', "Cet avis ne peut pas recevoir de réponse pour le moment.");
+        alert(t('restaurantReviews.replyNotPossibleTitle'), t('restaurantReviews.replyNotPossibleMessage'));
         return;
       }
       setReviews(prev =>
@@ -68,7 +70,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
       setReplyingId(null);
       setReplyText('');
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, "Impossible d'envoyer la réponse."));
+      alert(t('restaurantReviews.errorTitle'), formatAxiosError(e, t('restaurantReviews.replySendError')));
     } finally {
       setSubmittingReply(false);
     }
@@ -77,7 +79,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
   if (loading && reviews.length === 0) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Avis" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopBar navigation={navigation} title={t('restaurantReviews.title')} showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -87,7 +89,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Avis" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('restaurantReviews.title')} showBackButton onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentInner}
@@ -97,8 +99,8 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
         {reviews.length === 0 ? (
           <View style={styles.empty}>
             <IconWrapper name="chatbubble-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>Aucun avis</Text>
-            <Text style={styles.emptyText}>Les avis de vos clients apparaîtront ici.</Text>
+            <Text style={styles.emptyTitle}>{t('restaurantReviews.noReviews')}</Text>
+            <Text style={styles.emptyText}>{t('restaurantReviews.noReviewsSubtitle')}</Text>
           </View>
         ) : (
           reviews.map((review, index) => (
@@ -108,14 +110,14 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
                   <IconWrapper name="star" size={16} color={Colors.darkGreen} />
                   <Text style={styles.ratingText}>{review.rating ?? review.score ?? '–'}</Text>
                 </View>
-                <Text style={styles.clientName}>{review.client_name ?? review.user_name ?? 'Client'}</Text>
+                <Text style={styles.clientName}>{review.client_name ?? review.user_name ?? t('restaurantReviews.defaultClient')}</Text>
               </View>
               {review.comment || review.comment_text ? (
                 <Text style={styles.comment}>{review.comment || review.comment_text}</Text>
               ) : null}
               {review.reply ? (
                 <View style={styles.replyBlock}>
-                  <Text style={styles.replyLabel}>Réponse :</Text>
+                  <Text style={styles.replyLabel}>{t('restaurantReviews.replyLabel')}</Text>
                   <Text style={styles.replyText}>{review.reply}</Text>
                 </View>
               ) : replyingId === review.id ? (
@@ -124,7 +126,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
                     style={styles.replyInput}
                     value={replyText}
                     onChangeText={setReplyText}
-                    placeholder="Votre réponse..."
+                    placeholder={t('restaurantReviews.replyPlaceholder')}
                     placeholderTextColor={Colors.textLight}
                     multiline
                     numberOfLines={3}
@@ -135,7 +137,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
                       style={styles.replyCancelBtn}
                       onPress={cancelReply}
                       disabled={submittingReply}>
-                      <Text style={styles.replyCancelText}>Annuler</Text>
+                      <Text style={styles.replyCancelText}>{t('restaurantReviews.cancel')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.replySubmitBtn, (!replyText.trim() || submittingReply) && styles.replySubmitBtnDisabled]}
@@ -144,7 +146,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
                       {submittingReply ? (
                         <ActivityIndicator size="small" color={Colors.white} />
                       ) : (
-                        <Text style={styles.replySubmitText}>Envoyer</Text>
+                        <Text style={styles.replySubmitText}>{t('restaurantReviews.send')}</Text>
                       )}
                     </TouchableOpacity>
                   </View>
@@ -152,7 +154,7 @@ const RestaurantReviewsScreen = ({navigation}: any) => {
               ) : (
                 <TouchableOpacity style={styles.replyPromptBtn} onPress={() => openReply(review)}>
                   <IconWrapper name="arrow-undo-outline" size={16} color={Colors.darkGreen} />
-                  <Text style={styles.replyPromptText}>Répondre</Text>
+                  <Text style={styles.replyPromptText}>{t('restaurantReviews.reply')}</Text>
                 </TouchableOpacity>
               )}
             </View>

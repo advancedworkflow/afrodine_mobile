@@ -1,12 +1,14 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet, StatusBar} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
 import {fontButton, fontDisplay, fontUI} from '../utils/fonts';
 
 export const ONBOARDING_SEEN_KEY = 'namke_onboarding_seen';
 
 const OnboardingScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const finishOnboarding = async (next: 'Signup' | 'Login') => {
     try {
       await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, '1');
@@ -24,7 +26,7 @@ const OnboardingScreen = ({navigation}: any) => {
         <View style={styles.overlayTop} />
         <View style={styles.overlayBottom} />
         <TouchableOpacity style={styles.skipButton} onPress={() => finishOnboarding('Login')} activeOpacity={0.85}>
-          <Text style={styles.skipButtonText}>Passer</Text>
+          <Text style={styles.skipButtonText}>{t('onboarding.skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -34,16 +36,16 @@ const OnboardingScreen = ({navigation}: any) => {
           <View style={styles.dot} />
           <View style={styles.dot} />
         </View>
-        <Text style={styles.title}>Mangez comme à la maison</Text>
+        <Text style={styles.title}>{t('onboarding.title')}</Text>
         <Text style={styles.subtitle}>
-          Des plats africains mijotés le matin par des voisin·e·s de Neukölln, Kreuzberg et Wedding.
+          {t('onboarding.subtitle')}
         </Text>
         <View style={styles.actions}>
           <TouchableOpacity style={styles.primaryButton} onPress={() => finishOnboarding('Signup')} activeOpacity={0.85}>
-            <Text style={styles.primaryButtonText}>Commencer</Text>
+            <Text style={styles.primaryButtonText}>{t('onboarding.start')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.secondaryButton} onPress={() => finishOnboarding('Login')} activeOpacity={0.7}>
-            <Text style={styles.secondaryButtonText}>J'ai déjà un compte</Text>
+            <Text style={styles.secondaryButtonText}>{t('onboarding.alreadyHaveAccount')}</Text>
           </TouchableOpacity>
         </View>
       </View>

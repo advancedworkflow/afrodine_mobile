@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -24,6 +25,7 @@ import {
 } from '../../services/restaurantManagement';
 
 const RestaurantProfileScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [profile, setProfile] = useState<RestaurantProfileRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -95,12 +97,12 @@ const RestaurantProfileScreen = ({navigation}: any) => {
       const updated = await updateRestaurantProfile(payload);
       if (updated) {
         setProfile(updated);
-        alert('Profil enregistré', 'Les modifications ont bien été enregistrées.');
+        alert(t('restaurantProfile.savedTitle'), t('restaurantProfile.savedMessage'));
       } else {
-        alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+        alert(t('restaurantProfile.errorTitle'), t('restaurantProfile.errorMessage'));
       }
     } catch {
-      alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+      alert(t('restaurantProfile.errorTitle'), t('restaurantProfile.errorMessage'));
     } finally {
       setSaving(false);
     }
@@ -109,7 +111,7 @@ const RestaurantProfileScreen = ({navigation}: any) => {
   if (loading && !profile) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Profil restaurant" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopBar navigation={navigation} title={t('restaurantProfile.title')} showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -126,32 +128,32 @@ const RestaurantProfileScreen = ({navigation}: any) => {
         <RefreshControl refreshing={refreshing} onRefresh={() => loadProfile(true)} colors={[Colors.darkGreen]} />
       }>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Informations générales</Text>
-        <Field label="Nom du restaurant" value={name} onChangeText={setName} placeholder="Nom" />
-        <Field label="Description" value={description} onChangeText={setDescription} placeholder="Description" multiline />
-        <Field label="Type de cuisine" value={cuisineType} onChangeText={setCuisineType} placeholder="Ex: Africain, Camerounais" />
-        <Field label="Téléphone" value={phone} onChangeText={setPhone} placeholder="Téléphone" keyboardType="phone-pad" />
-        <Field label="Email" value={email} onChangeText={setEmail} placeholder="Email" keyboardType="email-address" />
-        <Field label="Adresse" value={address} onChangeText={setAddress} placeholder="Adresse complète" />
+        <Text style={styles.sectionTitle}>{t('restaurantProfile.generalInfo')}</Text>
+        <Field label={t('restaurantProfile.restaurantName')} value={name} onChangeText={setName} placeholder={t('restaurantProfile.namePlaceholder')} />
+        <Field label={t('restaurantProfile.description')} value={description} onChangeText={setDescription} placeholder={t('restaurantProfile.description')} multiline />
+        <Field label={t('restaurantProfile.cuisineType')} value={cuisineType} onChangeText={setCuisineType} placeholder={t('restaurantProfile.cuisineTypePlaceholder')} />
+        <Field label={t('restaurantProfile.phone')} value={phone} onChangeText={setPhone} placeholder={t('restaurantProfile.phone')} keyboardType="phone-pad" />
+        <Field label={t('restaurantProfile.email')} value={email} onChangeText={setEmail} placeholder={t('restaurantProfile.email')} keyboardType="email-address" />
+        <Field label={t('restaurantProfile.address')} value={address} onChangeText={setAddress} placeholder={t('restaurantProfile.addressPlaceholder')} />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Tarifs</Text>
-        <Field label="Frais de livraison (€)" value={deliveryFee} onChangeText={setDeliveryFee} placeholder="0.00" keyboardType="decimal-pad" />
-        <Field label="Commande minimum (€)" value={minimumOrder} onChangeText={setMinimumOrder} placeholder="0.00" keyboardType="decimal-pad" />
+        <Text style={styles.sectionTitle}>{t('restaurantProfile.pricing')}</Text>
+        <Field label={t('restaurantProfile.deliveryFee')} value={deliveryFee} onChangeText={setDeliveryFee} placeholder="0.00" keyboardType="decimal-pad" />
+        <Field label={t('restaurantProfile.minimumOrder')} value={minimumOrder} onChangeText={setMinimumOrder} placeholder="0.00" keyboardType="decimal-pad" />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Horaires & Bio</Text>
-        <Field label="Horaires d'ouverture" value={openingHours} onChangeText={setOpeningHours} placeholder="Ex: Lun-Ven 11h-22h" />
-        <Field label="Bio" value={bio} onChangeText={setBio} placeholder="Présentation du restaurant" multiline />
+        <Text style={styles.sectionTitle}>{t('restaurantProfile.hoursAndBio')}</Text>
+        <Field label={t('restaurantProfile.openingHours')} value={openingHours} onChangeText={setOpeningHours} placeholder={t('restaurantProfile.openingHoursPlaceholder')} />
+        <Field label={t('restaurantProfile.bio')} value={bio} onChangeText={setBio} placeholder={t('restaurantProfile.bioPlaceholder')} multiline />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Réseaux & site</Text>
-        <Field label="Site web" value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." keyboardType="url" />
-        <Field label="Facebook" value={facebookLink} onChangeText={setFacebookLink} placeholder="Lien Facebook" keyboardType="url" />
-        <Field label="Instagram" value={instagramLink} onChangeText={setInstagramLink} placeholder="Lien Instagram" keyboardType="url" />
+        <Text style={styles.sectionTitle}>{t('restaurantProfile.socialAndWebsite')}</Text>
+        <Field label={t('restaurantProfile.website')} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." keyboardType="url" />
+        <Field label={t('restaurantProfile.facebook')} value={facebookLink} onChangeText={setFacebookLink} placeholder={t('restaurantProfile.facebookPlaceholder')} keyboardType="url" />
+        <Field label={t('restaurantProfile.instagram')} value={instagramLink} onChangeText={setInstagramLink} placeholder={t('restaurantProfile.instagramPlaceholder')} keyboardType="url" />
       </View>
 
       <TouchableOpacity
@@ -163,7 +165,7 @@ const RestaurantProfileScreen = ({navigation}: any) => {
         ) : (
           <>
             <IconWrapper name="save-outline" size={20} color={Colors.white} style={styles.saveIcon} />
-            <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+            <Text style={styles.saveButtonText}>{t('restaurantProfile.saveChanges')}</Text>
           </>
         )}
       </TouchableOpacity>
@@ -173,7 +175,7 @@ const RestaurantProfileScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Profil restaurant" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('restaurantProfile.title')} showBackButton onBackPress={() => navigation.goBack()} />
       {Platform.OS === 'ios' ? (
         <KeyboardAvoidingView style={styles.flex} behavior="padding">
           {content}

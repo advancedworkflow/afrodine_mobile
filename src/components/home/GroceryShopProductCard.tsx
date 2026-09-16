@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {Colors, Radius, Shadows} from '../../utils/colors';
 import {fontDisplayMedium, fontHeading, fontUI} from '../../utils/fonts';
 import type {GroceryShopProductApi} from '../../services/groceryShop';
@@ -20,6 +21,7 @@ const formatPrice = (p: number | string) => {
 };
 
 const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
+  const {t} = useTranslation();
   const origin = [product.origin_country, product.origin_region].filter(Boolean).join(' · ');
   const imageSource = product.image_url ? {uri: product.image_url} : namkeFallback;
 
@@ -34,7 +36,7 @@ const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
           <Image source={imageSource} style={styles.compactImage} resizeMode="cover" />
           {product.is_african ? (
             <View style={styles.compactBadge}>
-              <Text style={styles.badgeText}>Afrique</Text>
+              <Text style={styles.badgeText}>{t('groceryShopProductCard.africaBadge')}</Text>
             </View>
           ) : null}
         </View>
@@ -47,7 +49,22 @@ const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
               {product.category}
             </Text>
           ) : null}
-          <Text style={styles.compactPrice}>{formatPrice(product.price)}</Text>
+          {product.restaurant_name ? (
+            <Text style={styles.compactRestaurant} numberOfLines={1}>
+              {t('groceryShopProductCard.offeredBy', {name: product.restaurant_name})}
+            </Text>
+          ) : null}
+          {origin ? (
+            <Text style={styles.compactOrigin} numberOfLines={1}>
+              {origin}
+            </Text>
+          ) : null}
+          <View style={styles.compactBottomRow}>
+            <Text style={styles.compactPrice}>{formatPrice(product.price)}</Text>
+            {product.unit ? (
+              <Text style={styles.compactUnit} numberOfLines={1}>{product.unit}</Text>
+            ) : null}
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -69,7 +86,7 @@ const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
           </Text>
           {product.is_african ? (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>Afrique</Text>
+              <Text style={styles.badgeText}>{t('groceryShopProductCard.africaBadge')}</Text>
             </View>
           ) : null}
         </View>
@@ -90,7 +107,7 @@ const GroceryShopProductCard = ({product, onPress, compact = false}: Props) => {
         ) : null}
         <Text style={styles.price}>{formatPrice(product.price)}</Text>
         {product.unit ? (
-          <Text style={styles.unit}>Unité : {product.unit}</Text>
+          <Text style={styles.unit}>{t('groceryShopProductCard.unitLabel', {unit: product.unit})}</Text>
         ) : null}
       </View>
     </TouchableOpacity>
@@ -174,15 +191,15 @@ const styles = StyleSheet.create({
   },
   // Variante compacte (carrousel)
   compactCard: {
-    width: 152,
-    backgroundColor: Colors.surface,
+    width: 210,
+    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     overflow: 'hidden',
     ...Shadows.sm,
   },
   compactImageWrap: {
     width: '100%',
-    height: 110,
+    height: 130,
   },
   compactImage: {
     width: '100%',
@@ -199,19 +216,40 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   compactBody: {
-    padding: 10,
+    padding: 12,
+    gap: 3,
   },
   compactName: {
-    fontSize: 13,
+    fontSize: 16,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
-    minHeight: 34,
+    minHeight: 40,
+  },
+  compactRestaurant: {
+    fontSize: 12.5,
+    fontFamily: fontUI,
+    color: Colors.textLight,
+  },
+  compactOrigin: {
+    fontSize: 12.5,
+    fontFamily: fontUI,
+    color: Colors.textLight,
+  },
+  compactBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginTop: 6,
   },
   compactPrice: {
-    fontSize: 15,
+    fontSize: 17,
     fontFamily: fontHeading,
     color: Colors.primary,
-    marginTop: 6,
+  },
+  compactUnit: {
+    fontSize: 12,
+    fontFamily: fontUI,
+    color: Colors.textLight,
   },
 });
 

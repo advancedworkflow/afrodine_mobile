@@ -11,6 +11,7 @@ import {
   TextInput,
   Linking,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -29,15 +30,16 @@ import {
   type StripeConnectPayout,
 } from '../../services/restaurantManagement';
 
-const PAYOUT_STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente',
-  in_transit: 'En transit',
-  paid: 'Payé',
-  failed: 'Échoué',
-  canceled: 'Annulé',
-};
-
 const WalletScreen = ({navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const PAYOUT_STATUS_LABELS: Record<string, string> = {
+    pending: t('restaurantWallet.payoutStatus.pending'),
+    in_transit: t('restaurantWallet.payoutStatus.inTransit'),
+    paid: t('restaurantWallet.payoutStatus.paid'),
+    failed: t('restaurantWallet.payoutStatus.failed'),
+    canceled: t('restaurantWallet.payoutStatus.canceled'),
+  };
+  const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [connectStatus, setConnectStatus] = useState<StripeConnectStatus | null>(null);
   const [connectBalance, setConnectBalance] = useState<StripeConnectBalance | null>(null);
@@ -92,11 +94,11 @@ const WalletScreen = ({navigation}: any) => {
   const onConfirmPayout = async () => {
     const amount = parseFloat(payoutAmount.replace(',', '.'));
     if (!Number.isFinite(amount) || amount <= 0) {
-      alert('Montant invalide', 'Saisissez un montant positif.');
+      alert(t('restaurantWallet.invalidAmountTitle'), t('restaurantWallet.invalidAmountMessage'));
       return;
     }
     if (amount > walletBalance) {
-      alert('Solde insuffisant', `Solde disponible : ${walletBalance.toFixed(2)} €`);
+      alert(t('restaurantWallet.insufficientBalanceTitle'), t('restaurantWallet.availableBalance', {amount: walletBalance.toFixed(2)}));
       return;
     }
     setPayoutLoading(true);
@@ -105,13 +107,13 @@ const WalletScreen = ({navigation}: any) => {
       if (result?.success) {
         setPayoutModalVisible(false);
         setPayoutAmount('');
-        alert('Succès', `Payout de ${amount.toFixed(2)} € demandé. Arrivée sous 1-3 jours ouvrés.`);
+        alert(t('restaurantWallet.successTitle'), t('restaurantWallet.payoutRequestedMessage', {amount: amount.toFixed(2)}));
         load(true);
       } else {
-        alert('Erreur', (result as any)?.message ?? "Impossible d'effectuer le retrait.");
+        alert(t('restaurantWallet.errorTitle'), (result as any)?.message ?? t('restaurantWallet.payoutError'));
       }
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, "Impossible d'effectuer le retrait."));
+      alert(t('restaurantWallet.errorTitle'), formatAxiosError(e, t('restaurantWallet.payoutError')));
     } finally {
       setPayoutLoading(false);
     }
@@ -122,17 +124,17 @@ const WalletScreen = ({navigation}: any) => {
     try {
       const link = await createStripeConnectOnboardingLink();
       if (!link?.url) {
-        alert('Stripe Connect', 'Impossible de générer le lien onboarding pour le moment.');
+        alert('Stripe Connect', t('restaurantWallet.onboardingLinkError'));
         return;
       }
       const canOpen = await Linking.canOpenURL(link.url);
       if (!canOpen) {
-        alert('Stripe Connect', "Impossible d'ouvrir le navigateur sur cet appareil.");
+        alert('Stripe Connect', t('restaurantWallet.cannotOpenBrowser'));
         return;
       }
       await Linking.openURL(link.url);
     } catch {
-      alert('Stripe Connect', "Impossible d'ouvrir le lien onboarding. Réessayez.");
+      alert('Stripe Connect', t('restaurantWallet.onboardingOpenError'));
     } finally {
       setConnectLoading(false);
     }
@@ -143,7 +145,7 @@ const WalletScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Portefeuille" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopBar navigation={navigation} title={t('restaurantWallet.title')} showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -153,7 +155,7 @@ const WalletScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Portefeuille" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('restaurantWallet.title')} showBackButton onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentInner}
@@ -163,16 +165,16 @@ const WalletScreen = ({navigation}: any) => {
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="wallet-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Solde</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantWallet.balance')}</Text>
           </View>
-          <Text style={styles.walletBalance}>{walletBalance.toFixed(2)} € disponibles</Text>
+          <Text style={styles.walletBalance}>{t('restaurantWallet.balanceAvailable', {amount: walletBalance.toFixed(2)})}</Text>
           <TouchableOpacity
             style={[styles.payoutButton, walletBalance <= 0 && styles.payoutButtonDisabled]}
             onPress={() => setPayoutModalVisible(true)}
             activeOpacity={0.8}
             disabled={walletBalance <= 0}>
             <IconWrapper name="card-outline" size={20} color={Colors.white} />
-            <Text style={styles.payoutButtonText}>Effectuer un payout</Text>
+            <Text style={styles.payoutButtonText}>{t('restaurantWallet.makePayout')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -182,15 +184,15 @@ const WalletScreen = ({navigation}: any) => {
             <Text style={styles.sectionTitle}>Stripe Connect</Text>
           </View>
           <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>Statut</Text>
-            <Text style={styles.connectValue}>{connectActive ? 'Actif' : connectStatus?.status || 'Non configuré'}</Text>
+            <Text style={styles.connectLabel}>{t('restaurantWallet.status')}</Text>
+            <Text style={styles.connectValue}>{connectActive ? t('restaurantWallet.statusActive') : connectStatus?.status || t('restaurantWallet.statusNotConfigured')}</Text>
           </View>
           <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>Disponible Connect</Text>
+            <Text style={styles.connectLabel}>{t('restaurantWallet.connectAvailable')}</Text>
             <Text style={styles.connectValue}>{(connectBalance?.available_balance ?? 0).toFixed(2)} €</Text>
           </View>
           <View style={[styles.connectRow, styles.connectRowLast]}>
-            <Text style={styles.connectLabel}>En attente Connect</Text>
+            <Text style={styles.connectLabel}>{t('restaurantWallet.connectPending')}</Text>
             <Text style={styles.connectValue}>{(connectBalance?.pending_balance ?? 0).toFixed(2)} €</Text>
           </View>
           <TouchableOpacity
@@ -201,21 +203,21 @@ const WalletScreen = ({navigation}: any) => {
             {connectLoading ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
-              <Text style={styles.connectButtonText}>Activer / Mettre à jour Connect</Text>
+              <Text style={styles.connectButtonText}>{t('restaurantWallet.activateUpdateConnect')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Historique des virements</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantWallet.payoutHistory')}</Text>
           {payouts.length === 0 ? (
-            <Text style={styles.mutedText}>Aucun virement pour le moment.</Text>
+            <Text style={styles.mutedText}>{t('restaurantWallet.noPayouts')}</Text>
           ) : (
             payouts.map((payout, index) => (
               <View key={payout.id ?? payout.stripe_payout_id ?? index} style={styles.payoutRow}>
                 <View style={styles.payoutRowLeft}>
                   <Text style={styles.payoutDate}>
-                    {payout.created_at ? new Date(payout.created_at).toLocaleDateString('fr-FR') : '—'}
+                    {payout.created_at ? new Date(payout.created_at).toLocaleDateString(dateLocale) : '—'}
                   </Text>
                   <Text style={styles.payoutStatus}>
                     {PAYOUT_STATUS_LABELS[payout.status ?? ''] ?? payout.status ?? '—'}
@@ -237,8 +239,8 @@ const WalletScreen = ({navigation}: any) => {
         onRequestClose={() => !payoutLoading && setPayoutModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Effectuer un payout</Text>
-            <Text style={styles.modalHint}>Montant à retirer (€)</Text>
+            <Text style={styles.modalTitle}>{t('restaurantWallet.makePayout')}</Text>
+            <Text style={styles.modalHint}>{t('restaurantWallet.amountToWithdraw')}</Text>
             <TextInput
               style={styles.modalInput}
               value={payoutAmount}
@@ -248,13 +250,13 @@ const WalletScreen = ({navigation}: any) => {
               keyboardType="decimal-pad"
               editable={!payoutLoading}
             />
-            <Text style={styles.modalBalance}>Solde : {walletBalance.toFixed(2)} €</Text>
+            <Text style={styles.modalBalance}>{t('restaurantWallet.balanceLabel', {amount: walletBalance.toFixed(2)})}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalBtn, styles.modalBtnCancel]}
                 onPress={() => !payoutLoading && setPayoutModalVisible(false)}
                 disabled={payoutLoading}>
-                <Text style={styles.modalBtnCancelText}>Annuler</Text>
+                <Text style={styles.modalBtnCancelText}>{t('restaurantWallet.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalBtn, styles.modalBtnConfirm]}
@@ -263,7 +265,7 @@ const WalletScreen = ({navigation}: any) => {
                 {payoutLoading ? (
                   <ActivityIndicator size="small" color={Colors.white} />
                 ) : (
-                  <Text style={styles.modalBtnConfirmText}>Confirmer</Text>
+                  <Text style={styles.modalBtnConfirmText}>{t('restaurantWallet.confirm')}</Text>
                 )}
               </TouchableOpacity>
             </View>

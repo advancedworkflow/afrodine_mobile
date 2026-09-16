@@ -13,6 +13,7 @@ import {
 import {alert} from '../utils/alert';
 import TopBar from '../components/TopBar';
 import IconWrapper from '../components/IconWrapper';
+import {useTranslation} from 'react-i18next';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
 import {
@@ -23,6 +24,7 @@ import {
 } from '../services/clientProfile';
 
 const EditProfileScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [profile, setProfile] = useState<ClientProfileRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -70,14 +72,14 @@ const EditProfileScreen = ({navigation}: any) => {
       const updated = await updateClientProfile(payload);
       if (updated) {
         setProfile(updated);
-        alert('Profil enregistré', 'Les modifications ont bien été enregistrées.', [
+        alert(t('editProfile.savedTitle'), t('editProfile.savedMessage'), [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       } else {
-        alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+        alert(t('editProfile.errorTitle'), t('editProfile.saveFailed'));
       }
     } catch {
-      alert('Erreur', 'Impossible d\'enregistrer le profil. Réessayez.');
+      alert(t('editProfile.errorTitle'), t('editProfile.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -86,7 +88,7 @@ const EditProfileScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Modifier mon profil" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopBar navigation={navigation} title={t('editProfile.title')} showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
@@ -100,22 +102,22 @@ const EditProfileScreen = ({navigation}: any) => {
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled">
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Informations personnelles</Text>
-        <Field label="Prénom" value={firstName} onChangeText={setFirstName} placeholder="Prénom" />
-        <Field label="Nom" value={lastName} onChangeText={setLastName} placeholder="Nom" />
-        <Field label="Téléphone" value={phone} onChangeText={setPhone} placeholder="Téléphone" keyboardType="phone-pad" />
+        <Text style={styles.sectionTitle}>{t('editProfile.personalInfo')}</Text>
+        <Field label={t('editProfile.firstName')} value={firstName} onChangeText={setFirstName} placeholder={t('editProfile.firstName')} />
+        <Field label={t('editProfile.lastName')} value={lastName} onChangeText={setLastName} placeholder={t('editProfile.lastName')} />
+        <Field label={t('editProfile.phone')} value={phone} onChangeText={setPhone} placeholder={t('editProfile.phone')} keyboardType="phone-pad" />
         <Field
-          label="Adresse de livraison"
+          label={t('editProfile.deliveryAddress')}
           value={address}
           onChangeText={setAddress}
-          placeholder="Rue, code postal, ville…"
+          placeholder={t('editProfile.addressPlaceholder')}
           multiline
         />
         <Field
-          label="Date de naissance (optionnel)"
+          label={t('editProfile.birthDate')}
           value={birthDate}
           onChangeText={setBirthDate}
-          placeholder="AAAA-MM-JJ"
+          placeholder={t('editProfile.birthDatePlaceholder')}
         />
       </View>
 
@@ -128,7 +130,7 @@ const EditProfileScreen = ({navigation}: any) => {
         ) : (
           <>
             <IconWrapper name="save-outline" size={20} color={Colors.white} style={styles.saveIcon} />
-            <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+            <Text style={styles.saveButtonText}>{t('editProfile.saveChanges')}</Text>
           </>
         )}
       </TouchableOpacity>
@@ -138,7 +140,7 @@ const EditProfileScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Modifier mon profil" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('editProfile.title')} showBackButton onBackPress={() => navigation.goBack()} />
       {Platform.OS === 'ios' ? (
         <KeyboardAvoidingView style={styles.flex} behavior="padding">
           {content}

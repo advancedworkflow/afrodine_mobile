@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Switch,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -31,6 +32,7 @@ import {
 const LOW_STOCK_THRESHOLD = 5;
 
 const GroceryManagementScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [shop, setShop] = useState<ManagementGroceryShop | null>(null);
   const [products, setProducts] = useState<ManagementGroceryProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +80,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
 
   const handleSaveShop = async () => {
     if (!shopName.trim()) {
-      alert('Champ requis', 'Le nom du magasin est obligatoire.');
+      alert(t('restaurantGroceryManagement.requiredFieldTitle'), t('restaurantGroceryManagement.nameRequired'));
       return;
     }
     setSavingShop(true);
@@ -95,7 +97,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
       setEditingShop(false);
       if (!shop) load();
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, "Impossible d'enregistrer le magasin."));
+      alert(t('restaurantGroceryManagement.errorTitle'), formatAxiosError(e, t('restaurantGroceryManagement.saveShopFailed')));
     } finally {
       setSavingShop(false);
     }
@@ -109,7 +111,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
       const updated = await updateManagementGroceryProduct(product.id, {stock_quantity: nextStock});
       setProducts(prev => prev.map(p => (p.id === product.id ? updated : p)));
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de mettre à jour le stock.'));
+      alert(t('restaurantGroceryManagement.errorTitle'), formatAxiosError(e, t('restaurantGroceryManagement.stockUpdateFailed')));
     } finally {
       setBusyId(null);
     }
@@ -121,7 +123,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
       const updated = await updateManagementGroceryProduct(product.id, {is_active: !product.is_active});
       setProducts(prev => prev.map(p => (p.id === product.id ? updated : p)));
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de changer le statut.'));
+      alert(t('restaurantGroceryManagement.errorTitle'), formatAxiosError(e, t('restaurantGroceryManagement.statusChangeFailed')));
     } finally {
       setBusyId(null);
     }
@@ -135,7 +137,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
       await deleteManagementGroceryProduct(id);
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (e) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer ce produit.'));
+      alert(t('restaurantGroceryManagement.errorTitle'), formatAxiosError(e, t('restaurantGroceryManagement.deleteProductFailed')));
     }
   };
 
@@ -147,7 +149,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Grocery shop" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopBar navigation={navigation} title={t('restaurantGroceryManagement.title')} showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -157,7 +159,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Grocery shop" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('restaurantGroceryManagement.title')} showBackButton onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
@@ -165,38 +167,38 @@ const GroceryManagementScreen = ({navigation}: any) => {
         {!shop && !editingShop ? (
           <View style={styles.empty}>
             <IconWrapper name="storefront-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>Aucun magasin grocery</Text>
+            <Text style={styles.emptyTitle}>{t('restaurantGroceryManagement.noShopTitle')}</Text>
             <Text style={styles.emptyText}>
-              Créez votre magasin pour vendre des produits d'épicerie en plus de votre menu.
+              {t('restaurantGroceryManagement.noShopText')}
             </Text>
             <TouchableOpacity style={styles.addButton} onPress={openShopEditor} activeOpacity={0.8}>
               <IconWrapper name="add-circle-outline" size={22} color={Colors.white} />
-              <Text style={styles.addButtonText}>Créer mon magasin</Text>
+              <Text style={styles.addButtonText}>{t('restaurantGroceryManagement.createShop')}</Text>
             </TouchableOpacity>
           </View>
         ) : editingShop ? (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>{shop ? 'Modifier le magasin' : 'Créer le magasin'}</Text>
-            <Text style={styles.label}>Nom *</Text>
+            <Text style={styles.sectionTitle}>{shop ? t('restaurantGroceryManagement.editShopTitle') : t('restaurantGroceryManagement.createShopTitle')}</Text>
+            <Text style={styles.label}>{t('restaurantGroceryManagement.nameLabel')}</Text>
             <TextInput
               style={styles.input}
               value={shopName}
               onChangeText={setShopName}
-              placeholder="Nom du magasin"
+              placeholder={t('restaurantGroceryManagement.namePlaceholder')}
               placeholderTextColor={Colors.textLight}
             />
-            <Text style={styles.label}>Description</Text>
+            <Text style={styles.label}>{t('restaurantGroceryManagement.descriptionLabel')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={shopDesc}
               onChangeText={setShopDesc}
-              placeholder="Description (optionnel)"
+              placeholder={t('restaurantGroceryManagement.descriptionPlaceholder')}
               placeholderTextColor={Colors.textLight}
               multiline
               numberOfLines={3}
             />
             <View style={styles.toggleRow}>
-              <Text style={styles.toggleLabel}>Magasin actif</Text>
+              <Text style={styles.toggleLabel}>{t('restaurantGroceryManagement.shopActive')}</Text>
               <Switch
                 value={shopActive}
                 onValueChange={setShopActive}
@@ -210,7 +212,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
                   style={[styles.formBtn, styles.formBtnCancel]}
                   onPress={() => setEditingShop(false)}
                   disabled={savingShop}>
-                  <Text style={styles.formBtnCancelText}>Annuler</Text>
+                  <Text style={styles.formBtnCancelText}>{t('restaurantGroceryManagement.cancel')}</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
@@ -220,7 +222,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
                 {savingShop ? (
                   <ActivityIndicator size="small" color={Colors.white} />
                 ) : (
-                  <Text style={styles.formBtnConfirmText}>{shop ? 'Enregistrer' : 'Créer'}</Text>
+                  <Text style={styles.formBtnConfirmText}>{shop ? t('restaurantGroceryManagement.save') : t('restaurantGroceryManagement.create')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -238,26 +240,26 @@ const GroceryManagementScreen = ({navigation}: any) => {
                 </TouchableOpacity>
               </View>
               <View style={[styles.statusBadge, shop!.is_active ? styles.statusActive : styles.statusInactive]}>
-                <Text style={styles.statusBadgeText}>{shop!.is_active ? 'Actif' : 'Inactif'}</Text>
+                <Text style={styles.statusBadgeText}>{shop!.is_active ? t('restaurantGroceryManagement.statusActive') : t('restaurantGroceryManagement.statusInactive')}</Text>
               </View>
             </View>
 
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>{totalCount}</Text>
-                <Text style={styles.statLabel}>Produits</Text>
+                <Text style={styles.statLabel}>{t('restaurantGroceryManagement.products')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>{activeCount}</Text>
-                <Text style={styles.statLabel}>Actifs</Text>
+                <Text style={styles.statLabel}>{t('restaurantGroceryManagement.active')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>{inactiveCount}</Text>
-                <Text style={styles.statLabel}>Inactifs</Text>
+                <Text style={styles.statLabel}>{t('restaurantGroceryManagement.inactive')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={[styles.statValue, lowStockCount > 0 && styles.statValueWarning]}>{lowStockCount}</Text>
-                <Text style={styles.statLabel}>Stock bas</Text>
+                <Text style={styles.statLabel}>{t('restaurantGroceryManagement.lowStock')}</Text>
               </View>
             </View>
 
@@ -266,14 +268,14 @@ const GroceryManagementScreen = ({navigation}: any) => {
               onPress={() => navigation.navigate('GroceryProductForm', {shopId: shop!.id})}
               activeOpacity={0.8}>
               <IconWrapper name="add-circle-outline" size={22} color={Colors.white} />
-              <Text style={styles.addButtonText}>Nouveau produit</Text>
+              <Text style={styles.addButtonText}>{t('restaurantGroceryManagement.newProduct')}</Text>
             </TouchableOpacity>
 
             {products.length === 0 ? (
               <View style={styles.empty}>
                 <IconWrapper name="basket-outline" size={56} color={Colors.textLight} />
-                <Text style={styles.emptyTitle}>Aucun produit</Text>
-                <Text style={styles.emptyText}>Ajoutez vos premiers produits d'épicerie.</Text>
+                <Text style={styles.emptyTitle}>{t('restaurantGroceryManagement.noProductsTitle')}</Text>
+                <Text style={styles.emptyText}>{t('restaurantGroceryManagement.noProductsText')}</Text>
               </View>
             ) : (
               products.map(product => (
@@ -288,7 +290,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
                       </Text>
                       <View
                         style={[styles.statusBadge, product.is_active ? styles.statusActive : styles.statusInactive]}>
-                        <Text style={styles.statusBadgeText}>{product.is_active ? 'Actif' : 'Inactif'}</Text>
+                        <Text style={styles.statusBadgeText}>{product.is_active ? t('restaurantGroceryManagement.statusActive') : t('restaurantGroceryManagement.statusInactive')}</Text>
                       </View>
                     </View>
                     <View style={styles.cardMetaRow}>
@@ -302,7 +304,7 @@ const GroceryManagementScreen = ({navigation}: any) => {
                     {product.stock_quantity <= LOW_STOCK_THRESHOLD && (
                       <View style={styles.lowStockRow}>
                         <IconWrapper name="alert-circle-outline" size={14} color={Colors.warning} />
-                        <Text style={styles.lowStockText}>Stock bas</Text>
+                        <Text style={styles.lowStockText}>{t('restaurantGroceryManagement.lowStock')}</Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -355,9 +357,9 @@ const GroceryManagementScreen = ({navigation}: any) => {
 
       <ConfirmModal
         visible={deleteTarget != null}
-        title="Supprimer le produit"
-        message={`Supprimer "${deleteTarget?.name}" ?`}
-        confirmLabel="Supprimer"
+        title={t('restaurantGroceryManagement.deleteConfirmTitle')}
+        message={t('restaurantGroceryManagement.deleteConfirmMessage', {name: deleteTarget?.name})}
+        confirmLabel={t('restaurantGroceryManagement.deleteConfirmButton')}
         onConfirm={handleDeleteProduct}
         onCancel={() => setDeleteTarget(null)}
         variant="danger"

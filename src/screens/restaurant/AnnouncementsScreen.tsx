@@ -6,13 +6,18 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import { Colors } from '../../utils/colors';
 import { secondaryFont } from '../../utils/fonts';
 import { getManagementAnnouncements, type ManagementAnnouncement } from '../../services/restaurantManagement';
 
+const LOCALE_MAP: Record<string, string> = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+
 const AnnouncementsScreen = ({ navigation }: any) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = LOCALE_MAP[i18n.language] || 'fr-FR';
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [announcements, setAnnouncements] = useState<ManagementAnnouncement[]>([]);
@@ -33,20 +38,20 @@ const AnnouncementsScreen = ({ navigation }: any) => {
   }, [load]);
 
   const getExpiryLabel = (expiresAt?: string) => {
-    if (!expiresAt) return 'Sans expiration';
+    if (!expiresAt) return t('restaurantAnnouncements.noExpiry');
     const ms = new Date(expiresAt).getTime() - Date.now();
-    if (!Number.isFinite(ms)) return 'Expiration invalide';
-    if (ms <= 0) return 'Expiree';
+    if (!Number.isFinite(ms)) return t('restaurantAnnouncements.invalidExpiry');
+    if (ms <= 0) return t('restaurantAnnouncements.expired');
     const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
-    if (days <= 1) return "Expire aujourd'hui";
-    return `Expire dans ${days} jours`;
+    if (days <= 1) return t('restaurantAnnouncements.expiresToday');
+    return t('restaurantAnnouncements.expiresInDays', { count: days });
   };
 
   const isExpired = (expiresAt?: string) => {
     if (!expiresAt) return false;
-    const t = new Date(expiresAt).getTime();
-    if (!Number.isFinite(t)) return false;
-    return t <= Date.now();
+    const expiryTime = new Date(expiresAt).getTime();
+    if (!Number.isFinite(expiryTime)) return false;
+    return expiryTime <= Date.now();
   };
 
   const visibleAnnouncements = announcements.filter((ann) => {
@@ -70,25 +75,25 @@ const AnnouncementsScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Annonces" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('restaurantAnnouncements.title')} showBackButton onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[Colors.darkGreen]} />}
       >
         <View style={styles.tabsRow}>
-          <TabBtn label={`Actives (${activeCount})`} active={view === 'active'} onPress={() => setView('active')} />
-          <TabBtn label={`Archives (${archivedCount})`} active={view === 'archived'} onPress={() => setView('archived')} />
-          <TabBtn label={`Toutes (${allCount})`} active={view === 'all'} onPress={() => setView('all')} />
+          <TabBtn label={t('restaurantAnnouncements.tabActive', { count: activeCount })} active={view === 'active'} onPress={() => setView('active')} />
+          <TabBtn label={t('restaurantAnnouncements.tabArchived', { count: archivedCount })} active={view === 'archived'} onPress={() => setView('archived')} />
+          <TabBtn label={t('restaurantAnnouncements.tabAll', { count: allCount })} active={view === 'all'} onPress={() => setView('all')} />
         </View>
         <View style={styles.tabsRow}>
-          <TabBtn label="Plus recentes" active={sortBy === 'date_desc'} onPress={() => setSortBy('date_desc')} />
-          <TabBtn label="Plus anciennes" active={sortBy === 'date_asc'} onPress={() => setSortBy('date_asc')} />
-          <TabBtn label="Urgentes d'abord" active={sortBy === 'urgent_first'} onPress={() => setSortBy('urgent_first')} />
+          <TabBtn label={t('restaurantAnnouncements.sortNewest')} active={sortBy === 'date_desc'} onPress={() => setSortBy('date_desc')} />
+          <TabBtn label={t('restaurantAnnouncements.sortOldest')} active={sortBy === 'date_asc'} onPress={() => setSortBy('date_asc')} />
+          <TabBtn label={t('restaurantAnnouncements.sortUrgentFirst')} active={sortBy === 'urgent_first'} onPress={() => setSortBy('urgent_first')} />
         </View>
         {loading ? (
-          <Text style={styles.emptyText}>Chargement des annonces...</Text>
+          <Text style={styles.emptyText}>{t('restaurantAnnouncements.loading')}</Text>
         ) : visibleAnnouncements.length === 0 ? (
-          <Text style={styles.emptyText}>Aucune annonce dans cette vue.</Text>
+          <Text style={styles.emptyText}>{t('restaurantAnnouncements.emptyView')}</Text>
         ) : (
           visibleAnnouncements.map((ann) => (
             <View key={ann.id} style={[styles.card, ann.is_urgent ? styles.cardUrgent : null]}>
@@ -96,7 +101,7 @@ const AnnouncementsScreen = ({ navigation }: any) => {
                 <Text style={styles.title}>{ann.title}</Text>
                 {ann.is_urgent && (
                   <View style={styles.badge}>
-                    <Text style={styles.badgeText}>Urgent</Text>
+                    <Text style={styles.badgeText}>{t('restaurantAnnouncements.urgent')}</Text>
                   </View>
                 )}
               </View>
@@ -104,7 +109,7 @@ const AnnouncementsScreen = ({ navigation }: any) => {
               <View style={styles.metaRow}>
                 <IconWrapper name="calendar-outline" size={14} color={Colors.textLight} />
                 <Text style={styles.metaText}>
-                  {ann.created_at ? new Date(ann.created_at).toLocaleDateString('fr-FR') : '-'}
+                  {ann.created_at ? new Date(ann.created_at).toLocaleDateString(dateLocale) : '-'}
                 </Text>
               </View>
               <Text style={styles.expiryText}>{getExpiryLabel(ann.expires_at)}</Text>

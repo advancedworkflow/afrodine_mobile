@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -37,6 +38,15 @@ import {
 } from '../../utils/promotionPricing';
 
 const PromotionFormScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
+  const labelName = (v: string) =>
+    v === '' ? t('restaurantPromotionForm.labelNone')
+      : v === 'offre_du_jour' ? t('restaurantPromotionForm.labelDealOfDay')
+      : t('restaurantPromotionForm.labelNew');
+  const promotionTypeName = (v: string) =>
+    v === 'percentage' ? t('restaurantPromotionForm.typePercentage')
+      : v === 'fixed_amount' ? t('restaurantPromotionForm.typeFixed')
+      : t('restaurantPromotionForm.typeFlash');
   const promotion = route.params?.promotion as ManagementPromotion | undefined;
   const isEdit = promotion != null;
 
@@ -60,7 +70,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
   const [label, setLabel] = useState('');
   const [layoutType, setLayoutType] = useState<'dish' | 'menu'>('dish');
   const [ctaType, setCtaType] = useState('discover');
-  const [ctaText, setCtaText] = useState('Découvrir');
+  const [ctaText, setCtaText] = useState(t('restaurantPromotionForm.ctaDiscover'));
   const [promotionType, setPromotionType] = useState('percentage');
   const [dishes, setDishes] = useState<ManagementDish[]>([]);
   const [menus, setMenus] = useState<MenuRead[]>([]);
@@ -107,7 +117,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
       setLabel(p.label ?? '');
       setLayoutType((p.layout_type as 'dish' | 'menu') ?? 'dish');
       setCtaType(p.cta_type ?? 'discover');
-      setCtaText(p.cta_label ?? p.cta_text ?? 'Découvrir');
+      setCtaText(p.cta_label ?? p.cta_text ?? t('restaurantPromotionForm.ctaDiscover'));
       setPromotionType(p.promotion_type === 'discount' ? 'percentage' : (p.promotion_type ?? 'percentage'));
       if (p.dish_ids?.length) {
         setTargetType('dish');
@@ -189,23 +199,23 @@ const PromotionFormScreen = ({navigation, route}: any) => {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      alert('Champ requis', 'Saisissez un titre.');
+      alert(t('restaurantPromotionForm.requiredFieldTitle'), t('restaurantPromotionForm.titleRequired'));
       return;
     }
     if (targetType === 'dish' && dishIds.length === 0) {
-      alert('Champ requis', 'Sélectionnez un plat.');
+      alert(t('restaurantPromotionForm.requiredFieldTitle'), t('restaurantPromotionForm.dishRequired'));
       return;
     }
     if (targetType === 'menu' && menuIds.length === 0) {
-      alert('Champ requis', 'Sélectionnez un menu.');
+      alert(t('restaurantPromotionForm.requiredFieldTitle'), t('restaurantPromotionForm.menuRequired'));
       return;
     }
     if (effectiveMediaType === 'image' && !imageUrl.trim()) {
-      alert('Champ requis', 'Saisissez l’URL de l’image ou uploadez une image depuis le tableau de bord web.');
+      alert(t('restaurantPromotionForm.requiredFieldTitle'), t('restaurantPromotionForm.imageUrlRequired'));
       return;
     }
     if (effectiveMediaType === 'video' && !videoUrl.trim()) {
-      alert('Champ requis', 'Saisissez l’URL de la vidéo ou uploadez depuis le tableau de bord web.');
+      alert(t('restaurantPromotionForm.requiredFieldTitle'), t('restaurantPromotionForm.videoUrlRequired'));
       return;
     }
 
@@ -214,17 +224,17 @@ const PromotionFormScreen = ({navigation, route}: any) => {
     try {
       if (isEdit && promotion?.id) {
         await updateManagementPromotion(promotion.id, payload);
-        alert('Succès', 'Promotion mise à jour.', [
+        alert(t('restaurantPromotionForm.successTitle'), t('restaurantPromotionForm.updatedMessage'), [
           {text: 'OK', onPress: () => navigation.goBack()},
         ]);
       } else {
         await createManagementPromotion(payload);
-        alert('Succès', 'Promotion créée. Paiement requis pour activation.', [
+        alert(t('restaurantPromotionForm.successTitle'), t('restaurantPromotionForm.createdMessage'), [
           {text: 'OK', onPress: () => navigation.goBack()},
         ]);
       }
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Erreur lors de l\'enregistrement'));
+      alert(t('restaurantPromotionForm.errorTitle'), formatAxiosError(e, t('restaurantPromotionForm.saveError')));
     } finally {
       setSubmitting(false);
     }
@@ -234,7 +244,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title={isEdit ? 'Modifier la promotion' : 'Nouvelle promotion'}
+        title={isEdit ? t('restaurantPromotionForm.editTitle') : t('restaurantPromotionForm.newTitle')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
@@ -245,35 +255,35 @@ const PromotionFormScreen = ({navigation, route}: any) => {
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled">
-          <Text style={styles.sectionTitle}>Informations générales</Text>
-          <Text style={styles.label}>Titre *</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.generalInfo')}</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.titleLabel')}</Text>
           <TextInput
             style={styles.input}
             value={title}
             onChangeText={setTitle}
-            placeholder="Ex. Menu -20%"
+            placeholder={t('restaurantPromotionForm.titlePlaceholder')}
             placeholderTextColor={Colors.textLight}
           />
-          <Text style={styles.label}>Description courte</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.shortDescription')}</Text>
           <TextInput
             style={styles.input}
             value={shortDescription}
             onChangeText={setShortDescription}
-            placeholder="Description courte"
+            placeholder={t('restaurantPromotionForm.shortDescription')}
             placeholderTextColor={Colors.textLight}
           />
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.description')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={description}
             onChangeText={setDescription}
-            placeholder="Description détaillée"
+            placeholder={t('restaurantPromotionForm.descriptionPlaceholder')}
             placeholderTextColor={Colors.textLight}
             multiline
           />
 
-          <Text style={styles.sectionTitle}>Média</Text>
-          <Text style={styles.label}>URL de l'image</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.media')}</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.imageUrl')}</Text>
           <TextInput
             style={styles.input}
             value={imageUrl}
@@ -285,7 +295,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
           />
           {canUseVideo && (
             <>
-              <Text style={styles.label}>URL de la vidéo (si type Vidéo)</Text>
+              <Text style={styles.label}>{t('restaurantPromotionForm.videoUrl')}</Text>
               <TextInput
                 style={styles.input}
                 value={videoUrl}
@@ -298,32 +308,32 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             </>
           )}
 
-          <Text style={styles.sectionTitle}>Promouvoir</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.promote')}</Text>
           <View style={styles.row}>
             <TouchableOpacity
               style={[styles.optionBtn, targetType === 'dish' && styles.optionBtnActive]}
               onPress={() => setTargetType('dish')}>
               <Text style={[styles.optionBtnText, targetType === 'dish' && styles.optionBtnTextActive]}>
-                Plats
+                {t('restaurantPromotionForm.dishes')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.optionBtn, targetType === 'menu' && styles.optionBtnActive]}
               onPress={() => setTargetType('menu')}>
               <Text style={[styles.optionBtnText, targetType === 'menu' && styles.optionBtnTextActive]}>
-                Menus
+                {t('restaurantPromotionForm.menus')}
               </Text>
             </TouchableOpacity>
           </View>
           {targetType === 'dish' && (
             <View style={styles.listBox}>
               {loadingData ? (
-                <Text style={styles.hint}>Chargement...</Text>
+                <Text style={styles.hint}>{t('restaurantPromotionForm.loading')}</Text>
               ) : dishes.length === 0 ? (
-                <Text style={styles.hint}>Aucun plat disponible</Text>
+                <Text style={styles.hint}>{t('restaurantPromotionForm.noDishAvailable')}</Text>
               ) : (
                 <>
-                  <Text style={styles.hint}>Choisir un seul plat</Text>
+                  <Text style={styles.hint}>{t('restaurantPromotionForm.chooseSingleDish')}</Text>
                   {dishes.map(d => (
                     <TouchableOpacity
                       key={d.id}
@@ -345,12 +355,12 @@ const PromotionFormScreen = ({navigation, route}: any) => {
           {targetType === 'menu' && (
             <View style={styles.listBox}>
               {loadingData ? (
-                <Text style={styles.hint}>Chargement...</Text>
+                <Text style={styles.hint}>{t('restaurantPromotionForm.loading')}</Text>
               ) : menus.length === 0 ? (
-                <Text style={styles.hint}>Aucun menu disponible</Text>
+                <Text style={styles.hint}>{t('restaurantPromotionForm.noMenuAvailable')}</Text>
               ) : (
                 <>
-                  <Text style={styles.hint}>Choisir un seul menu</Text>
+                  <Text style={styles.hint}>{t('restaurantPromotionForm.chooseSingleMenu')}</Text>
                   {menus.map(m => (
                     <TouchableOpacity
                       key={m.id}
@@ -369,7 +379,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             </View>
           )}
 
-          <Text style={styles.sectionTitle}>Format d'affichage</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.displayFormat')}</Text>
           <View style={styles.formatRow}>
             {DISPLAY_FORMATS.map(f => (
               <TouchableOpacity
@@ -391,13 +401,13 @@ const PromotionFormScreen = ({navigation, route}: any) => {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.label}>Type de média</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.mediaType')}</Text>
           <View style={styles.row}>
             <TouchableOpacity
               style={[styles.optionBtn, effectiveMediaType === 'image' && styles.optionBtnActive]}
               onPress={() => setMediaType('image')}>
               <Text style={[styles.optionBtnText, effectiveMediaType === 'image' && styles.optionBtnTextActive]}>
-                Image
+                {t('restaurantPromotionForm.image')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -413,14 +423,14 @@ const PromotionFormScreen = ({navigation, route}: any) => {
                 effectiveMediaType === 'video' && styles.optionBtnTextActive,
                 !canUseVideo && styles.optionBtnTextDisabled,
               ]}>
-                Vidéo (+25%)
+                {t('restaurantPromotionForm.videoSurcharge')}
               </Text>
             </TouchableOpacity>
           </View>
           {!canUseVideo && (
-            <Text style={styles.hint}>La bande en haut ne supporte que les images.</Text>
+            <Text style={styles.hint}>{t('restaurantPromotionForm.topBannerImageOnly')}</Text>
           )}
-          <Text style={styles.label}>Durée du slide: {slideDuration}s</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.slideDuration', {seconds: slideDuration})}</Text>
           <View style={styles.durationRow}>
             {DURATION_OPTIONS.map(d => (
               <TouchableOpacity
@@ -434,8 +444,8 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             ))}
           </View>
 
-          <Text style={styles.sectionTitle}>Paramètres visuels</Text>
-          <Text style={styles.label}>Couleur de fond</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.visualSettings')}</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.backgroundColor')}</Text>
           <TextInput
             style={styles.input}
             value={backgroundColor}
@@ -443,7 +453,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             placeholder="#FFFFFF"
             placeholderTextColor={Colors.textLight}
           />
-          <Text style={styles.label}>Label</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.label')}</Text>
           <View style={styles.pickerRow}>
             {['', 'offre_du_jour', 'nouveau'].map(v => (
               <TouchableOpacity
@@ -451,70 +461,70 @@ const PromotionFormScreen = ({navigation, route}: any) => {
                 style={[styles.optionBtn, label === v && styles.optionBtnActive]}
                 onPress={() => setLabel(v)}>
                 <Text style={[styles.optionBtnText, label === v && styles.optionBtnTextActive]}>
-                  {v === '' ? 'Aucun' : v === 'offre_du_jour' ? 'Offre du jour' : 'Nouveau'}
+                  {labelName(v)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.label}>Layout</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.layout')}</Text>
           <View style={styles.row}>
             <TouchableOpacity
               style={[styles.optionBtn, layoutType === 'dish' && styles.optionBtnActive]}
               onPress={() => setLayoutType('dish')}>
               <Text style={[styles.optionBtnText, layoutType === 'dish' && styles.optionBtnTextActive]}>
-                Plat
+                {t('restaurantPromotionForm.dish')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.optionBtn, layoutType === 'menu' && styles.optionBtnActive]}
               onPress={() => setLayoutType('menu')}>
               <Text style={[styles.optionBtnText, layoutType === 'menu' && styles.optionBtnTextActive]}>
-                Menu
+                {t('restaurantPromotionForm.menu')}
               </Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.label}>Bouton (CTA)</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.ctaButton')}</Text>
           <View style={styles.row}>
             <TouchableOpacity
               style={[styles.optionBtn, ctaType === 'discover' && styles.optionBtnActive]}
               onPress={() => setCtaType('discover')}>
               <Text style={[styles.optionBtnText, ctaType === 'discover' && styles.optionBtnTextActive]}>
-                Découvrir
+                {t('restaurantPromotionForm.ctaDiscover')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.optionBtn, ctaType === 'order' && styles.optionBtnActive]}
               onPress={() => setCtaType('order')}>
               <Text style={[styles.optionBtnText, ctaType === 'order' && styles.optionBtnTextActive]}>
-                Commander
+                {t('restaurantPromotionForm.ctaOrder')}
               </Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.label}>Texte du bouton</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.buttonText')}</Text>
           <TextInput
             style={styles.input}
             value={ctaText}
             onChangeText={setCtaText}
-            placeholder="Découvrir"
+            placeholder={t('restaurantPromotionForm.ctaDiscover')}
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.sectionTitle}>Type de promotion</Text>
-          <Text style={styles.label}>Type</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.promotionTypeSection')}</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.type')}</Text>
           <View style={styles.pickerRow}>
-            {['percentage', 'fixed_amount', 'flash_sale'].map(t => (
+            {['percentage', 'fixed_amount', 'flash_sale'].map(pt => (
               <TouchableOpacity
-                key={t}
-                style={[styles.optionBtn, promotionType === t && styles.optionBtnActive]}
-                onPress={() => setPromotionType(t)}>
-                <Text style={[styles.optionBtnText, promotionType === t && styles.optionBtnTextActive]}
+                key={pt}
+                style={[styles.optionBtn, promotionType === pt && styles.optionBtnActive]}
+                onPress={() => setPromotionType(pt)}>
+                <Text style={[styles.optionBtnText, promotionType === pt && styles.optionBtnTextActive]}
                   numberOfLines={1}>
-                  {t === 'percentage' ? '%' : t === 'fixed_amount' ? 'Fixe' : 'Flash'}
+                  {promotionTypeName(pt)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.label}>Prix original (€)</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.originalPrice')}</Text>
           <TextInput
             style={styles.input}
             value={originalPrice}
@@ -523,16 +533,16 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             placeholderTextColor={Colors.textLight}
             keyboardType="decimal-pad"
           />
-          <Text style={styles.label}>Réduction (%)</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.discount')}</Text>
           <TextInput
             style={styles.input}
             value={discountPercent}
             onChangeText={setDiscountPercent}
-            placeholder="Ex. 20"
+            placeholder={t('restaurantPromotionForm.discountPlaceholder')}
             placeholderTextColor={Colors.textLight}
             keyboardType="decimal-pad"
           />
-          <Text style={styles.label}>Frais de service (€)</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.serviceFee')}</Text>
           <TextInput
             style={styles.input}
             value={servicePrice}
@@ -542,8 +552,8 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             keyboardType="decimal-pad"
           />
 
-          <Text style={styles.sectionTitle}>Dates</Text>
-          <Text style={styles.label}>Date de début (AAAA-MM-JJ)</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.dates')}</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.startDate')}</Text>
           <TextInput
             style={styles.input}
             value={startDate}
@@ -551,7 +561,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             placeholder="2025-01-01"
             placeholderTextColor={Colors.textLight}
           />
-          <Text style={styles.label}>Date de fin (AAAA-MM-JJ)</Text>
+          <Text style={styles.label}>{t('restaurantPromotionForm.endDate')}</Text>
           <TextInput
             style={styles.input}
             value={endDate}
@@ -561,7 +571,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
           />
 
           <View style={styles.estimatorBox}>
-            <Text style={styles.estimatorTitle}>Estimation du coût</Text>
+            <Text style={styles.estimatorTitle}>{t('restaurantPromotionForm.costEstimate')}</Text>
             <Text style={styles.estimatorPrice}>{formatPromotionPrice(estimatedPrice)}</Text>
             <Text style={styles.estimatorDetail}>
               {displayFormat === 'floating_left' && '7$ base + 0.5$/s'}
@@ -579,7 +589,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <Text style={styles.submitBtnText}>
-                {isEdit ? 'Enregistrer' : 'Créer la promotion'}
+                {isEdit ? t('restaurantPromotionForm.save') : t('restaurantPromotionForm.createPromotion')}
               </Text>
             )}
           </TouchableOpacity>

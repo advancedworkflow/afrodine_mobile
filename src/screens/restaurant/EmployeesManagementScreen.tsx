@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -18,21 +19,13 @@ import {
   deleteEmployee,
   toggleEmployeeStatus,
   type ManagementEmployee,
-  type EmployeeRole,
 } from '../../services/restaurantManagement';
 import ConfirmModal from '../../components/ConfirmModal';
 import {formatAxiosError} from '../../utils/formatApiError';
 
-const ROLE_LABELS: Record<EmployeeRole, string> = {
-  manager: 'Manager',
-  kitchen: 'Cuisine',
-  service: 'Service',
-  cashier: 'Caisse',
-  delivery: 'Livraison',
-  staff: 'Staff',
-};
-
 const EmployeesManagementScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+  const roleLabel = (role: string) => t(`restaurantEmployeeForm.roles.${role}`, {defaultValue: role});
   const [employees, setEmployees] = useState<ManagementEmployee[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -65,7 +58,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
       const updated = await toggleEmployeeStatus(employee.id);
       setEmployees((prev) => prev.map((e) => (e.id === employee.id ? updated : e)));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de changer le statut.'));
+      alert(t('restaurantEmployeesManagement.errorTitle'), formatAxiosError(e, t('restaurantEmployeesManagement.statusChangeFailed')));
     } finally {
       setBusyId(null);
     }
@@ -78,9 +71,9 @@ const EmployeesManagementScreen = ({navigation}: any) => {
     try {
       await deleteEmployee(id);
       setEmployees((prev) => prev.filter((e) => e.id !== id));
-      alert('Succès', 'Employé supprimé.');
+      alert(t('restaurantEmployeesManagement.successTitle'), t('restaurantEmployeesManagement.deleteSuccess'));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert(t('restaurantEmployeesManagement.errorTitle'), formatAxiosError(e, t('restaurantEmployeesManagement.deleteFailed')));
     }
   };
 
@@ -89,7 +82,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Employés" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopBar navigation={navigation} title={t('restaurantEmployeesManagement.title')} showBackButton onBackPress={() => navigation.goBack()} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -99,7 +92,7 @@ const EmployeesManagementScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Employés" showBackButton onBackPress={() => navigation.goBack()} />
+      <TopBar navigation={navigation} title={t('restaurantEmployeesManagement.title')} showBackButton onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
@@ -107,11 +100,11 @@ const EmployeesManagementScreen = ({navigation}: any) => {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{employees.length}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t('restaurantEmployeesManagement.total')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{activeCount}</Text>
-            <Text style={styles.statLabel}>Actifs</Text>
+            <Text style={styles.statLabel}>{t('restaurantEmployeesManagement.active')}</Text>
           </View>
         </View>
 
@@ -120,14 +113,14 @@ const EmployeesManagementScreen = ({navigation}: any) => {
           onPress={() => navigation.navigate('EmployeeForm', {employee: undefined})}
           activeOpacity={0.8}>
           <IconWrapper name="person-add-outline" size={24} color={Colors.white} />
-          <Text style={styles.addButtonText}>Nouvel employé</Text>
+          <Text style={styles.addButtonText}>{t('restaurantEmployeesManagement.newEmployee')}</Text>
         </TouchableOpacity>
 
         {employees.length === 0 ? (
           <View style={styles.empty}>
             <IconWrapper name="people-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>Aucun employé</Text>
-            <Text style={styles.emptyText}>Ajoutez les membres de votre équipe pour gérer les accès.</Text>
+            <Text style={styles.emptyTitle}>{t('restaurantEmployeesManagement.emptyTitle')}</Text>
+            <Text style={styles.emptyText}>{t('restaurantEmployeesManagement.emptyText')}</Text>
           </View>
         ) : (
           employees.map((employee) => (
@@ -142,13 +135,13 @@ const EmployeesManagementScreen = ({navigation}: any) => {
                     {employee.first_name} {employee.last_name}
                   </Text>
                   <View style={[styles.statusBadge, employee.is_active ? styles.statusActive : styles.statusInactive]}>
-                    <Text style={styles.statusBadgeText}>{employee.is_active ? 'Actif' : 'Inactif'}</Text>
+                    <Text style={styles.statusBadgeText}>{employee.is_active ? t('restaurantEmployeesManagement.statusActive') : t('restaurantEmployeesManagement.statusInactive')}</Text>
                   </View>
                 </View>
                 <Text style={styles.cardMeta}>{employee.email}</Text>
                 <View style={styles.cardMetaRow}>
                   <View style={styles.roleBadge}>
-                    <Text style={styles.roleBadgeText}>{ROLE_LABELS[employee.role] ?? employee.role}</Text>
+                    <Text style={styles.roleBadgeText}>{roleLabel(employee.role)}</Text>
                   </View>
                   {employee.phone ? <Text style={styles.cardMeta}>{employee.phone}</Text> : null}
                 </View>
@@ -183,9 +176,9 @@ const EmployeesManagementScreen = ({navigation}: any) => {
 
       <ConfirmModal
         visible={deleteTarget != null}
-        title="Supprimer l'employé"
-        message={`Supprimer ${deleteTarget?.first_name} ${deleteTarget?.last_name} ?`}
-        confirmLabel="Supprimer"
+        title={t('restaurantEmployeesManagement.deleteConfirmTitle')}
+        message={t('restaurantEmployeesManagement.deleteConfirmMessage', {name: `${deleteTarget?.first_name} ${deleteTarget?.last_name}`})}
+        confirmLabel={t('restaurantEmployeesManagement.deleteConfirmButton')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         variant="danger"

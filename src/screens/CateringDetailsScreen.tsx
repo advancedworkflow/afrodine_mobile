@@ -1,16 +1,18 @@
 import React from 'react';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import TopBar from '../components/TopBar';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius, Shadows} from '../utils/colors';
 import {fontButton, fontDisplay, fontUI} from '../utils/fonts';
 
 const CateringDetailsScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   return (
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title="Service traiteur"
+        title={t('catering.intro.title')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
@@ -22,30 +24,30 @@ const CateringDetailsScreen = ({navigation}: any) => {
           <View style={styles.heroIconWrap}>
             <IconWrapper name="restaurant-outline" size={56} color={Colors.white} />
           </View>
-          <Text style={styles.heroTitle}>Traiteur pour vos événements</Text>
+          <Text style={styles.heroTitle}>{t('catering.intro.heroTitle')}</Text>
           <Text style={styles.heroSubtitle}>
-            Mariages, séminaires, anniversaires… Des formules sur mesure avec les meilleurs restaurants.
+            {t('catering.intro.heroSubtitle')}
           </Text>
         </View>
         <View style={styles.features}>
           <View style={styles.featureRow}>
             <IconWrapper name="people-outline" size={24} color={Colors.primary} />
-            <Text style={styles.featureText}>De 10 à 500+ convives</Text>
+            <Text style={styles.featureText}>{t('catering.intro.featureGuests')}</Text>
           </View>
           <View style={styles.featureRow}>
             <IconWrapper name="calendar-outline" size={24} color={Colors.primary} />
-            <Text style={styles.featureText}>Réservation et devis en ligne</Text>
+            <Text style={styles.featureText}>{t('catering.intro.featureBooking')}</Text>
           </View>
           <View style={styles.featureRow}>
             <IconWrapper name="star-outline" size={24} color={Colors.primary} />
-            <Text style={styles.featureText}>Restaurants partenaires sélectionnés</Text>
+            <Text style={styles.featureText}>{t('catering.intro.featurePartners')}</Text>
           </View>
         </View>
         <TouchableOpacity
           style={styles.ctaButton}
           onPress={() => navigation.navigate('Catering')}
           activeOpacity={0.8}>
-          <Text style={styles.ctaButtonText}>Voir les offres traiteur</Text>
+          <Text style={styles.ctaButtonText}>{t('catering.intro.cta')}</Text>
           <IconWrapper name="arrow-forward-circle" size={24} color={Colors.white} />
         </TouchableOpacity>
       </ScrollView>

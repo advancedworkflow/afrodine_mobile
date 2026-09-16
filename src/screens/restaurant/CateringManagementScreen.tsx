@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -23,21 +24,14 @@ import {
 import ConfirmModal from '../../components/ConfirmModal';
 import {formatAxiosError} from '../../utils/formatApiError';
 
-const SERVICE_TYPE_LABELS: Record<string, string> = {
-  buffet: 'Buffet',
-  cocktail: 'Cocktail',
-  seated_dinner: 'Dîner assis',
-  catering_delivery: 'Livraison traiteur',
-};
+const SERVICE_TYPE_KEYS = ['buffet', 'cocktail', 'seated_dinner', 'catering_delivery'];
+const BOOKING_STATUS_KEYS = ['pending', 'confirmed', 'cancelled', 'completed'];
 
-const BOOKING_STATUS_LABELS: Record<string, string> = {
-  pending: 'En attente',
-  confirmed: 'Confirmée',
-  cancelled: 'Annulée',
-  completed: 'Terminée',
-};
+const LOCALE_MAP: Record<string, string> = {fr: 'fr-FR', en: 'en-GB', de: 'de-DE'};
 
 const CateringManagementScreen = ({navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = LOCALE_MAP[i18n.language] || 'fr-FR';
   const [services, setServices] = useState<ManagementCateringService[]>([]);
   const [bookings, setBookings] = useState<CateringBookingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,16 +70,22 @@ const CateringManagementScreen = ({navigation}: any) => {
     try {
       await deleteManagementCateringService(id);
       setServices((prev) => prev.filter((s) => s.id !== id));
-      alert('Succès', 'Offre supprimée.');
+      alert(t('restaurantCateringManagement.successTitle'), t('restaurantCateringManagement.deleteSuccess'));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert(t('restaurantCateringManagement.errorTitle'), formatAxiosError(e, t('restaurantCateringManagement.deleteFailed')));
     }
   };
 
-  const typeLabel = (t?: string) => (t ? SERVICE_TYPE_LABELS[t] ?? t : 'Traiteur');
+  const typeLabel = (serviceType?: string) =>
+    serviceType && SERVICE_TYPE_KEYS.includes(serviceType)
+      ? t(`restaurantCateringManagement.serviceTypes.${serviceType}`)
+      : serviceType ?? t('restaurantCateringManagement.defaultServiceType');
+
+  const bookingStatusLabel = (status: string) =>
+    BOOKING_STATUS_KEYS.includes(status) ? t(`restaurantCateringManagement.bookingStatuses.${status}`) : status;
 
   const formatBookingDateTime = (b: CateringBookingItem) => {
-    const dateStr = new Date(b.event_date).toLocaleDateString('fr-FR', {
+    const dateStr = new Date(b.event_date).toLocaleDateString(dateLocale, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -102,7 +102,7 @@ const CateringManagementScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar
           navigation={navigation}
-          title="Offres traiteur"
+          title={t('restaurantCateringManagement.title')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -117,7 +117,7 @@ const CateringManagementScreen = ({navigation}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title="Offres traiteur"
+        title={t('restaurantCateringManagement.title')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
@@ -132,15 +132,15 @@ const CateringManagementScreen = ({navigation}: any) => {
           onPress={() => navigation.navigate('CateringOfferDetail', {serviceId: undefined})}
           activeOpacity={0.8}>
           <IconWrapper name="add-outline" size={20} color={Colors.white} />
-          <Text style={styles.addButtonText}>Nouvelle offre traiteur</Text>
+          <Text style={styles.addButtonText}>{t('restaurantCateringManagement.newOffer')}</Text>
         </TouchableOpacity>
 
         {services.length === 0 ? (
           <View style={styles.empty}>
             <IconWrapper name="restaurant-outline" size={44} color={Colors.gray[400]} />
-            <Text style={styles.emptyTitle}>Aucune offre</Text>
+            <Text style={styles.emptyTitle}>{t('restaurantCateringManagement.emptyTitle')}</Text>
             <Text style={styles.emptyText}>
-              Créez une offre (menu traiteur, buffet, cocktail…) pour vos événements.
+              {t('restaurantCateringManagement.emptyText')}
             </Text>
           </View>
         ) : (
@@ -160,17 +160,17 @@ const CateringManagementScreen = ({navigation}: any) => {
                 ) : null}
                 <View style={styles.cardMeta}>
                   <Text style={styles.cardPriceLine}>
-                    <Text style={styles.cardPriceLabel}>À partir de </Text>
+                    <Text style={styles.cardPriceLabel}>{t('restaurantCateringManagement.startingFrom')} </Text>
                     <Text style={styles.cardPriceValue}>
                       {Number(s.base_price).toFixed(0)} €
                     </Text>
                   </Text>
                   <Text style={styles.cardGuests}>
-                    {s.min_guests}–{s.max_guests ?? '+'} pers.
+                    {t('restaurantCateringManagement.guestsRange', {min: s.min_guests, max: s.max_guests ?? '+'})}
                   </Text>
                 </View>
                 {s.is_active === false && (
-                  <Text style={styles.inactiveBadge}>Inactive</Text>
+                  <Text style={styles.inactiveBadge}>{t('restaurantCateringManagement.inactive')}</Text>
                 )}
               </View>
               <View style={styles.cardActions}>
@@ -195,19 +195,19 @@ const CateringManagementScreen = ({navigation}: any) => {
         <View style={styles.reservationsSection}>
           <View style={styles.sectionHeader}>
             <IconWrapper name="calendar-outline" size={20} color={Colors.textLight} />
-            <Text style={styles.sectionTitle}>Réservations traiteur</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantCateringManagement.bookingsSectionTitle')}</Text>
           </View>
           {bookings.length === 0 ? (
             <View style={styles.emptyBookings}>
-              <Text style={styles.emptyText}>Aucune réservation pour le moment.</Text>
+              <Text style={styles.emptyText}>{t('restaurantCateringManagement.noBookings')}</Text>
             </View>
           ) : (
             <View style={styles.tableWrap}>
               <View style={styles.tableHeaderRow}>
-                <Text style={[styles.tableHeadCell, styles.tableColDate]}>Date</Text>
-                <Text style={[styles.tableHeadCell, styles.tableColStatus]}>Statut</Text>
-                <Text style={[styles.tableHeadCell, styles.tableColGuests]}>Inv.</Text>
-                <Text style={[styles.tableHeadCell, styles.tableColAmount]}>Montant</Text>
+                <Text style={[styles.tableHeadCell, styles.tableColDate]}>{t('restaurantCateringManagement.tableDate')}</Text>
+                <Text style={[styles.tableHeadCell, styles.tableColStatus]}>{t('restaurantCateringManagement.tableStatus')}</Text>
+                <Text style={[styles.tableHeadCell, styles.tableColGuests]}>{t('restaurantCateringManagement.tableGuestsAbbr')}</Text>
+                <Text style={[styles.tableHeadCell, styles.tableColAmount]}>{t('restaurantCateringManagement.tableAmount')}</Text>
               </View>
               {bookings.map((b, index) => (
                 <View
@@ -234,7 +234,7 @@ const CateringManagementScreen = ({navigation}: any) => {
                             b.status === 'cancelled' && styles.bookingStatusTextCancelled,
                           ]}
                           numberOfLines={1}>
-                          {BOOKING_STATUS_LABELS[b.status] ?? b.status}
+                          {bookingStatusLabel(b.status)}
                         </Text>
                       </View>
                     </View>
@@ -259,14 +259,14 @@ const CateringManagementScreen = ({navigation}: any) => {
 
       <ConfirmModal
         visible={deleteTarget !== null}
-        title="Supprimer cette offre ?"
+        title={t('restaurantCateringManagement.deleteConfirmTitle')}
         message={
           deleteTarget
-            ? `« ${deleteTarget.service_name } » sera définitivement supprimée.`
+            ? t('restaurantCateringManagement.deleteConfirmMessage', {name: deleteTarget.service_name})
             : ''
         }
-        confirmLabel="Supprimer"
-        cancelLabel="Annuler"
+        confirmLabel={t('restaurantCateringManagement.deleteConfirmButton')}
+        cancelLabel={t('restaurantCateringManagement.cancel')}
         variant="danger"
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}

@@ -8,22 +8,23 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
 import * as ordersApi from '../services/orders';
 import {formatAxiosError} from '../utils/formatApiError';
 
-const statusLabel: Record<string, string> = {
-  delivered: 'Livrée',
-  cancelled: 'Annulée',
-  pending: 'En attente',
-  confirmed: 'Confirmée',
-  preparing: 'En préparation',
-  ready: 'Prête',
-  paid: 'Payée',
-  payment_failed: 'Paiement échoué',
-};
+const KNOWN_STATUSES = [
+  'delivered',
+  'cancelled',
+  'pending',
+  'confirmed',
+  'preparing',
+  'ready',
+  'paid',
+  'payment_failed',
+];
 
 const statusColor: Record<string, string> = {
   delivered: Colors.success,
@@ -37,6 +38,8 @@ const statusColor: Record<string, string> = {
 };
 
 const OrderDetailsScreen = ({navigation, route}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const orderId = route.params?.orderId ?? route.params?.order_id;
   const [order, setOrder] = useState<ordersApi.OrderApi | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +47,7 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
 
   const loadOrder = useCallback(async () => {
     if (orderId == null) {
-      setError('Commande introuvable');
+      setError(t('orderDetails.notFound'));
       setLoading(false);
       return;
     }
@@ -54,12 +57,12 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
       const data = await ordersApi.getOrderById(orderId);
       setOrder(data);
     } catch (e: any) {
-      setError(formatAxiosError(e, 'Erreur de chargement'));
+      setError(formatAxiosError(e, t('orderDetails.loadError')));
       setOrder(null);
     } finally {
       setLoading(false);
     }
-  }, [orderId]);
+  }, [orderId, t]);
 
   useEffect(() => {
     loadOrder();
@@ -67,7 +70,7 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
-    return d.toLocaleDateString('fr-FR', {
+    return d.toLocaleDateString(dateLocale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -81,7 +84,7 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
       <View style={styles.container}>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('orderDetails.loading')}</Text>
         </View>
       </View>
     );
@@ -92,18 +95,20 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
       <View style={styles.container}>
         <View style={styles.centered}>
           <IconWrapper name="alert-circle-outline" size={64} color={Colors.error} />
-          <Text style={styles.errorTitle}>Erreur</Text>
-          <Text style={styles.errorText}>{error ?? 'Commande introuvable'}</Text>
+          <Text style={styles.errorTitle}>{t('orderDetails.errorTitle')}</Text>
+          <Text style={styles.errorText}>{error ?? t('orderDetails.notFound')}</Text>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.backButtonText}>Retour</Text>
+            <Text style={styles.backButtonText}>{t('orderDetails.back')}</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  const status = order.status as keyof typeof statusLabel;
-  const label = statusLabel[status] ?? 'En cours';
+  const status = order.status as string;
+  const label = KNOWN_STATUSES.includes(status)
+    ? t(`orderDetails.status.${status}`)
+    : t('orderDetails.status.inProgress');
   const color = statusColor[status] ?? Colors.textLight;
   const total = order.paid_amount ?? order.items?.reduce((s, i) => s + (i.total_price || 0), 0) ?? 0;
   const paymentDone = order.paid || order.status === 'paid';
@@ -112,7 +117,7 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.orderId}>Commande #{order.id}</Text>
+          <Text style={styles.orderId}>{t('orderDetails.orderNumber', {id: order.id})}</Text>
           <View style={[styles.statusBadge, {backgroundColor: color + '20'}]}>
             <Text style={[styles.statusText, {color}]}>{label}</Text>
           </View>
@@ -120,10 +125,10 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
         <Text style={styles.date}>{formatDate(order.created)}</Text>
 
         <View style={styles.block}>
-          <Text style={styles.blockTitle}>Adresse de livraison</Text>
+          <Text style={styles.blockTitle}>{t('orderDetails.deliveryAddress')}</Text>
           <Text style={styles.blockText}>{order.address}</Text>
           {order.phone ? (
-            <Text style={styles.blockText}>Tél. {order.phone}</Text>
+            <Text style={styles.blockText}>{t('orderDetails.phone', {phone: order.phone})}</Text>
           ) : null}
           {order.email ? (
             <Text style={styles.blockText}>{order.email}</Text>
@@ -131,11 +136,11 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
         </View>
 
         <View style={styles.block}>
-          <Text style={styles.blockTitle}>Détail des articles</Text>
+          <Text style={styles.blockTitle}>{t('orderDetails.itemsDetail')}</Text>
           {order.items?.map((item) => (
             <View key={item.id} style={styles.itemRow}>
               <Text style={styles.itemName}>
-                Article #{item.dish_id} × {item.quantity}
+                {t('orderDetails.itemLine', {id: item.dish_id, quantity: item.quantity})}
               </Text>
               <Text style={styles.itemPrice}>{item.total_price.toFixed(2)} €</Text>
             </View>
@@ -143,29 +148,32 @@ const OrderDetailsScreen = ({navigation, route}: any) => {
         </View>
 
         <View style={styles.block}>
-          <Text style={styles.blockTitle}>Paiement</Text>
+          <Text style={styles.blockTitle}>{t('orderDetails.payment')}</Text>
           <Text style={[styles.blockText, paymentDone ? styles.paymentSuccess : styles.paymentPending]}>
-            {paymentDone ? 'Payé' : 'En attente de paiement'}
+            {paymentDone ? t('orderDetails.paid') : t('orderDetails.paymentPending')}
           </Text>
           {order.paid_at ? (
-            <Text style={styles.blockText}>Validé le {formatDate(order.paid_at)}</Text>
+            <Text style={styles.blockText}>{t('orderDetails.confirmedOn', {date: formatDate(order.paid_at)})}</Text>
           ) : null}
           {order.paid_amount != null ? (
             <Text style={styles.blockText}>
-              Montant payé: {Number(order.paid_amount).toFixed(2)} {order.paid_currency?.toUpperCase() || 'EUR'}
+              {t('orderDetails.amountPaid', {
+                amount: Number(order.paid_amount).toFixed(2),
+                currency: order.paid_currency?.toUpperCase() || 'EUR',
+              })}
             </Text>
           ) : null}
         </View>
 
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalLabel}>{t('orderDetails.total')}</Text>
           <Text style={styles.totalValue}>{Number(total).toFixed(2)} €</Text>
         </View>
 
         <TouchableOpacity
           style={styles.detailButton}
           onPress={() => navigation.goBack()}>
-          <Text style={styles.detailButtonText}>Retour à l'historique</Text>
+          <Text style={styles.detailButtonText}>{t('orderDetails.backToHistory')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

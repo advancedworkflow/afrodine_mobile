@@ -12,6 +12,7 @@ import {
   TextInput,
   Linking,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -42,7 +43,6 @@ import LineChartCard from '../../components/charts/LineChartCard';
 
 const DASHBOARD_CHART_HEIGHT = 100;
 const DASHBOARD_BAR_MAX = 70;
-const DAY_LABELS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
 function getPointValue(point: RevenueDataPoint | OrdersDataPoint, valueKey: 'revenue' | 'orders'): number {
   return valueKey === 'revenue' ? (point as RevenueDataPoint).revenue ?? 0 : (point as OrdersDataPoint).orders ?? 0;
@@ -72,10 +72,12 @@ function MiniBarChart({
   data,
   valueKey,
   color = Colors.darkGreen,
+  dayLabels,
 }: {
   data: RevenueDataPoint[] | OrdersDataPoint[];
   valueKey: 'revenue' | 'orders';
   color?: string;
+  dayLabels: string[];
 }) {
   const values = data.map((d) => getPointValue(d, valueKey));
   const max = Math.max(...values, 1);
@@ -102,7 +104,7 @@ function MiniBarChart({
                   },
                 ]}
               />
-              <Text style={dashboardStyles.barDay}>{DAY_LABELS[new Date(dateStr).getDay()] ?? ''}</Text>
+              <Text style={dashboardStyles.barDay}>{dayLabels[new Date(dateStr).getDay()] ?? ''}</Text>
             </View>
           );
         })}
@@ -205,13 +207,15 @@ const dashboardStyles = StyleSheet.create({
 });
 
 type ChartPeriod = '7d' | '30d' | '90d';
-const PERIOD_OPTIONS: { value: ChartPeriod; label: string }[] = [
-  { value: '7d', label: '7 jours' },
-  { value: '30d', label: '30 jours' },
-  { value: '90d', label: '90 jours' },
-];
+const PERIOD_VALUES: ChartPeriod[] = ['7d', '30d', '90d'];
 
 const RestaurantDashboardScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+  const dayLabels = t('restaurantDashboard.dayLabels', {returnObjects: true}) as string[];
+  const PERIOD_OPTIONS: { value: ChartPeriod; label: string }[] = PERIOD_VALUES.map((value) => ({
+    value,
+    label: t(`restaurantDashboard.periods.${value}`),
+  }));
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>([]);
   const [ordersData, setOrdersData] = useState<OrdersDataPoint[]>([]);
@@ -354,26 +358,26 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
   const onConfirmPayout = async () => {
     const amount = parseFloat(payoutAmount.replace(',', '.'));
     if (!Number.isFinite(amount) || amount <= 0) {
-      alert('Montant invalide', 'Saisissez un montant positif.');
+      alert(t('restaurantDashboard.invalidAmountTitle'), t('restaurantDashboard.invalidAmountMessage'));
       return;
     }
     if (amount > walletBalance) {
-      alert('Solde insuffisant', `Solde disponible : ${walletBalance.toFixed(2)} €`);
+      alert(t('restaurantDashboard.insufficientBalanceTitle'), t('restaurantDashboard.insufficientBalanceMessage', {amount: walletBalance.toFixed(2)}));
       return;
     }
     setPayoutLoading(true);
     try {
-      const result = await requestPayout(amount, 'Retrait manuel');
+      const result = await requestPayout(amount, t('restaurantDashboard.manualWithdrawal'));
       if (result?.success) {
         setPayoutModalVisible(false);
         setPayoutAmount('');
         setWalletBalance(result?.new_balance ?? walletBalance - amount);
-        alert('Succès', `Payout de ${amount.toFixed(2)} € demandé. Arrivée sous 1-3 jours ouvrés.`);
+        alert(t('restaurantDashboard.successTitle'), t('restaurantDashboard.payoutRequested', {amount: amount.toFixed(2)}));
       } else {
-        alert('Erreur', (result as any)?.message ?? 'Impossible d\'effectuer le retrait.');
+        alert(t('restaurantDashboard.errorTitle'), (result as any)?.message ?? t('restaurantDashboard.payoutFailed'));
       }
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible d\'effectuer le retrait.'));
+      alert(t('restaurantDashboard.errorTitle'), formatAxiosError(e, t('restaurantDashboard.payoutFailed')));
     } finally {
       setPayoutLoading(false);
     }
@@ -382,18 +386,18 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
   const onOpenConnectOnboarding = async () => {
     const link = await createStripeConnectOnboardingLink();
     if (!link?.url) {
-      alert('Stripe Connect', 'Impossible de generer le lien onboarding pour le moment.');
+      alert('Stripe Connect', t('restaurantDashboard.connectLinkFailed'));
       return;
     }
     try {
       const canOpen = await Linking.canOpenURL(link.url);
       if (!canOpen) {
-        alert('Stripe Connect', 'Impossible d’ouvrir le navigateur sur cet appareil.');
+        alert('Stripe Connect', t('restaurantDashboard.connectCannotOpenBrowser'));
         return;
       }
       await Linking.openURL(link.url);
     } catch {
-      alert('Stripe Connect', 'Impossible d’ouvrir le lien onboarding. Reessayez.');
+      alert('Stripe Connect', t('restaurantDashboard.connectLinkOpenFailed'));
     }
   };
 
@@ -402,12 +406,12 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar
           navigation={navigation}
-          title="Tableau de bord"
+          title={t('restaurantDashboard.title')}
           showOptionsMenu
           showNotifications={true}
           optionsMenuItems={[
-            { label: 'Profil', onPress: () => navigation.navigate('RestaurantProfile') },
-            { label: 'Paramètres', onPress: () => navigation.navigate('Settings') },
+            { label: t('restaurantDashboard.menuProfile'), onPress: () => navigation.navigate('RestaurantProfile') },
+            { label: t('restaurantDashboard.menuSettings'), onPress: () => navigation.navigate('Settings') },
           ]}
         />
         <View style={styles.centered}>
@@ -428,12 +432,12 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title="Tableau de bord"
+        title={t('restaurantDashboard.title')}
         showOptionsMenu
         showNotifications={true}
         optionsMenuItems={[
-          { label: 'Profil', onPress: () => navigation.navigate('RestaurantProfile') },
-          { label: 'Paramètres', onPress: () => navigation.navigate('Settings') },
+          { label: t('restaurantDashboard.menuProfile'), onPress: () => navigation.navigate('RestaurantProfile') },
+          { label: t('restaurantDashboard.menuSettings'), onPress: () => navigation.navigate('Settings') },
         ]}
       />
       <ScrollView
@@ -445,29 +449,29 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
           <View style={[styles.card, styles.cardPrimary]}>
             <IconWrapper name="receipt-outline" size={28} color={Colors.white} />
             <Text style={styles.cardValueWhite}>{pending}</Text>
-            <Text style={styles.cardLabelWhite}>En attente</Text>
+            <Text style={styles.cardLabelWhite}>{t('restaurantDashboard.pending')}</Text>
           </View>
           <View style={styles.card}>
             <IconWrapper name="cash-outline" size={28} color={Colors.darkGreen} />
             <Text style={styles.cardValue}>{todayRev.toFixed(0)} €</Text>
-            <Text style={styles.cardLabel}>Aujourd'hui</Text>
+            <Text style={styles.cardLabel}>{t('restaurantDashboard.today')}</Text>
           </View>
         </View>
         <View style={styles.cardsRow}>
           <View style={styles.card}>
             <IconWrapper name="restaurant-outline" size={28} color={Colors.darkGreen} />
             <Text style={styles.cardValue}>{totalOrders}</Text>
-            <Text style={styles.cardLabel}>Commandes</Text>
+            <Text style={styles.cardLabel}>{t('restaurantDashboard.orders')}</Text>
           </View>
           <View style={styles.card}>
             <IconWrapper name="pricetag-outline" size={28} color={Colors.darkGreen} />
             <Text style={styles.cardValue}>{totalDishes}</Text>
-            <Text style={styles.cardLabel}>Plats</Text>
+            <Text style={styles.cardLabel}>{t('restaurantDashboard.dishes')}</Text>
           </View>
         </View>
 
         <View style={[styles.periodRow, periodDropdownOpen && styles.periodRowDropdownOpen]}>
-          <Text style={styles.periodLabel}>Période des graphiques</Text>
+          <Text style={styles.periodLabel}>{t('restaurantDashboard.chartsPeriod')}</Text>
           <View style={styles.periodDropdownWrap}>
             <TouchableOpacity
               style={styles.periodDropdownButton}
@@ -507,42 +511,42 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
           data={revenueData.length > 0 ? revenueData : last7DaysRevenue()}
           valueKey="revenue"
           color={Colors.darkGreen}
-          title="Revenus"
-          valueLabel={PERIOD_OPTIONS.find((p) => p.value === chartPeriod)?.label ?? `Total ${chartPeriod}`}
+          title={t('restaurantDashboard.revenue')}
+          valueLabel={PERIOD_OPTIONS.find((p) => p.value === chartPeriod)?.label ?? t('restaurantDashboard.totalPeriod', {period: chartPeriod})}
           formatValue={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k €` : `${v.toFixed(0)} €`)}
         />
         <LineChartCard
           data={ordersData.length > 0 ? ordersData : last7DaysOrders()}
           valueKey="orders"
           color={Colors.olive}
-          title="Commandes"
-          valueLabel={PERIOD_OPTIONS.find((p) => p.value === chartPeriod)?.label ?? `Total ${chartPeriod}`}
+          title={t('restaurantDashboard.orders')}
+          valueLabel={PERIOD_OPTIONS.find((p) => p.value === chartPeriod)?.label ?? t('restaurantDashboard.totalPeriod', {period: chartPeriod})}
           formatValue={(v) => `${v}`}
         />
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Revenu total</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantDashboard.totalRevenue')}</Text>
           <Text style={styles.revenueTotal}>{totalRev.toFixed(2)} €</Text>
-          <Text style={styles.dataSourceLabel}>Données en direct (API)</Text>
+          <Text style={styles.dataSourceLabel}>{t('restaurantDashboard.liveData')}</Text>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="wallet-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Portefeuille</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantDashboard.wallet')}</Text>
           </View>
-          <Text style={styles.walletBalance}>{walletBalance.toFixed(2)} € disponibles</Text>
+          <Text style={styles.walletBalance}>{t('restaurantDashboard.availableBalance', {amount: walletBalance.toFixed(2)})}</Text>
           <TouchableOpacity
             style={styles.payoutButton}
             onPress={() => setPayoutModalVisible(true)}
             activeOpacity={0.8}
             disabled={walletBalance <= 0}>
             <IconWrapper name="card-outline" size={20} color={Colors.white} />
-            <Text style={styles.payoutButtonText}>Effectuer un payout</Text>
+            <Text style={styles.payoutButtonText}>{t('restaurantDashboard.makePayout')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.linkButton}
             onPress={() => navigation.navigate('RestaurantWallet')}
             activeOpacity={0.7}>
-            <Text style={styles.linkButtonText}>Voir le portefeuille</Text>
+            <Text style={styles.linkButtonText}>{t('restaurantDashboard.viewWallet')}</Text>
             <IconWrapper name="chevron-forward" size={18} color={Colors.darkGreen} />
           </TouchableOpacity>
         </View>
@@ -552,38 +556,38 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             <Text style={styles.sectionTitle}>Stripe Connect</Text>
           </View>
           <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>Statut</Text>
+            <Text style={styles.connectLabel}>{t('restaurantDashboard.status')}</Text>
             <Text style={styles.connectValue}>
               {connectStatus?.charges_enabled && connectStatus?.payouts_enabled
-                ? 'Actif'
-                : (connectStatus?.status || 'Non configure')}
+                ? t('restaurantDashboard.statusActive')
+                : (connectStatus?.status || t('restaurantDashboard.statusNotConfigured'))}
             </Text>
           </View>
           <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>Disponible Connect</Text>
+            <Text style={styles.connectLabel}>{t('restaurantDashboard.connectAvailable')}</Text>
             <Text style={styles.connectValue}>{(connectBalance?.available_balance ?? 0).toFixed(2)} €</Text>
           </View>
           <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>En attente Connect</Text>
+            <Text style={styles.connectLabel}>{t('restaurantDashboard.connectPending')}</Text>
             <Text style={styles.connectValue}>{(connectBalance?.pending_balance ?? 0).toFixed(2)} €</Text>
           </View>
           <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>Dernier payout</Text>
+            <Text style={styles.connectLabel}>{t('restaurantDashboard.lastPayout')}</Text>
             <Text style={styles.connectValue}>
-              {lastPayout?.amount != null ? `${Number(lastPayout.amount).toFixed(2)} €` : 'Aucun'}
+              {lastPayout?.amount != null ? `${Number(lastPayout.amount).toFixed(2)} €` : t('restaurantDashboard.none')}
             </Text>
           </View>
           <TouchableOpacity
             style={styles.connectButton}
             onPress={onOpenConnectOnboarding}
             activeOpacity={0.8}>
-            <Text style={styles.connectButtonText}>Activer / Mettre a jour Connect</Text>
+            <Text style={styles.connectButtonText}>{t('restaurantDashboard.activateConnect')}</Text>
           </TouchableOpacity>
         </View>
         {topDishes.length > 0 && (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Plats populaires (CA)</Text>
+              <Text style={styles.sectionTitle}>{t('restaurantDashboard.popularDishesByRevenue')}</Text>
               <HorizontalBarChart
                 items={topDishes}
                 valueKey="revenue"
@@ -591,19 +595,19 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
               />
             </View>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Plats les plus commandés</Text>
+              <Text style={styles.sectionTitle}>{t('restaurantDashboard.mostOrderedDishes')}</Text>
               <HorizontalBarChart
                 items={topDishes}
                 valueKey="orders"
-                labelFormat={(v) => `${v} cmd`}
+                labelFormat={(v) => t('restaurantDashboard.orderAbbr', {count: v})}
               />
             </View>
           </>
         )}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Avis</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantDashboard.reviews')}</Text>
           {recentReviews.length === 0 ? (
-            <Text style={styles.mutedText}>Aucun avis pour le moment.</Text>
+            <Text style={styles.mutedText}>{t('restaurantDashboard.noReviews')}</Text>
           ) : (
             recentReviews.map((review, index) => (
               <View key={review.id ?? index} style={styles.reviewRow}>
@@ -612,7 +616,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
                   <Text style={styles.reviewRating}>{review.rating ?? review.score ?? '–'}</Text>
                 </View>
                 <Text style={styles.reviewComment} numberOfLines={2}>{review.comment || review.comment_text || '—'}</Text>
-                <Text style={styles.reviewAuthor}>{review.client_name ?? review.user_name ?? 'Client'}</Text>
+                <Text style={styles.reviewAuthor}>{review.client_name ?? review.user_name ?? t('restaurantDashboard.defaultClientName')}</Text>
               </View>
             ))
           )}
@@ -620,73 +624,73 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             style={styles.linkButton}
             onPress={() => navigation.navigate('RestaurantReviews')}
             activeOpacity={0.7}>
-            <Text style={styles.linkButtonText}>Voir avis</Text>
+            <Text style={styles.linkButtonText}>{t('restaurantDashboard.viewReviews')}</Text>
             <IconWrapper name="chevron-forward" size={18} color={Colors.darkGreen} />
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="megaphone-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Annonces</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantDashboard.announcements')}</Text>
           </View>
-          <Text style={styles.mutedText}>Consultez les annonces de l'administration.</Text>
+          <Text style={styles.mutedText}>{t('restaurantDashboard.announcementsHint')}</Text>
           <TouchableOpacity
             style={styles.traiteurButton}
             onPress={() => navigation.navigate('RestaurantAnnouncements')}
             activeOpacity={0.8}>
-            <Text style={styles.traiteurButtonText}>Voir les annonces</Text>
+            <Text style={styles.traiteurButtonText}>{t('restaurantDashboard.viewAnnouncements')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="restaurant" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Service traiteur</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantDashboard.cateringService')}</Text>
           </View>
-          <Text style={styles.mutedText}>Gérez vos demandes traiteur et formules pour événements.</Text>
+          <Text style={styles.mutedText}>{t('restaurantDashboard.cateringHint')}</Text>
           <TouchableOpacity
             style={styles.traiteurButton}
             onPress={() => navigation.navigate('CateringManagement')}
             activeOpacity={0.8}>
-            <Text style={styles.traiteurButtonText}>Accéder au traiteur</Text>
+            <Text style={styles.traiteurButtonText}>{t('restaurantDashboard.goToCatering')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="storefront-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Grocery shop</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantDashboard.groceryShop')}</Text>
           </View>
-          <Text style={styles.mutedText}>Gérez votre magasin d'épicerie et son catalogue de produits.</Text>
+          <Text style={styles.mutedText}>{t('restaurantDashboard.groceryHint')}</Text>
           <TouchableOpacity
             style={styles.traiteurButton}
             onPress={() => navigation.navigate('GroceryManagement')}
             activeOpacity={0.8}>
-            <Text style={styles.traiteurButtonText}>Gérer le grocery shop</Text>
+            <Text style={styles.traiteurButtonText}>{t('restaurantDashboard.manageGrocery')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="pricetag-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Promotions</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantDashboard.promotions')}</Text>
           </View>
-          <Text style={styles.mutedText}>Créez et gérez vos offres promotionnelles.</Text>
+          <Text style={styles.mutedText}>{t('restaurantDashboard.promotionsHint')}</Text>
           <TouchableOpacity
             style={styles.traiteurButton}
             onPress={() => navigation.navigate('PromotionsManagement')}
             activeOpacity={0.8}>
-            <Text style={styles.traiteurButtonText}>Gérer les promotions</Text>
+            <Text style={styles.traiteurButtonText}>{t('restaurantDashboard.managePromotions')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="people-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Employés</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantDashboard.employees')}</Text>
           </View>
-          <Text style={styles.mutedText}>Gérez les membres de votre équipe et leurs rôles.</Text>
+          <Text style={styles.mutedText}>{t('restaurantDashboard.employeesHint')}</Text>
           <TouchableOpacity
             style={styles.traiteurButton}
             onPress={() => navigation.navigate('EmployeesManagement')}
             activeOpacity={0.8}>
-            <Text style={styles.traiteurButtonText}>Gérer les employés</Text>
+            <Text style={styles.traiteurButtonText}>{t('restaurantDashboard.manageEmployees')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -697,8 +701,8 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
         onRequestClose={() => !payoutLoading && setPayoutModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Effectuer un payout</Text>
-            <Text style={styles.modalHint}>Montant à retirer (€)</Text>
+            <Text style={styles.modalTitle}>{t('restaurantDashboard.makePayout')}</Text>
+            <Text style={styles.modalHint}>{t('restaurantDashboard.amountToWithdraw')}</Text>
             <TextInput
               style={styles.modalInput}
               value={payoutAmount}
@@ -708,13 +712,13 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
               keyboardType="decimal-pad"
               editable={!payoutLoading}
             />
-            <Text style={styles.modalBalance}>Solde : {walletBalance.toFixed(2)} €</Text>
+            <Text style={styles.modalBalance}>{t('restaurantDashboard.balance', {amount: walletBalance.toFixed(2)})}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalBtn, styles.modalBtnCancel]}
                 onPress={() => !payoutLoading && setPayoutModalVisible(false)}
                 disabled={payoutLoading}>
-                <Text style={styles.modalBtnCancelText}>Annuler</Text>
+                <Text style={styles.modalBtnCancelText}>{t('restaurantDashboard.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalBtn, styles.modalBtnConfirm]}
@@ -723,7 +727,7 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
                 {payoutLoading ? (
                   <ActivityIndicator size="small" color={Colors.white} />
                 ) : (
-                  <Text style={styles.modalBtnConfirmText}>Confirmer</Text>
+                  <Text style={styles.modalBtnConfirmText}>{t('restaurantDashboard.confirm')}</Text>
                 )}
               </TouchableOpacity>
             </View>

@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -17,6 +18,7 @@ import {
 import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontSub, fontUI} from '../utils/fonts';
 import {useCart} from '../contexts/CartContext';
 import {useAuth} from '../contexts/AuthContext';
@@ -33,6 +35,7 @@ const CTA_BUTTON_BG = '#054625';
 const CTA_BUTTON_TEXT = '#ffffff';
 
 const CartScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const {items: cartItems, removeItem, updateQuantity, clearCart} = useCart();
   const {user, isAuthenticated, isRestaurant} = useAuth();
   const {mergePublishableKey} = useStripeBootstrap();
@@ -118,11 +121,11 @@ const CartScreen = ({navigation}: any) => {
     const address = deliveryAddress.trim();
     const phone = deliveryPhone.trim();
     if (!address) {
-      alert('Champ requis', 'Veuillez saisir votre adresse de livraison.');
+      alert(t('cart.requiredFieldTitle'), t('cart.missingAddress'));
       return;
     }
     if (!phone) {
-      alert('Champ requis', 'Veuillez saisir votre numéro de téléphone.');
+      alert(t('cart.requiredFieldTitle'), t('cart.missingPhone'));
       return;
     }
     setCheckoutLoading(true);
@@ -156,7 +159,7 @@ const CartScreen = ({navigation}: any) => {
         }
       }
       if (orderLines.length === 0) {
-        alert('Panier invalide', 'Aucun article valide pour la commande. Ajoutez un plat au panier.');
+        alert(t('cart.invalidCartTitle'), t('cart.invalidCartMessage'));
         setCheckoutLoading(false);
         return;
       }
@@ -197,12 +200,12 @@ const CartScreen = ({navigation}: any) => {
         // qui ne reecrivent pas les routes SPA comme /checkout-pay.
         const payUrl = `${webAppUrl.replace(/\/$/, '')}/?checkout=pay#secret=${encodeURIComponent(secret)}`;
         Linking.openURL(payUrl).catch(() =>
-          alert('Erreur', "Impossible d'ouvrir la page de paiement."),
+          alert(t('cart.errorTitle'), t('cart.cannotOpenPaymentPage')),
         );
       };
 
       if (stripeClientSecret) {
-        const orderLabel = orderId != null ? ` Commande #${orderId}.` : '';
+        const orderLabel = orderId != null ? ` ${t('cart.orderNumberLabel', {id: orderId})}` : '';
         const emailForStripe = deliveryEmail.trim() || user?.email || undefined;
 
         if (Platform.OS !== 'web') {
@@ -224,13 +227,12 @@ const CartScreen = ({navigation}: any) => {
             });
             if (initError) {
               alert(
-                'Paiement',
-                initError.message ||
-                  'Impossible d’ouvrir le paiement dans l’app. Ouverture du navigateur sécurisé.',
+                t('cart.paymentTitle'),
+                initError.message || t('cart.paymentAppUnavailable'),
                 [
-                  {text: 'Annuler', style: 'cancel', onPress: goHomeOrHistory},
+                  {text: t('cart.cancel'), style: 'cancel', onPress: goHomeOrHistory},
                   {
-                    text: 'Continuer',
+                    text: t('cart.continue'),
                     onPress: () => openWebCheckout(stripeClientSecret),
                   },
                 ],
@@ -241,25 +243,25 @@ const CartScreen = ({navigation}: any) => {
                 const code = (presentError as {code?: string}).code;
                 if (code === 'Canceled') {
                   alert(
-                    'Paiement annulé',
-                    `La commande est enregistrée.${orderLabel}`,
+                    t('cart.paymentCancelledTitle'),
+                    `${t('cart.orderSavedNotice')}${orderLabel}`,
                     [{text: 'OK', onPress: goHomeOrHistory}],
                   );
                 } else {
                   alert(
-                    'Paiement',
-                    presentError.message || 'Le paiement a échoué.',
+                    t('cart.paymentTitle'),
+                    presentError.message || t('cart.paymentFailed'),
                     [
-                      {text: 'Annuler', style: 'cancel', onPress: goHomeOrHistory},
+                      {text: t('cart.cancel'), style: 'cancel', onPress: goHomeOrHistory},
                       {
-                        text: 'Payer en ligne',
+                        text: t('cart.payOnline'),
                         onPress: () => openWebCheckout(stripeClientSecret),
                       },
                     ],
                   );
                 }
               } else {
-                alert('Paiement réussi', `Votre commande${orderLabel} a été payée.`, [
+                alert(t('cart.paymentSuccessTitle'), `${t('cart.orderPaidNotice')}${orderLabel}`, [
                   {text: 'OK', onPress: goHomeOrHistory},
                 ]);
               }
@@ -268,16 +270,16 @@ const CartScreen = ({navigation}: any) => {
             console.warn('[Cart] Payment Sheet natif indisponible', e);
             openWebCheckout(stripeClientSecret);
             alert(
-              'Paiement',
-              `Ouverture du paiement sécurisé dans le navigateur.${orderLabel}`,
+              t('cart.paymentTitle'),
+              `${t('cart.openingSecurePaymentInBrowser')}${orderLabel}`,
               [{text: 'OK', onPress: goHomeOrHistory}],
             );
           }
         } else {
           openWebCheckout(stripeClientSecret);
           alert(
-            'Paiement',
-            `Finalisez le paiement dans l’onglet du navigateur.${orderLabel}`,
+            t('cart.paymentTitle'),
+            `${t('cart.finalizePaymentInBrowserTab')}${orderLabel}`,
             [{text: 'OK', onPress: goHomeOrHistory}],
           );
         }
@@ -287,20 +289,20 @@ const CartScreen = ({navigation}: any) => {
         ];
         if (user) {
           buttons.unshift({
-            text: 'Voir l\'historique',
+            text: t('cart.viewHistory'),
             onPress: () => navigation.navigate('OrderHistory'),
           });
         }
         alert(
-          'Commande enregistrée',
+          t('cart.orderSavedTitle'),
           orderTotal > 0
-            ? 'Votre commande est enregistrée, mais le paiement par carte n’a pas pu être démarré (vérifiez la configuration Stripe sur le serveur : STRIPE_SECRET_KEY / STRIPE_PUBLISHABLE_KEY).'
-            : 'Votre commande a bien été prise en compte.',
+            ? t('cart.orderSavedNoStripeMessage')
+            : t('cart.orderConfirmedMessage'),
           buttons,
         );
       }
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Erreur lors de la commande'));
+      alert(t('cart.errorTitle'), formatAxiosError(e, t('cart.orderError')));
     } finally {
       setCheckoutLoading(false);
     }
@@ -314,16 +316,16 @@ const CartScreen = ({navigation}: any) => {
             <IconWrapper name="arrow-back-outline" size={22} color={Colors.darkGreen} />
           </TouchableOpacity>
         )}
-        <Text style={styles.headerTitle}>Votre commande</Text>
+        <Text style={styles.headerTitle}>{t('cart.title')}</Text>
       </View>
       {cartItems.length === 0 ? (
         <View style={styles.emptyContainer}>
           <IconWrapper name="cart-outline" size={80} color={Colors.textLight} />
-          <Text style={styles.emptyText}>Votre panier est vide</Text>
+          <Text style={styles.emptyText}>{t('cart.empty')}</Text>
           <TouchableOpacity
             style={styles.browseButton}
             onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.browseButtonText}>Parcourir les restaurants</Text>
+            <Text style={styles.browseButtonText}>{t('cart.browseRestaurants')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -333,7 +335,7 @@ const CartScreen = ({navigation}: any) => {
               <View style={styles.restaurantAvatar}>
                 <Text style={styles.restaurantAvatarText}>{restaurantInitials}</Text>
               </View>
-              <Text style={styles.restaurantName} numberOfLines={1}>{restaurantInfo?.name ?? 'Votre commande'}</Text>
+              <Text style={styles.restaurantName} numberOfLines={1}>{restaurantInfo?.name ?? t('cart.title')}</Text>
               {restaurantInfo?.city ? <Text style={styles.restaurantCity}>{restaurantInfo.city}</Text> : null}
             </View>
 
@@ -383,7 +385,7 @@ const CartScreen = ({navigation}: any) => {
                       onPress={() => removeItem(item.id)}
                       hitSlop={{top: 6, bottom: 6, left: 6, right: 6}}
                       style={styles.removeLink}>
-                      <Text style={styles.removeLinkText}>Retirer</Text>
+                      <Text style={styles.removeLinkText}>{t('cart.remove')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -398,7 +400,7 @@ const CartScreen = ({navigation}: any) => {
                 if (restaurantId != null) navigation.navigate('RestaurantDetails', {restaurantId});
                 else navigation.navigate('Home');
               }}>
-              <Text style={styles.addMoreText}>+ Ajouter un article</Text>
+              <Text style={styles.addMoreText}>{t('cart.addAnotherItem')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -407,21 +409,21 @@ const CartScreen = ({navigation}: any) => {
               <IconWrapper name="location-outline" size={17} color={Colors.darkGreen} />
             </View>
             <View style={styles.infoTextWrap}>
-              <Text style={styles.infoTitle} numberOfLines={1}>{deliveryAddress || 'Ajouter une adresse'}</Text>
-              <Text style={styles.infoSubtitle} numberOfLines={1}>{deliveryPhone || 'Téléphone requis'}</Text>
+              <Text style={styles.infoTitle} numberOfLines={1}>{deliveryAddress || t('cart.addAddress')}</Text>
+              <Text style={styles.infoSubtitle} numberOfLines={1}>{deliveryPhone || t('cart.phoneRequired')}</Text>
             </View>
-            <Text style={styles.infoAction}>Changer</Text>
+            <Text style={styles.infoAction}>{t('cart.change')}</Text>
           </TouchableOpacity>
 
           <View style={styles.summary}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Sous-total</Text>
+              <Text style={styles.summaryLabel}>{t('cart.subtotal')}</Text>
               <Text style={styles.summaryValue}>{subtotal.toFixed(2)} €</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Livraison</Text>
+              <Text style={styles.summaryLabel}>{t('cart.delivery')}</Text>
               <Text style={styles.summaryValue}>
-                {deliveryFee === 0 ? 'Gratuit' : `${deliveryFee.toFixed(2)} €`}
+                {deliveryFee === 0 ? t('cart.free') : `${deliveryFee.toFixed(2)} €`}
               </Text>
             </View>
           </View>
@@ -431,7 +433,7 @@ const CartScreen = ({navigation}: any) => {
       {cartItems.length > 0 && (
         <View style={styles.bottomBar}>
           <View style={styles.bottomBarTotal}>
-            <Text style={styles.bottomBarTotalLabel}>Total</Text>
+            <Text style={styles.bottomBarTotalLabel}>{t('cart.total')}</Text>
             <Text style={styles.bottomBarTotalValue}>{total.toFixed(2)} €</Text>
           </View>
           <TouchableOpacity
@@ -442,7 +444,7 @@ const CartScreen = ({navigation}: any) => {
             {checkoutLoading ? (
               <ActivityIndicator size="small" color={CTA_BUTTON_TEXT} />
             ) : (
-              <Text style={styles.checkoutButtonText}>Payer</Text>
+              <Text style={styles.checkoutButtonText}>{t('cart.pay')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -463,7 +465,7 @@ const CartScreen = ({navigation}: any) => {
               hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
               <IconWrapper name="close" size={28} color={Colors.white} />
             </TouchableOpacity>
-            <Text style={styles.checkoutModalHeaderTitle}>Checkout</Text>
+            <Text style={styles.checkoutModalHeaderTitle}>{t('cart.checkout')}</Text>
             <View style={styles.checkoutModalHeaderRight} />
           </View>
 
@@ -475,10 +477,10 @@ const CartScreen = ({navigation}: any) => {
               contentContainerStyle={styles.checkoutModalScrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled">
-              <Text style={styles.checkoutModalSectionTitle}>Adresse de livraison</Text>
+              <Text style={styles.checkoutModalSectionTitle}>{t('cart.deliveryAddress')}</Text>
               <TextInput
                 style={styles.checkoutInput}
-                placeholder="Adresse complète"
+                placeholder={t('cart.fullAddressPlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 value={deliveryAddress}
                 onChangeText={setDeliveryAddress}
@@ -486,7 +488,7 @@ const CartScreen = ({navigation}: any) => {
               />
               <TextInput
                 style={styles.checkoutInput}
-                placeholder="Téléphone"
+                placeholder={t('cart.phonePlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 value={deliveryPhone}
                 onChangeText={setDeliveryPhone}
@@ -494,7 +496,7 @@ const CartScreen = ({navigation}: any) => {
               />
               <TextInput
                 style={styles.checkoutInput}
-                placeholder="Email (optionnel)"
+                placeholder={t('cart.emailOptionalPlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 value={deliveryEmail}
                 onChangeText={setDeliveryEmail}
@@ -505,18 +507,18 @@ const CartScreen = ({navigation}: any) => {
               <View style={styles.checkoutStripeSection}>
                 <View style={styles.checkoutStripeHeader}>
                   <IconWrapper name="card-outline" size={24} color={Colors.darkGreen} />
-                  <Text style={styles.checkoutModalSectionTitle}>Paiement</Text>
+                  <Text style={styles.checkoutModalSectionTitle}>{t('cart.payment')}</Text>
                 </View>
                 <View style={styles.checkoutStripeBadge}>
-                  <Text style={styles.checkoutStripeText}>Paiement sécurisé par Stripe</Text>
+                  <Text style={styles.checkoutStripeText}>{t('cart.securePaymentByStripe')}</Text>
                 </View>
                 <Text style={styles.checkoutStripeHint}>
-                  Vous serez redirigé vers le paiement après validation de la commande.
+                  {t('cart.redirectedAfterOrderNotice')}
                 </Text>
               </View>
 
               <View style={styles.checkoutSummaryRow}>
-                <Text style={styles.checkoutSummaryLabel}>Total</Text>
+                <Text style={styles.checkoutSummaryLabel}>{t('cart.total')}</Text>
                 <Text style={styles.checkoutSummaryValue}>{total.toFixed(2)}€</Text>
               </View>
 
@@ -524,7 +526,7 @@ const CartScreen = ({navigation}: any) => {
                 style={styles.checkoutModalConfirmFull}
                 onPress={submitCheckout}
                 activeOpacity={0.8}>
-                <Text style={styles.checkoutModalConfirmText}>Confirmer la commande</Text>
+                <Text style={styles.checkoutModalConfirmText}>{t('cart.confirmOrder')}</Text>
                 <IconWrapper name="arrow-forward-outline" size={20} color={CTA_BUTTON_TEXT} style={styles.checkoutIcon} />
               </TouchableOpacity>
             </ScrollView>
@@ -760,6 +762,7 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 22,
     paddingTop: 12,
+    marginBottom: GLOBAL_TAB_BAR_HEIGHT,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     backgroundColor: Colors.background,

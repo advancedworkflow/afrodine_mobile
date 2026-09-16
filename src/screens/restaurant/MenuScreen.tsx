@@ -15,6 +15,7 @@ import {
   Image,
   Switch,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -51,6 +52,7 @@ type Section = {
 type DeleteTarget = { type: 'dish'; id: number; name: string } | { type: 'menu'; id: number; name: string } | null;
 
 const RestaurantMenuScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [menus, setMenus] = useState<MenuWithDishes[]>([]);
   const [allDishes, setAllDishes] = useState<ManagementDish[]>([]);
   const [supplements, setSupplements] = useState<ManagementSupplement[]>([]);
@@ -170,7 +172,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         const { image_url } = await uploadManagementImageFile(file, 'dishes');
         setDishImageUrl(image_url || '');
       } catch {
-        alert('Erreur', 'Impossible d\'uploader l\'image.');
+        alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.uploadError'));
       } finally {
         setUploadingImage(false);
         if (target) target.value = '';
@@ -203,7 +205,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         const { image_url } = await uploadManagementImageFile(file, 'menus');
         setMenuImageUrl(image_url || '');
       } catch {
-        alert('Erreur', 'Impossible d\'uploader l\'image.');
+        alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.uploadError'));
       } finally {
         setUploadingMenuImage(false);
         if (target) target.value = '';
@@ -233,8 +235,8 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       return;
     }
     alert(
-      'Image du menu',
-      'Sur l\'app mobile, saisissez l\'URL de l\'image dans le champ ci-dessus. L\'upload de fichier est disponible sur le tableau de bord web.',
+      t('restaurantMenu.menuImageTitle'),
+      t('restaurantMenu.menuImageMobileHint'),
     );
   };
 
@@ -253,9 +255,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       });
       setModalDish(false);
       load();
-      alert('Succès', 'Plat créé.');
+      alert(t('restaurantMenu.successTitle'), t('restaurantMenu.dishCreated'));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de créer le plat.'));
+      alert(t('restaurantMenu.errorTitle'), formatAxiosError(e, t('restaurantMenu.createDishError')));
     } finally {
       setSubmitting(false);
     }
@@ -265,11 +267,11 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     const name = dishName.trim();
     const price = parseFloat(dishPrice.replace(',', '.'));
     if (!name) {
-      alert('Erreur', 'Nom du plat requis.');
+      alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.dishNameRequired'));
       return;
     }
     if (isNaN(price) || price < 0) {
-      alert('Erreur', 'Prix invalide.');
+      alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.invalidPrice'));
       return;
     }
     setConfirmCreateDish(true);
@@ -289,9 +291,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       });
       setModalMenu(false);
       load();
-      alert('Succès', 'Menu créé.');
+      alert(t('restaurantMenu.successTitle'), t('restaurantMenu.menuCreated'));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de créer le menu.'));
+      alert(t('restaurantMenu.errorTitle'), formatAxiosError(e, t('restaurantMenu.createMenuError')));
     } finally {
       setSubmitting(false);
     }
@@ -300,7 +302,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   const handleCreateMenu = () => {
     const name = menuName.trim();
     if (!name) {
-      alert('Erreur', 'Nom du menu requis.');
+      alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.menuNameRequired'));
       return;
     }
     setConfirmCreateMenu(true);
@@ -313,19 +315,19 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     try {
       if (target.type === 'dish') {
         await deleteDish(target.id);
-        alert('Succès', 'Plat supprimé.');
+        alert(t('restaurantMenu.successTitle'), t('restaurantMenu.dishDeleted'));
       } else {
         await deleteMenu(target.id);
-        alert('Succès', 'Menu supprimé.');
+        alert(t('restaurantMenu.successTitle'), t('restaurantMenu.menuDeleted'));
       }
       load();
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert(t('restaurantMenu.errorTitle'), formatAxiosError(e, t('restaurantMenu.deleteError')));
     }
   };
 
   const allSections: Section[] = [
-    ...(allDishes.length > 0 ? [{ title: 'Tous les plats', data: allDishes, isAllDishes: true as const }] : []),
+    ...(allDishes.length > 0 ? [{ title: t('restaurantMenu.allDishes'), data: allDishes, isAllDishes: true as const }] : []),
     ...menus.map((m) => ({
       title: m.name,
       data: (m.dishes ?? []).map((d) => ({ ...d, dish_image_url: d.dish_image_url ?? (d as any).image_url })),
@@ -432,15 +434,15 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     const name = supplementName.trim();
     const price = parseFloat(supplementPrice.replace(',', '.'));
     if (!name) {
-      alert('Erreur', 'Nom du supplément requis.');
+      alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.supplementNameRequired'));
       return;
     }
     if (!Number.isFinite(price) || price < 0) {
-      alert('Erreur', 'Prix invalide.');
+      alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.invalidPrice'));
       return;
     }
     if (supplementDishId == null) {
-      alert('Erreur', 'Choisissez un plat.');
+      alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.chooseDish'));
       return;
     }
     setSupplementSubmitting(true);
@@ -448,9 +450,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       await createManagementSupplement({ name, price, dish_id: supplementDishId });
       setModalSupplement(false);
       load();
-      alert('Succès', `Supplément « ${name} » créé et assigné au plat.`);
+      alert(t('restaurantMenu.successTitle'), t('restaurantMenu.supplementCreated', {name}));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de créer le supplément.'));
+      alert(t('restaurantMenu.errorTitle'), formatAxiosError(e, t('restaurantMenu.createSupplementError')));
     } finally {
       setSupplementSubmitting(false);
     }
@@ -462,7 +464,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         <IconWrapper name="search-outline" size={20} color={Colors.textLight} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Rechercher un plat ou un menu..."
+          placeholder={t('restaurantMenu.searchPlaceholder')}
           placeholderTextColor={Colors.textLight}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -477,16 +479,16 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         <View style={styles.addRow}>
           <TouchableOpacity style={styles.addButton} onPress={openDishModal}>
             <IconWrapper name="add" size={22} color={Colors.white} />
-            <Text style={styles.addButtonText}>Plat</Text>
+            <Text style={styles.addButtonText}>{t('restaurantMenu.dish')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.addButton} onPress={openMenuModal}>
             <IconWrapper name="add" size={22} color={Colors.white} />
-            <Text style={styles.addButtonText}>Menu</Text>
+            <Text style={styles.addButtonText}>{t('restaurantMenu.menu')}</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.addButtonSupplement} onPress={openSupplementModal}>
           <IconWrapper name="add-outline" size={22} color={Colors.white} />
-          <Text style={styles.addButtonSupplementText}>Supplément</Text>
+          <Text style={styles.addButtonSupplementText}>{t('restaurantMenu.supplement')}</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -495,7 +497,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title="Menu" />
+        <TopBar navigation={navigation} title={t('restaurantMenu.title')} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -505,7 +507,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title="Menu" />
+      <TopBar navigation={navigation} title={t('restaurantMenu.title')} />
       {sections.length === 0 ? (
         <ScrollView
           style={styles.content}
@@ -516,8 +518,8 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           {ListHeader}
           <View style={styles.empty}>
             <IconWrapper name="restaurant-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>Aucun plat ni menu</Text>
-            <Text style={styles.emptyText}>Créez un menu ou un plat avec les boutons ci-dessus.</Text>
+            <Text style={styles.emptyTitle}>{t('restaurantMenu.noDishOrMenu')}</Text>
+            <Text style={styles.emptyText}>{t('restaurantMenu.noDishOrMenuSubtitle')}</Text>
           </View>
         </ScrollView>
       ) : (
@@ -541,7 +543,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalFullScreen}>
           <View style={styles.modalFullHeader}>
-            <Text style={styles.modalFullTitle}>Nouveau plat</Text>
+            <Text style={styles.modalFullTitle}>{t('restaurantMenu.newDish')}</Text>
             <TouchableOpacity
               onPress={() => setModalDish(false)}
               style={styles.modalCloseBtn}
@@ -556,14 +558,14 @@ const RestaurantMenuScreen = ({navigation}: any) => {
             showsVerticalScrollIndicator={false}>
             <TextInput
               style={styles.input}
-              placeholder="Nom du plat *"
+              placeholder={t('restaurantMenu.dishNamePlaceholder')}
               value={dishName}
               onChangeText={setDishName}
               placeholderTextColor={Colors.textLight}
             />
             <TextInput
               style={[styles.input, styles.inputArea]}
-              placeholder="Description"
+              placeholder={t('restaurantMenu.description')}
               value={dishDesc}
               onChangeText={setDishDesc}
               placeholderTextColor={Colors.textLight}
@@ -572,17 +574,17 @@ const RestaurantMenuScreen = ({navigation}: any) => {
             />
             <TextInput
               style={styles.input}
-              placeholder="Prix (€) *"
+              placeholder={t('restaurantMenu.pricePlaceholder')}
               value={dishPrice}
               onChangeText={setDishPrice}
               placeholderTextColor={Colors.textLight}
               keyboardType="decimal-pad"
             />
             <View style={styles.imageUploadSection}>
-              <Text style={styles.imageUploadLabel}>Photo du plat (URL ou upload)</Text>
+              <Text style={styles.imageUploadLabel}>{t('restaurantMenu.dishPhoto')}</Text>
               <TextInput
                 style={[styles.input, { marginBottom: 8 }]}
-                placeholder="URL de l'image (optionnel)"
+                placeholder={t('restaurantMenu.imageUrlOptional')}
                 placeholderTextColor={Colors.textLight}
                 value={dishImageUrl}
                 onChangeText={setDishImageUrl}
@@ -593,7 +595,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
                 <View style={styles.imagePreviewWrap}>
                   <Image source={{ uri: getAbsoluteImageUrl(dishImageUrl) || dishImageUrl }} style={styles.imagePreview} resizeMode="cover" />
                   <TouchableOpacity style={styles.changeImageBtn} onPress={handleImagePick} disabled={uploadingImage}>
-                    <Text style={styles.changeImageBtnText}>{uploadingImage ? 'Upload...' : 'Changer'}</Text>
+                    <Text style={styles.changeImageBtnText}>{uploadingImage ? t('restaurantMenu.uploading') : t('restaurantMenu.change')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -603,7 +605,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
                   ) : (
                     <>
                       <IconWrapper name="image-outline" size={24} color={Colors.white} />
-                      <Text style={styles.uploadImageBtnText}>Choisir une image (upload CDN)</Text>
+                      <Text style={styles.uploadImageBtnText}>{t('restaurantMenu.chooseImageCdn')}</Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -611,8 +613,8 @@ const RestaurantMenuScreen = ({navigation}: any) => {
             </View>
             <View style={styles.toggleRow}>
               <View style={styles.toggleInfo}>
-                <Text style={styles.toggleLabel}>Traiteur uniquement</Text>
-                <Text style={styles.toggleSub}>Masqué du menu public, visible dans les offres traiteur</Text>
+                <Text style={styles.toggleLabel}>{t('restaurantMenu.cateringOnly')}</Text>
+                <Text style={styles.toggleSub}>{t('restaurantMenu.cateringOnlyHint')}</Text>
               </View>
               <Switch
                 value={dishCateringOnly}
@@ -625,7 +627,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
               onPress={handleCreateDish}
               disabled={submitting}>
-              <Text style={styles.submitBtnText}>{submitting ? 'Création...' : 'Créer le plat'}</Text>
+              <Text style={styles.submitBtnText}>{submitting ? t('restaurantMenu.creating') : t('restaurantMenu.createDish')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -636,7 +638,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalFullScreen}>
           <View style={styles.modalFullHeader}>
-            <Text style={styles.modalFullTitle}>Nouveau menu</Text>
+            <Text style={styles.modalFullTitle}>{t('restaurantMenu.newMenu')}</Text>
             <TouchableOpacity
               onPress={() => setModalMenu(false)}
               style={styles.modalCloseBtn}
@@ -651,33 +653,33 @@ const RestaurantMenuScreen = ({navigation}: any) => {
             showsVerticalScrollIndicator={false}>
             <TextInput
               style={styles.input}
-              placeholder="Nom du menu *"
+              placeholder={t('restaurantMenu.menuNamePlaceholder')}
               value={menuName}
               onChangeText={setMenuName}
               placeholderTextColor={Colors.textLight}
             />
             <TextInput
               style={[styles.input, styles.inputArea]}
-              placeholder="Description"
+              placeholder={t('restaurantMenu.description')}
               value={menuDesc}
               onChangeText={setMenuDesc}
               placeholderTextColor={Colors.textLight}
               multiline
               numberOfLines={3}
             />
-            <Text style={styles.inputLabel}>Prix (€)</Text>
+            <Text style={styles.inputLabel}>{t('restaurantMenu.priceLabel')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex. 12.90"
+              placeholder={t('restaurantMenu.priceExample')}
               placeholderTextColor={Colors.textLight}
               keyboardType="decimal-pad"
               value={menuPrice}
               onChangeText={setMenuPrice}
             />
-            <Text style={styles.inputLabel}>Image du menu</Text>
+            <Text style={styles.inputLabel}>{t('restaurantMenu.menuImage')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="URL de l'image ou uploadez ci-dessous"
+              placeholder={t('restaurantMenu.menuImagePlaceholder')}
               value={menuImageUrl}
               onChangeText={setMenuImageUrl}
               placeholderTextColor={Colors.textLight}
@@ -690,14 +692,14 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               disabled={uploadingMenuImage}>
               <IconWrapper name="image-outline" size={20} color={Colors.white} />
               <Text style={styles.uploadImageBtnText}>
-                {uploadingMenuImage ? 'Upload...' : 'Choisir une image'}
+                {uploadingMenuImage ? t('restaurantMenu.uploading') : t('restaurantMenu.chooseImage')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
               onPress={handleCreateMenu}
               disabled={submitting}>
-              <Text style={styles.submitBtnText}>{submitting ? 'Création...' : 'Créer le menu'}</Text>
+              <Text style={styles.submitBtnText}>{submitting ? t('restaurantMenu.creating') : t('restaurantMenu.createMenu')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -705,20 +707,20 @@ const RestaurantMenuScreen = ({navigation}: any) => {
 
       <ConfirmModal
         visible={confirmCreateDish}
-        title="Créer ce plat ?"
-        message={`Plat : ${dishName.trim() || '—'} à ${dishPrice || '0'} €. Confirmer la création ?`}
-        confirmLabel="Créer"
-        cancelLabel="Annuler"
+        title={t('restaurantMenu.createDishConfirmTitle')}
+        message={t('restaurantMenu.createDishConfirmMessage', {name: dishName.trim() || '—', price: dishPrice || '0'})}
+        confirmLabel={t('restaurantMenu.create')}
+        cancelLabel={t('restaurantMenu.cancel')}
         variant="primary"
         onConfirm={doCreateDish}
         onCancel={() => setConfirmCreateDish(false)}
       />
       <ConfirmModal
         visible={confirmCreateMenu}
-        title="Créer ce menu ?"
-        message={`Menu : ${menuName.trim() || '—'}${menuPrice.trim() ? ` • ${menuPrice} €` : ''}. Confirmer la création ?`}
-        confirmLabel="Créer"
-        cancelLabel="Annuler"
+        title={t('restaurantMenu.createMenuConfirmTitle')}
+        message={t('restaurantMenu.createMenuConfirmMessage', {name: menuName.trim() || '—', priceSuffix: menuPrice.trim() ? ` • ${menuPrice} €` : ''})}
+        confirmLabel={t('restaurantMenu.create')}
+        cancelLabel={t('restaurantMenu.cancel')}
         variant="primary"
         onConfirm={doCreateMenu}
         onCancel={() => setConfirmCreateMenu(false)}
@@ -729,7 +731,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalFullScreen}>
           <View style={styles.modalFullHeader}>
-            <Text style={styles.modalFullTitle}>Nouveau supplément</Text>
+            <Text style={styles.modalFullTitle}>{t('restaurantMenu.newSupplement')}</Text>
             <TouchableOpacity
               onPress={() => setModalSupplement(false)}
               style={styles.modalCloseBtn}
@@ -742,15 +744,15 @@ const RestaurantMenuScreen = ({navigation}: any) => {
             contentContainerStyle={styles.modalFullContentInner}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <Text style={styles.inputLabel}>Nom du supplément *</Text>
+            <Text style={styles.inputLabel}>{t('restaurantMenu.supplementNameLabel')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex. Portion supplémentaire, Sauce"
+              placeholder={t('restaurantMenu.supplementNamePlaceholder')}
               placeholderTextColor={Colors.textLight}
               value={supplementName}
               onChangeText={setSupplementName}
             />
-            <Text style={styles.inputLabel}>Prix (€) *</Text>
+            <Text style={styles.inputLabel}>{t('restaurantMenu.priceRequiredLabel')}</Text>
             <TextInput
               style={styles.input}
               placeholder="0.00"
@@ -759,9 +761,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               value={supplementPrice}
               onChangeText={setSupplementPrice}
             />
-            <Text style={styles.inputLabel}>Assigner au plat</Text>
+            <Text style={styles.inputLabel}>{t('restaurantMenu.assignToDish')}</Text>
             {allDishes.length === 0 ? (
-              <Text style={styles.mutedText}>Aucun plat. Créez d'abord un plat.</Text>
+              <Text style={styles.mutedText}>{t('restaurantMenu.noDishCreateFirst')}</Text>
             ) : (
               <ScrollView style={styles.dishPickList} nestedScrollEnabled>
                 {allDishes.map((d) => (
@@ -782,7 +784,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               onPress={handleCreateSupplement}
               disabled={supplementSubmitting || allDishes.length === 0}>
               <Text style={styles.submitBtnText}>
-                {supplementSubmitting ? 'Création...' : 'Créer le supplément'}
+                {supplementSubmitting ? t('restaurantMenu.creating') : t('restaurantMenu.createSupplement')}
               </Text>
             </TouchableOpacity>
           </ScrollView>
@@ -791,14 +793,14 @@ const RestaurantMenuScreen = ({navigation}: any) => {
 
       <ConfirmModal
         visible={deleteTarget !== null}
-        title={deleteTarget?.type === 'dish' ? 'Supprimer ce plat ?' : 'Supprimer ce menu ?'}
+        title={deleteTarget?.type === 'dish' ? t('restaurantMenu.deleteDishConfirmTitle') : t('restaurantMenu.deleteMenuConfirmTitle')}
         message={
           deleteTarget
-            ? `« ${deleteTarget.name} » sera définitivement supprimé.`
+            ? t('restaurantMenu.deleteConfirmMessage', {name: deleteTarget.name})
             : ''
         }
-        confirmLabel="Supprimer"
-        cancelLabel="Annuler"
+        confirmLabel={t('restaurantMenu.delete')}
+        cancelLabel={t('restaurantMenu.cancel')}
         variant="danger"
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
@@ -809,13 +811,13 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setAddDishToMenuTarget(null)} />
         <View style={styles.modalCenterWrap}>
         <View style={styles.modalBox}>
-          <Text style={styles.modalTitle}>Ajouter à un menu</Text>
+          <Text style={styles.modalTitle}>{t('restaurantMenu.addToMenu')}</Text>
           <Text style={styles.modalSubtitle}>
             {addDishToMenuTarget ? `« ${addDishToMenuTarget.dishName} »` : ''}
           </Text>
           <ScrollView style={{ maxHeight: 240 }}>
             {menus.length === 0 ? (
-              <Text style={styles.mutedText}>Aucun menu. Créez d'abord un menu.</Text>
+              <Text style={styles.mutedText}>{t('restaurantMenu.noMenuCreateFirst')}</Text>
             ) : (
               menus.map((menu) => (
                 <TouchableOpacity
@@ -827,9 +829,9 @@ const RestaurantMenuScreen = ({navigation}: any) => {
                       await addDishesToMenu(menu.id, [addDishToMenuTarget.dishId]);
                       setAddDishToMenuTarget(null);
                       load();
-                      alert('Succès', `Plat ajouté au menu « ${menu.name} ».`);
+                      alert(t('restaurantMenu.successTitle'), t('restaurantMenu.dishAddedToMenu', {name: menu.name}));
                     } catch (e: any) {
-                      alert('Erreur', formatAxiosError(e, 'Impossible d\'ajouter au menu.'));
+                      alert(t('restaurantMenu.errorTitle'), formatAxiosError(e, t('restaurantMenu.addToMenuError')));
                     }
                   }}>
                   <Text style={styles.menuPickName}>{menu.name}</Text>
@@ -839,7 +841,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
             )}
           </ScrollView>
           <TouchableOpacity style={styles.cancelBtn} onPress={() => setAddDishToMenuTarget(null)}>
-            <Text style={styles.cancelBtnText}>Annuler</Text>
+            <Text style={styles.cancelBtnText}>{t('restaurantMenu.cancel')}</Text>
           </TouchableOpacity>
         </View>
         </View>

@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {View, TextInput, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../IconWrapper';
 import {Colors, Radius} from '../../utils/colors';
 import {fontHeading, fontUI} from '../../utils/fonts';
@@ -34,7 +35,7 @@ interface SearchBarProps {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
-  placeholder = 'Rechercher un plat ou restaurant...',
+  placeholder,
   onSearch,
   onPress,
   onFilterPress,
@@ -46,6 +47,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSuggestionPress,
   pillColor = Colors.surface,
 }) => {
+  const {t} = useTranslation();
   const {searchQuery, setSearchQuery, isSearching} = useSearch();
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [isFocused, setIsFocused] = useState(false);
@@ -109,7 +111,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </TouchableOpacity>
           <TextInput
             style={[styles.input, {backgroundColor: pillColor}]}
-            placeholder={placeholder}
+            placeholder={placeholder || t('searchBar.placeholder')}
             placeholderTextColor={Colors.gray[400]}
             value={localQuery}
             onChangeText={setLocalQuery}

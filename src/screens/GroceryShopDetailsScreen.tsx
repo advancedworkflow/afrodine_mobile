@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
 import IconWrapper from '../components/IconWrapper';
 import {fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
@@ -28,8 +29,16 @@ const formatPrice = (p: number | string) => {
 };
 
 const GroceryShopDetailsScreen = ({route, navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = i18n.language === 'en' ? 'en-US' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const {groceryShopId, groceryShopName} = route.params || {};
   const {items, addItem} = useCart();
+
+  const categoryLabel = (category: string) => {
+    if (category === ALL) return t('groceryShopDetails.allCategories');
+    if (category === 'Autres') return t('groceryShopDetails.otherCategory');
+    return category;
+  };
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +53,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
     let cancelled = false;
     (async () => {
       if (!groceryShopId) {
-        setError('Épicerie introuvable');
+        setError(t('groceryShopDetails.notFound'));
         setLoading(false);
         return;
       }
@@ -73,7 +82,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
             .catch(() => {});
         }
       } catch (e: any) {
-        if (!cancelled) setError(formatAxiosError(e, 'Erreur de chargement'));
+        if (!cancelled) setError(formatAxiosError(e, t('groceryShopDetails.loadError')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -108,7 +117,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
     });
   };
 
-  const name = shop?.name ?? groceryShopName ?? 'Épicerie';
+  const name = shop?.name ?? groceryShopName ?? t('groceryShopDetails.defaultName');
   const isOpen = shop?.is_active !== false && restaurant?.is_active !== false;
 
   if (loading) {
@@ -159,22 +168,22 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
             <View style={styles.titleRow}>
               <Text style={styles.title}>{name}</Text>
               <View style={[styles.statusBadge, !isOpen && styles.statusBadgeClosed]}>
-                <Text style={styles.statusBadgeText}>{isOpen ? 'Ouverte' : 'Fermée'}</Text>
+                <Text style={styles.statusBadgeText}>{isOpen ? t('groceryShopDetails.open') : t('groceryShopDetails.closed')}</Text>
               </View>
             </View>
             <Text style={styles.subLine} numberOfLines={2}>
               {[
                 restaurant?.rating != null ? `★ ${restaurant.rating.toFixed(1)}` : null,
-                reviews.length > 0 ? `${reviews.length} avis` : null,
+                reviews.length > 0 ? t('groceryShopDetails.reviewsCount', {count: reviews.length}) : null,
                 restaurant?.cuisine_type,
                 restaurant?.city,
               ].filter(Boolean).join(' · ')}
             </Text>
             {(restaurant?.minimum_order != null || restaurant?.delivery_fee != null) && (
               <Text style={styles.deliveryLine}>
-                {restaurant?.minimum_order != null ? `Min. ${restaurant.minimum_order.toFixed(0)} €` : ''}
+                {restaurant?.minimum_order != null ? t('groceryShopDetails.minOrder', {amount: restaurant.minimum_order.toFixed(0)}) : ''}
                 {restaurant?.minimum_order != null && restaurant?.delivery_fee != null ? ' · ' : ''}
-                {restaurant?.delivery_fee != null ? `livraison ${restaurant.delivery_fee.toFixed(2)} €` : ''}
+                {restaurant?.delivery_fee != null ? t('groceryShopDetails.deliveryFee', {amount: restaurant.delivery_fee.toFixed(2)}) : ''}
               </Text>
             )}
           </View>
@@ -183,7 +192,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
             {(['rayons', 'avis', 'infos'] as Tab[]).map(tab => (
               <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={styles.tabButton}>
                 <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-                  {tab === 'rayons' ? 'Rayons' : tab === 'avis' ? 'Avis' : 'Infos'}
+                  {tab === 'rayons' ? t('groceryShopDetails.tabAisles') : tab === 'avis' ? t('groceryShopDetails.tabReviews') : t('groceryShopDetails.tabInfo')}
                 </Text>
                 {activeTab === tab && <View style={styles.tabIndicator} />}
               </TouchableOpacity>
@@ -205,7 +214,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
                       onPress={() => setSelectedCategory(category)}
                       activeOpacity={0.85}>
                       <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]} numberOfLines={1}>
-                        {category}
+                        {categoryLabel(category)}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -216,7 +225,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
                 {filteredProducts.length === 0 ? (
                   <View style={styles.emptyState}>
                     <IconWrapper name="basket-outline" size={40} color={Colors.gray[300]} />
-                    <Text style={styles.emptyText}>Aucun produit dans cette catégorie</Text>
+                    <Text style={styles.emptyText}>{t('groceryShopDetails.noProductsInCategory')}</Text>
                   </View>
                 ) : (
                   filteredProducts.map(p => {
@@ -246,7 +255,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
                           <View style={styles.productPriceRow}>
                             <Text style={styles.productPrice}>{formatPrice(p.price)}</Text>
                             {p.stock_quantity > 0 && p.stock_quantity <= 5 && (
-                              <Text style={styles.stockBadge}>{p.stock_quantity} restants</Text>
+                              <Text style={styles.stockBadge}>{t('groceryShopDetails.lowStockLeft', {count: p.stock_quantity})}</Text>
                             )}
                             <TouchableOpacity
                               style={styles.addButton}
@@ -272,14 +281,14 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
               {reviews.length === 0 ? (
                 <View style={styles.emptyState}>
                   <IconWrapper name="chatbubble-outline" size={40} color={Colors.gray[300]} />
-                  <Text style={styles.emptyText}>Aucun avis pour le moment</Text>
+                  <Text style={styles.emptyText}>{t('groceryShopDetails.noReviewsYet')}</Text>
                 </View>
               ) : (
                 reviews.map(r => (
                   <View key={r.id} style={styles.reviewCard}>
                     <Text style={styles.reviewRating}>★ {r.rating.toFixed(1)}</Text>
                     {r.comment ? <Text style={styles.reviewComment}>{r.comment}</Text> : null}
-                    <Text style={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</Text>
+                    <Text style={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString(dateLocale)}</Text>
                   </View>
                 ))
               )}
@@ -307,7 +316,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
                 </View>
               ) : null}
               {!shop?.description && !restaurant?.address && !restaurant?.phone && (
-                <Text style={styles.emptyText}>Aucune information disponible.</Text>
+                <Text style={styles.emptyText}>{t('groceryShopDetails.noInfoAvailable')}</Text>
               )}
             </View>
           )}
@@ -318,7 +327,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
         <View style={styles.cartBar}>
           <TouchableOpacity style={styles.cartButton} activeOpacity={0.9} onPress={() => navigation.navigate('Cart')}>
             <Text style={styles.cartButtonText}>
-              Voir le panier · {cartCount} article{cartCount > 1 ? 's' : ''}
+              {t('groceryShopDetails.viewCart', {count: cartCount})}
             </Text>
             <Text style={styles.cartButtonTotal}>{formatPrice(cartTotal)}</Text>
           </TouchableOpacity>

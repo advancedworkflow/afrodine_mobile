@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../IconWrapper';
 import {Colors, Radius} from '../../utils/colors';
 import {fontButton, fontHeading} from '../../utils/fonts';
@@ -12,17 +13,18 @@ interface LocationSectionProps {
 }
 
 const LocationSection: React.FC<LocationSectionProps> = ({
-  address = 'Adresse non renseignée',
+  address,
   onPress,
   onNotificationsPress,
   hasUnreadNotifications = true,
 }) => {
+  const {t} = useTranslation();
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.textContainer} onPress={onPress} activeOpacity={0.7}>
-        <Text style={styles.label}>Livrer à</Text>
+        <Text style={styles.label}>{t('locationSection.deliverTo')}</Text>
         <Text style={styles.address} numberOfLines={1}>
-          {address} ▾
+          {address || t('locationSection.noAddress')} ▾
         </Text>
       </TouchableOpacity>
       <TouchableOpacity

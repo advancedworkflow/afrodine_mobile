@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
@@ -16,14 +17,7 @@ import {formatAxiosError} from '../utils/formatApiError';
 
 type OrderForList = ordersApi.OrderForList;
 
-const statusLabel: Record<string, string> = {
-  delivered: 'Livrées',
-  cancelled: 'Annulées',
-  pending: 'En attente',
-  confirmed: 'Confirmées',
-  preparing: 'En préparation',
-  ready: 'Prêtes',
-};
+const KNOWN_STATUSES = ['delivered', 'cancelled', 'pending', 'confirmed', 'preparing', 'ready'];
 
 const statusColor: Record<string, string> = {
   delivered: Colors.success,
@@ -34,11 +28,14 @@ const statusColor: Record<string, string> = {
   ready: Colors.warning,
 };
 
-const metric = (value: number) => value.toLocaleString('fr-FR');
-const euro = (value: number) =>
-  value.toLocaleString('fr-FR', {style: 'currency', currency: 'EUR', maximumFractionDigits: 2});
-
 const OrderStatsScreen = ({navigation}: any) => {
+  const {t, i18n} = useTranslation();
+  const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
+  const metric = (value: number) => value.toLocaleString(dateLocale);
+  const euro = (value: number) =>
+    value.toLocaleString(dateLocale, {style: 'currency', currency: 'EUR', maximumFractionDigits: 2});
+  const statusLabel = (status: string, fallbackKey: string) =>
+    KNOWN_STATUSES.includes(status) ? t(`orderStats.status.${status}`) : t(fallbackKey);
   const [orders, setOrders] = useState<OrderForList[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -54,7 +51,7 @@ const OrderStatsScreen = ({navigation}: any) => {
       setOrders(list);
     } catch (e: any) {
       if (getIsCancelled?.()) return;
-      setError(formatAxiosError(e, 'Erreur de chargement des statistiques'));
+      setError(formatAxiosError(e, t('orderStats.loadError')));
       setOrders([]);
     } finally {
       if (!getIsCancelled?.()) {
@@ -62,7 +59,7 @@ const OrderStatsScreen = ({navigation}: any) => {
         setRefreshing(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -100,7 +97,7 @@ const OrderStatsScreen = ({navigation}: any) => {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={styles.loadingText}>Chargement des statistiques...</Text>
+        <Text style={styles.loadingText}>{t('orderStats.loading')}</Text>
       </View>
     );
   }
@@ -109,10 +106,10 @@ const OrderStatsScreen = ({navigation}: any) => {
     return (
       <View style={styles.centered}>
         <IconWrapper name="alert-circle-outline" size={56} color={Colors.error} />
-        <Text style={styles.errorTitle}>Impossible de charger</Text>
+        <Text style={styles.errorTitle}>{t('orderStats.loadFailedTitle')}</Text>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => loadOrders()}>
-          <Text style={styles.retryButtonText}>Réessayer</Text>
+          <Text style={styles.retryButtonText}>{t('orderStats.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -125,35 +122,35 @@ const OrderStatsScreen = ({navigation}: any) => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={() => loadOrders(true)} colors={[Colors.primary]} />
       }>
-      <Text style={styles.sectionTitle}>Vue rapide</Text>
+      <Text style={styles.sectionTitle}>{t('orderStats.quickView')}</Text>
       <View style={styles.metricsGrid}>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Total commandes</Text>
+          <Text style={styles.metricLabel}>{t('orderStats.totalOrders')}</Text>
           <Text style={styles.metricValue}>{metric(stats.totalOrders)}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Montant total</Text>
+          <Text style={styles.metricLabel}>{t('orderStats.totalAmount')}</Text>
           <Text style={styles.metricValue}>{euro(stats.totalSpent)}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Panier moyen</Text>
+          <Text style={styles.metricLabel}>{t('orderStats.avgBasket')}</Text>
           <Text style={styles.metricValue}>{euro(stats.avgBasket)}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Livrées / Annulées</Text>
+          <Text style={styles.metricLabel}>{t('orderStats.deliveredCancelled')}</Text>
           <Text style={styles.metricValue}>
             {metric(stats.deliveredOrders)} / {metric(stats.cancelledOrders)}
           </Text>
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Répartition par statut</Text>
+      <Text style={styles.sectionTitle}>{t('orderStats.byStatus')}</Text>
       <View style={styles.card}>
         {Object.keys(stats.byStatus).length === 0 ? (
-          <Text style={styles.emptyText}>Aucune commande pour le moment.</Text>
+          <Text style={styles.emptyText}>{t('orderStats.noOrdersYet')}</Text>
         ) : (
           Object.entries(stats.byStatus).map(([status, count]) => {
-            const label = statusLabel[status] ?? 'Autres';
+            const label = statusLabel(status, 'orderStats.status.other');
             const color = statusColor[status] ?? Colors.textLight;
             return (
               <View key={status} style={styles.statusRow}>
@@ -168,10 +165,10 @@ const OrderStatsScreen = ({navigation}: any) => {
         )}
       </View>
 
-      <Text style={styles.sectionTitle}>Historique récent</Text>
+      <Text style={styles.sectionTitle}>{t('orderStats.recentHistory')}</Text>
       <View style={styles.card}>
         {stats.latest.length === 0 ? (
-          <Text style={styles.emptyText}>Aucune commande récente.</Text>
+          <Text style={styles.emptyText}>{t('orderStats.noRecentOrders')}</Text>
         ) : (
           stats.latest.map(order => (
             <TouchableOpacity
@@ -186,10 +183,10 @@ const OrderStatsScreen = ({navigation}: any) => {
               </View>
               <View style={styles.historyBottom}>
                 <Text style={styles.historyMeta}>
-                  {order.itemsCount} article{order.itemsCount > 1 ? 's' : ''}
+                  {t('orderStats.itemsCount', {count: order.itemsCount})}
                 </Text>
                 <Text style={styles.historyMeta}>
-                  {statusLabel[order.status] ?? 'En cours'}
+                  {statusLabel(order.status, 'orderStats.status.inProgress')}
                 </Text>
               </View>
             </TouchableOpacity>

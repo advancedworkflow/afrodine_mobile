@@ -1,4 +1,5 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -17,8 +18,9 @@ import DishCardCompact from '../components/home/DishCardCompact';
 import SectionHeader from '../components/home/SectionHeader';
 import PromoBanner from '../components/home/PromoBanner';
 import GroceryShopProductCard from '../components/home/GroceryShopProductCard';
-import {Colors, Radius} from '../utils/colors';
-import {fontDisplay, fontHeading, fontUI} from '../utils/fonts';
+import {Colors, Radius, Shadows} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {fontDisplay, fontDisplayMedium, fontHeading, fontSub, fontUI} from '../utils/fonts';
 import {useSearch} from '../contexts/SearchContext';
 import {useAuth} from '../contexts/AuthContext';
 import {useCart} from '../contexts/CartContext';
@@ -35,6 +37,7 @@ import {getAbsoluteImageUrl} from '../utils/api';
 const namkeFallback = require('../assets/namke-fallback.png');
 
 const HomeScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const {isAuthenticated, isRestaurant} = useAuth();
   const {setSearchQuery, setSearchResults, setIsSearching} = useSearch();
   const {addItem} = useCart();
@@ -43,7 +46,16 @@ const HomeScreen = ({navigation}: any) => {
   const [popularDishes, setPopularDishes] = useState<dishesApi.DishForList[]>([]);
   const [recommendedDishes, setRecommendedDishes] = useState<dishesApi.DishForList[]>([]);
   const [trendingMenus, setTrendingMenus] = useState<menusApi.MenuApi[]>([]);
+  const [dailyMenus, setDailyMenus] = useState<menusApi.MenuApi[]>([]);
   const [promos, setPromos] = useState<promotionsApi.PromotionForList[]>([]);
+  const promoDishIds = useMemo(
+    () => new Set(promos.flatMap(p => p.dishIds ?? []).map(String)),
+    [promos],
+  );
+  const promoMenuIds = useMemo(
+    () => new Set(promos.flatMap(p => p.menuIds ?? [])),
+    [promos],
+  );
   const [groceryProducts, setGroceryProducts] = useState<groceryShopApi.GroceryShopProductApi[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -52,7 +64,7 @@ const HomeScreen = ({navigation}: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [deliveryAddress, setDeliveryAddress] = useState('Adresse non renseignée');
+  const [deliveryAddress, setDeliveryAddress] = useState(t('home.noAddressSet'));
   const [liveSuggestions, setLiveSuggestions] = useState<SearchSuggestion[]>([]);
   const liveRequestIdRef = useRef(0);
   const liveSuggestionsCacheRef = useRef<Map<string, SearchSuggestion[]>>(new Map());
@@ -62,16 +74,16 @@ const HomeScreen = ({navigation}: any) => {
 
     const refreshAddress = async () => {
       if (!isAuthenticated || isRestaurant) {
-        if (!cancelled) setDeliveryAddress('Adresse non renseignée');
+        if (!cancelled) setDeliveryAddress(t('home.noAddressSet'));
         return;
       }
       try {
         const profile = await getClientProfile();
         if (cancelled) return;
         const nextAddress = profile?.address?.trim();
-        setDeliveryAddress(nextAddress && nextAddress.length > 0 ? nextAddress : 'Adresse non renseignée');
+        setDeliveryAddress(nextAddress && nextAddress.length > 0 ? nextAddress : t('home.noAddressSet'));
       } catch {
-        if (!cancelled) setDeliveryAddress('Adresse non renseignée');
+        if (!cancelled) setDeliveryAddress(t('home.noAddressSet'));
       }
     };
 
@@ -105,15 +117,17 @@ const HomeScreen = ({navigation}: any) => {
         [...recommendedRes].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 6),
       );
       setTrendingMenus(menusRes.slice(0, 6));
+      setDailyMenus(menusRes);
       setPromos(promosRes);
       setGroceryProducts(groceryProductsRes);
     } catch (e: any) {
       if (getIsCancelled?.()) return;
-      setError(formatAxiosError(e, 'Erreur de chargement'));
+      setError(formatAxiosError(e, t('home.loadError')));
       setPopularDishes([]);
       setCategories([]);
       setRecommendedDishes([]);
       setTrendingMenus([]);
+      setDailyMenus([]);
       setPromos([]);
       setGroceryProducts([]);
     } finally {
@@ -195,7 +209,7 @@ const HomeScreen = ({navigation}: any) => {
           }}
         />
         <SearchBar
-          placeholder="Un plat, une cuisine, un voisin…"
+          placeholder={t('home.searchPlaceholder')}
           onSearch={async query => {
             if (query.length > 0) {
               setIsSearching(true);
@@ -294,13 +308,13 @@ const HomeScreen = ({navigation}: any) => {
         {loading ? (
           <View style={styles.loadingSection}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.loadingText}>Chargement...</Text>
+            <Text style={styles.loadingText}>{t('home.loading')}</Text>
           </View>
         ) : error ? (
           <View style={styles.errorSection}>
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={() => loadData()}>
-              <Text style={styles.retryText}>Réessayer</Text>
+              <Text style={styles.retryText}>{t('home.retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -309,16 +323,16 @@ const HomeScreen = ({navigation}: any) => {
               <SectionHeader
                 title={
                   selectedCategoryId
-                    ? categories.find(c => c.id === selectedCategoryId)?.name ?? 'Marmites du jour'
-                    : 'Marmites du jour'
+                    ? categories.find(c => c.id === selectedCategoryId)?.name ?? t('home.dailyPots')
+                    : t('home.dailyPots')
                 }
-                seeAllText="Tout voir"
+                seeAllText={t('home.seeAll')}
                 onSeeAllPress={() => stackNav.navigate('PopularDishes')}
               />
               {selectedCategoryId && categoryDishesLoading ? (
                 <ActivityIndicator size="small" color={Colors.primary} />
               ) : featuredDishes.length === 0 ? (
-                <Text style={styles.emptyText}>Aucun plat pour le moment</Text>
+                <Text style={styles.emptyText}>{t('home.noDishesYet')}</Text>
               ) : (
                 <ScrollView
                   horizontal
@@ -332,6 +346,7 @@ const HomeScreen = ({navigation}: any) => {
                         rating={dish.rating}
                         restaurantName={dish.restaurantName}
                         imageUrl={dish.imageUrl}
+                        isPromo={promoDishIds.has(dish.id)}
                         onPress={() => navigation.navigate('DishDetails', {dishId: dish.id, restaurantId: dish.restaurantId})}
                         onAddPress={() => handleAddDishToCart(dish)}
                       />
@@ -344,8 +359,8 @@ const HomeScreen = ({navigation}: any) => {
             {groceryProducts.length > 0 && (
               <View style={styles.section}>
                 <SectionHeader
-                  title="Épicerie"
-                  seeAllText="Tout voir"
+                  title={t('home.grocery')}
+                  seeAllText={t('home.seeAll')}
                   onSeeAllPress={() => stackNav.navigate('GroceryShops')}
                 />
                 <ScrollView
@@ -367,7 +382,7 @@ const HomeScreen = ({navigation}: any) => {
 
             {(nearbyDishes.length > 0 || promos.length > 0) && (
               <View style={styles.section}>
-                <SectionHeader title="Près de vous" />
+                <SectionHeader title={t('home.nearYou')} />
                 {nearbyDishes.length > 0 && (
                   <View style={styles.nearbyList}>
                     {nearbyDishes.map(dish => (
@@ -421,9 +436,62 @@ const HomeScreen = ({navigation}: any) => {
               </View>
             )}
 
+            {dailyMenus.length > 0 && (
+              <View style={styles.section}>
+                <SectionHeader
+                  title={t('home.menuOfDay')}
+                  subtitle={t('home.menuOfDaySubtitle')}
+                />
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.menuOfDayScroll}>
+                  {dailyMenus.map((menu, index) => (
+                    <TouchableOpacity
+                      key={`daily-menu-${menu.id}`}
+                      style={styles.menuOfDayCard}
+                      activeOpacity={0.9}
+                      onPress={() => navigation.navigate('RestaurantDetails', {restaurantId: menu.restaurant_id})}>
+                      <Image
+                        source={menu.image_url ? {uri: menu.image_url} : namkeFallback}
+                        style={styles.menuOfDayImage}
+                        resizeMode="cover"
+                      />
+                      {index === 0 && (
+                        <View style={styles.menuOfDayBadge}>
+                          <Text style={styles.menuOfDayBadgeText}>🔥 {t('home.mostRequested')}</Text>
+                        </View>
+                      )}
+                      {promoMenuIds.has(menu.id) && (
+                        <View style={styles.menuOfDayPromoBadge}>
+                          <Text style={styles.menuOfDayBadgeText}>{t('home.promoBadge')}</Text>
+                        </View>
+                      )}
+                      <View style={styles.menuOfDayBody}>
+                        <Text style={styles.menuOfDayName} numberOfLines={1}>{menu.name}</Text>
+                        {menu.description ? (
+                          <Text style={styles.menuOfDayDescription} numberOfLines={2}>
+                            {menu.description}
+                          </Text>
+                        ) : null}
+                        <View style={styles.menuOfDayFooter}>
+                          <Text style={styles.menuOfDayPrice}>{(menu.price ?? 0).toFixed(2)} €</Text>
+                          <TouchableOpacity
+                            style={styles.menuOfDayAddBtn}
+                            onPress={() => handleAddMenuToCart(menu)}>
+                            <Text style={styles.menuOfDayAddBtnText}>{t('home.add')}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
             {(featuredDishes.length > 0 || trendingMenus.length > 0) && (
               <View style={styles.section}>
-                <SectionHeader title="En vogue" />
+                <SectionHeader title={t('home.trending')} />
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -436,6 +504,7 @@ const HomeScreen = ({navigation}: any) => {
                         rating={dish.rating}
                         restaurantName={dish.restaurantName}
                         imageUrl={dish.imageUrl}
+                        isPromo={promoDishIds.has(dish.id)}
                         onPress={() => navigation.navigate('DishDetails', {dishId: dish.id, restaurantId: dish.restaurantId})}
                         onAddPress={() => handleAddDishToCart(dish)}
                       />
@@ -447,6 +516,7 @@ const HomeScreen = ({navigation}: any) => {
                         name={menu.name}
                         price={menu.price ?? 0}
                         imageUrl={menu.image_url}
+                        isPromo={promoMenuIds.has(menu.id)}
                         onPress={() => navigation.navigate('RestaurantDetails', {restaurantId: menu.restaurant_id})}
                         onAddPress={() => handleAddMenuToCart(menu)}
                       />
@@ -458,7 +528,7 @@ const HomeScreen = ({navigation}: any) => {
 
             {recommendedDishes.length > 0 && (
               <View style={styles.section}>
-                <SectionHeader title="Recommandé pour vous" />
+                <SectionHeader title={t('home.recommendedForYou')} />
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -471,6 +541,7 @@ const HomeScreen = ({navigation}: any) => {
                         rating={dish.rating}
                         restaurantName={dish.restaurantName}
                         imageUrl={dish.imageUrl}
+                        isPromo={promoDishIds.has(dish.id)}
                         onPress={() => navigation.navigate('DishDetails', {dishId: dish.id, restaurantId: dish.restaurantId})}
                         onAddPress={() => handleAddDishToCart(dish)}
                       />
@@ -495,7 +566,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: GLOBAL_TAB_BAR_HEIGHT + 16,
   },
   headerCard: {
     backgroundColor: Colors.surface,
@@ -507,6 +578,82 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: 22,
     paddingVertical: 12,
+  },
+  menuOfDayScroll: {
+    paddingRight: 22,
+    gap: 16,
+  },
+  menuOfDayCard: {
+    width: 290,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
+    overflow: 'hidden',
+    ...Shadows.md,
+  },
+  menuOfDayImage: {
+    width: '100%',
+    height: 170,
+    backgroundColor: Colors.gray[100],
+  },
+  menuOfDayBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: Colors.terracotta,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: Radius.pill,
+  },
+  menuOfDayBadgeText: {
+    fontSize: 12,
+    fontFamily: fontHeading,
+    color: Colors.white,
+  },
+  menuOfDayPromoBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: Colors.terracotta,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: Radius.pill,
+  },
+  menuOfDayBody: {
+    padding: 16,
+    gap: 6,
+  },
+  menuOfDayName: {
+    fontSize: 19,
+    fontFamily: fontDisplayMedium,
+    color: Colors.text,
+  },
+  menuOfDayDescription: {
+    fontSize: 13.5,
+    fontFamily: fontSub,
+    color: Colors.textLight,
+    lineHeight: 19,
+  },
+  menuOfDayFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  menuOfDayPrice: {
+    fontSize: 19,
+    fontFamily: fontHeading,
+    color: Colors.primary,
+  },
+  menuOfDayAddBtn: {
+    backgroundColor: Colors.darkGreen,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: Radius.pill,
+  },
+  menuOfDayAddBtnText: {
+    fontSize: 13,
+    fontFamily: fontHeading,
+    color: Colors.white,
   },
   loadingSection: {
     padding: 40,

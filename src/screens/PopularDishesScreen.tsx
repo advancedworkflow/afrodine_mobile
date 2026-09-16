@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -18,6 +19,7 @@ import {formatAxiosError} from '../utils/formatApiError';
 const SUGGESTED_LIMIT = 15;
 
 const PopularDishesScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const {setSearchResults, setIsSearching} = useSearch();
   const [dishes, setDishes] = useState<dishesApi.DishForList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ const PopularDishesScreen = ({navigation}: any) => {
       const list = await dishesApi.getDishes({limit: SUGGESTED_LIMIT});
       setDishes(list);
     } catch (e: any) {
-      setError(formatAxiosError(e, 'Erreur de chargement'));
+      setError(formatAxiosError(e, t('popularDishes.loadError')));
       setDishes([]);
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ const PopularDishesScreen = ({navigation}: any) => {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={styles.loadingText}>Chargement...</Text>
+        <Text style={styles.loadingText}>{t('popularDishes.loading')}</Text>
       </View>
     );
   }
@@ -56,7 +58,7 @@ const PopularDishesScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <SearchBar
-        placeholder="Rechercher un plat ou restaurant..."
+        placeholder={t('popularDishes.searchPlaceholder')}
         onSearch={async query => {
           if (query.length > 0) {
             setIsSearching(true);
@@ -93,7 +95,7 @@ const PopularDishesScreen = ({navigation}: any) => {
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : dishes.length === 0 ? (
-        <Text style={styles.emptyText}>Aucun plat en suggestion pour le moment</Text>
+        <Text style={styles.emptyText}>{t('popularDishes.empty')}</Text>
       ) : (
         dishes.map(dish => (
           <DishCard

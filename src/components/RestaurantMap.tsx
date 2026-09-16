@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Linking, Platform} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from './IconWrapper';
 import {Colors} from '../utils/colors';
 
@@ -15,6 +16,7 @@ interface RestaurantMapProps {
 }
 
 const RestaurantMap: React.FC<RestaurantMapProps> = ({latitude, longitude, address, city}) => {
+  const {t} = useTranslation();
   const lat = latitude != null ? Number(latitude) : null;
   const lng = longitude != null ? Number(longitude) : null;
   const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
@@ -40,14 +42,14 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({latitude, longitude, addre
         <View style={styles.mapFallback}>
           <IconWrapper name="location-outline" size={32} color={Colors.textLight} />
           <Text style={styles.mapFallbackText}>
-            {hasCoords ? 'Carte indisponible sur cette plateforme' : "Carte non disponible"}
+            {hasCoords ? t('restaurantMap.unavailableOnPlatform') : t('restaurantMap.unavailable')}
           </Text>
         </View>
       )}
 
       <TouchableOpacity style={styles.directionsButton} onPress={() => Linking.openURL(directionsUrl)}>
         <IconWrapper name="navigate-outline" size={18} color={Colors.white} />
-        <Text style={styles.directionsButtonText}>Itinéraire</Text>
+        <Text style={styles.directionsButtonText}>{t('restaurantMap.directions')}</Text>
       </TouchableOpacity>
     </View>
   );

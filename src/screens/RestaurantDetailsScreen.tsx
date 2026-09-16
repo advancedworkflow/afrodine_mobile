@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useMemo} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -14,6 +15,7 @@ import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import RestaurantMap from '../components/RestaurantMap';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {secondaryFont, fontButton, fontDisplay, fontDisplayMedium, fontHeading} from '../utils/fonts';
 import SectionHeader from '../components/home/SectionHeader';
 import {useFavorites} from '../contexts/FavoritesContext';
@@ -36,6 +38,8 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   route,
   navigation,
 }) => {
+  const {t, i18n} = useTranslation();
+  const numberLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const {restaurantId} = route.params || {};
   const [restaurant, setRestaurant] = useState<any>(null);
   const [dishes, setDishes] = useState<restaurantsApi.DishForList[]>([]);
@@ -105,6 +109,9 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
       d => (d.categoryName?.trim() || 'Sans catégorie') === selectedCategory,
     );
   }, [dishes, selectedCategory]);
+
+  const categoryLabel = (name: string) =>
+    name === 'Sans catégorie' ? t('restaurantDetails.noCategory') : name;
 
   useEffect(() => {
     let cancelled = false;
@@ -289,11 +296,11 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
 
   const handleSubmitReview = async () => {
     if (!restaurantId || reviewRating < 1 || reviewRating > 5) {
-      alert('Erreur', 'Veuillez choisir une note entre 1 et 5 étoiles.');
+      alert(t('restaurantDetails.errorTitle'), t('restaurantDetails.chooseRatingError'));
       return;
     }
     if (!isLoggedIn) {
-      alert('Connexion requise', 'Connectez-vous pour laisser un avis.');
+      alert(t('restaurantDetails.loginRequiredTitle'), t('restaurantDetails.loginToReview'));
       return;
     }
     setReviewSubmitting(true);
@@ -314,14 +321,14 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
       setReviewRating(0);
       setReviewComment('');
       setUserHasReviewed(true);
-      alert('Merci !', 'Votre avis a bien été enregistré.');
+      alert(t('restaurantDetails.thanksTitle'), t('restaurantDetails.reviewSavedMessage'));
     } catch (e: any) {
-      const msg = formatAxiosError(e, 'Erreur lors de l\'envoi.');
+      const msg = formatAxiosError(e, t('restaurantDetails.submitError'));
       if (msg.toLowerCase().includes('already reviewed')) {
         setUserHasReviewed(true);
-        alert('Déjà avis', 'Vous avez déjà laissé un avis pour ce restaurant.');
+        alert(t('restaurantDetails.alreadyReviewedTitle'), t('restaurantDetails.alreadyReviewedMessage'));
       } else {
-        alert('Erreur', msg);
+        alert(t('restaurantDetails.errorTitle'), msg);
       }
     } finally {
       setReviewSubmitting(false);
@@ -334,7 +341,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
         <StatusBar barStyle="light-content" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('restaurantDetails.loading')}</Text>
         </View>
       </View>
     );
@@ -344,7 +351,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Restaurant introuvable</Text>
+          <Text style={styles.loadingText}>{t('restaurantDetails.notFound')}</Text>
         </View>
       </View>
     );
@@ -422,20 +429,20 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
           <View style={styles.header}>
             <Text style={styles.name}>{restaurant.name}</Text>
             <Text style={styles.metaLine}>
-              ★ {displayRating} · {reviews.length} avis · {restaurant.cuisine}
+              ★ {displayRating} · {t('restaurantDetails.reviewsCount', {count: reviews.length})} · {restaurant.cuisine}
               {restaurant.city ? ` · ${restaurant.city}` : ''}
             </Text>
             {restaurant.minimumOrder != null && (
-              <Text style={styles.metaHighlight}>Min. {Number(restaurant.minimumOrder).toFixed(0)} €</Text>
+              <Text style={styles.metaHighlight}>{t('restaurantDetails.minOrder', {amount: Number(restaurant.minimumOrder).toFixed(0)})}</Text>
             )}
           </View>
 
           {/* Onglets Carte / Avis / Infos */}
           <View style={styles.tabContainer}>
             {([
-              {key: 'carte', label: 'Carte'},
-              {key: 'avis', label: `Avis${reviews.length > 0 ? ` (${reviews.length})` : ''}`},
-              {key: 'infos', label: 'Infos'},
+              {key: 'carte', label: t('restaurantDetails.tabMenu')},
+              {key: 'avis', label: reviews.length > 0 ? t('restaurantDetails.tabReviewsCount', {count: reviews.length}) : t('restaurantDetails.tabReviews')},
+              {key: 'infos', label: t('restaurantDetails.tabInfo')},
             ] as {key: DetailTab; label: string}[]).map(tab => (
               <TouchableOpacity
                 key={tab.key}
@@ -458,7 +465,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                   onPress={() => setCardTab('plats')}
                   activeOpacity={0.8}>
                   <Text style={[styles.cardSubTabText, cardTab === 'plats' && styles.cardSubTabTextActive]}>
-                    Plats {dishes.length > 0 ? `(${dishes.length})` : ''}
+                    {dishes.length > 0 ? t('restaurantDetails.dishesTabCount', {count: dishes.length}) : t('restaurantDetails.dishesTab')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -466,7 +473,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                   onPress={() => setCardTab('menu')}
                   activeOpacity={0.8}>
                   <Text style={[styles.cardSubTabText, cardTab === 'menu' && styles.cardSubTabTextActive]}>
-                    Menus {menusWithDishes.length > 0 ? `(${menusWithDishes.length})` : ''}
+                    {menusWithDishes.length > 0 ? t('restaurantDetails.menusTabCount', {count: menusWithDishes.length}) : t('restaurantDetails.menusTab')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -491,7 +498,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                             styles.bubbleText,
                             (!selectedCategory || selectedCategory === 'Tout') && styles.bubbleTextActive,
                           ]}>
-                          Tout
+                          {t('restaurantDetails.allCategories')}
                         </Text>
                       </TouchableOpacity>
                       {categories.map(cat => (
@@ -506,14 +513,14 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                               selectedCategory === cat && styles.bubbleTextActive,
                             ]}
                             numberOfLines={1}>
-                            {cat}
+                            {categoryLabel(cat)}
                           </Text>
                         </TouchableOpacity>
                       ))}
                     </ScrollView>
                   )}
                   {filteredDishes.length === 0 ? (
-                    <Text style={styles.noDishes}>Aucun plat pour le moment.</Text>
+                    <Text style={styles.noDishes}>{t('restaurantDetails.noDishesYet')}</Text>
                   ) : (
                     filteredDishes.map(dish => {
                       const dishUri = getAbsoluteImageUrl(dish.imageUrl);
@@ -577,7 +584,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                       color={Colors.primary}
                     />
                     <Text style={styles.voirMenuButtonText}>
-                      {showMenuSection ? 'Masquer le menu' : 'Voir menu'}
+                      {showMenuSection ? t('restaurantDetails.hideMenu') : t('restaurantDetails.viewMenu')}
                     </Text>
                   </TouchableOpacity>
                   {showMenuSection &&
@@ -609,7 +616,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                               </Text>
                             ) : null}
                             <Text style={styles.menuCardPlats}>
-                              {menu.dishes?.length ?? 0} plat{(menu.dishes?.length ?? 0) > 1 ? 's' : ''}
+                              {t('restaurantDetails.dishesCount', {count: menu.dishes?.length ?? 0})}
                             </Text>
                           </View>
                         </View>
@@ -626,7 +633,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                               menuId: menu.id,
                               dishIds: dishIds.length > 0 ? dishIds : undefined,
                               restaurantId: restaurant.id,
-                              name: `Menu: ${menu.name}`,
+                              name: t('restaurantDetails.menuItemName', {name: menu.name}),
                               price: menuPrice,
                               quantity: 1,
                               imageUrl: menu.dishes?.[0]?.image_url ?? undefined,
@@ -636,14 +643,14 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                           activeOpacity={0.8}>
                           <IconWrapper name="cart-outline" size={20} color={Colors.white} />
                           <Text style={styles.addMenuToCartText} numberOfLines={1}>
-                            Ajouter le menu au panier
+                            {t('restaurantDetails.addMenuToCart')}
                           </Text>
                         </TouchableOpacity>
                       </View>
                     ))}
                 </>
               ) : (
-                <Text style={styles.noDishes}>Aucun menu pour le moment.</Text>
+                <Text style={styles.noDishes}>{t('restaurantDetails.noMenusYet')}</Text>
               )}
             </View>
           )}
@@ -651,9 +658,9 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
           {detailTab === 'avis' && (
             <View style={styles.section}>
               {!isLoggedIn ? (
-                <Text style={styles.reviewHint}>Connectez-vous pour noter ce restaurant.</Text>
+                <Text style={styles.reviewHint}>{t('restaurantDetails.loginToRate')}</Text>
               ) : userHasReviewed ? (
-                <Text style={styles.reviewHint}>Vous avez déjà laissé un avis.</Text>
+                <Text style={styles.reviewHint}>{t('restaurantDetails.alreadyReviewedHint')}</Text>
               ) : (
                 <>
                   <View style={styles.starRow}>
@@ -673,7 +680,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                   </View>
                   <TextInput
                     style={styles.reviewInput}
-                    placeholder="Votre avis (optionnel)"
+                    placeholder={t('restaurantDetails.reviewPlaceholder')}
                     placeholderTextColor={Colors.textLight}
                     value={reviewComment}
                     onChangeText={setReviewComment}
@@ -687,7 +694,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                     {reviewSubmitting ? (
                       <ActivityIndicator size="small" color={Colors.white} />
                     ) : (
-                      <Text style={styles.reviewSubmitText}>Envoyer l'avis</Text>
+                      <Text style={styles.reviewSubmitText}>{t('restaurantDetails.sendReview')}</Text>
                     )}
                   </TouchableOpacity>
                 </>
@@ -706,7 +713,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                   ))}
                 </View>
               ) : (
-                <Text style={styles.noDishes}>Aucun avis pour le moment.</Text>
+                <Text style={styles.noDishes}>{t('restaurantDetails.noReviewsYet')}</Text>
               )}
             </View>
           )}
@@ -715,7 +722,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
             <View style={styles.section}>
               {restaurant.description ? (
                 <View style={styles.infoBlock}>
-                  <Text style={styles.sectionTitle}>À propos</Text>
+                  <Text style={styles.sectionTitle}>{t('restaurantDetails.about')}</Text>
                   <Text style={styles.description}>{restaurant.description}</Text>
                 </View>
               ) : null}
@@ -745,24 +752,25 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
                 <View style={styles.loyaltyBanner}>
                   <IconWrapper name="gift-outline" size={22} color={Colors.primary} />
                   <View style={styles.loyaltyBannerTextWrap}>
-                    <Text style={styles.loyaltyBannerTitle}>Points de fidélité namke</Text>
+                    <Text style={styles.loyaltyBannerTitle}>{t('restaurantDetails.loyaltyTitle')}</Text>
                     <Text style={styles.loyaltyBannerSub}>
-                      {Number(restaurant.loyaltyPointsPerTranche ?? 1) || 0} point(s) tous les{' '}
-                      {Number(restaurant.loyaltyTrancheEuros ?? 10).toLocaleString('fr-FR', {
-                        maximumFractionDigits: 2,
-                      })}{' '}
-                      € dépensés (après paiement).
+                      {t('restaurantDetails.loyaltyEarnRate', {
+                        count: Number(restaurant.loyaltyPointsPerTranche ?? 1) || 0,
+                        amount: Number(restaurant.loyaltyTrancheEuros ?? 10).toLocaleString(numberLocale, {
+                          maximumFractionDigits: 2,
+                        }),
+                      })}
                     </Text>
                     {isLoggedIn && loyaltyBalanceLoading && (
                       <ActivityIndicator style={{marginTop: 8}} size="small" color={Colors.primary} />
                     )}
                     {isLoggedIn && !loyaltyBalanceLoading && loyaltyPointsBalance !== null && (
                       <Text style={styles.loyaltyBalance}>
-                        Vos points disponibles : <Text style={styles.loyaltyBalanceNum}>{loyaltyPointsBalance}</Text>
+                        {t('restaurantDetails.loyaltyBalanceLabel')} <Text style={styles.loyaltyBalanceNum}>{loyaltyPointsBalance}</Text>
                       </Text>
                     )}
                     {!isLoggedIn && (
-                      <Text style={styles.loyaltyHint}>Connectez-vous pour voir votre solde de points.</Text>
+                      <Text style={styles.loyaltyHint}>{t('restaurantDetails.loginToSeeBalance')}</Text>
                     )}
                   </View>
                 </View>
@@ -770,7 +778,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
 
               {galleryImages.length > 0 && (
                 <View style={styles.infoBlock}>
-                  <Text style={styles.sectionTitle}>Images du restaurant</Text>
+                  <Text style={styles.sectionTitle}>{t('restaurantDetails.restaurantImages')}</Text>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -800,7 +808,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
             onPress={() => navigation.navigate('Cart')}
             activeOpacity={0.85}>
             <Text style={styles.cartBarText}>
-              Voir le panier · {cartForRestaurant.count} article{cartForRestaurant.count > 1 ? 's' : ''}
+              {t('restaurantDetails.viewCart', {count: cartForRestaurant.count})}
             </Text>
             <Text style={styles.cartBarPrice}>{cartForRestaurant.total.toFixed(2)} €</Text>
           </TouchableOpacity>
@@ -1296,7 +1304,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: GLOBAL_TAB_BAR_HEIGHT,
     paddingHorizontal: 22,
     paddingTop: 12,
     paddingBottom: 20,

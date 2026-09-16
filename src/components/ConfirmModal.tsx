@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import IconWrapper from './IconWrapper';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
@@ -26,12 +27,15 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   visible,
   title,
   message,
-  confirmLabel = 'Confirmer',
-  cancelLabel = 'Annuler',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   variant = 'neutral',
 }) => {
+  const {t} = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('confirmModal.confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('confirmModal.cancel');
   const isDanger = variant === 'danger';
   const isPrimary = variant === 'primary';
   const confirmBg = isDanger ? Colors.error : isPrimary ? Colors.primary : Colors.gray[700];
@@ -53,13 +57,13 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               style={[styles.button, styles.cancelButton]}
               onPress={onCancel}
               activeOpacity={0.8}>
-              <Text style={styles.cancelText}>{cancelLabel}</Text>
+              <Text style={styles.cancelText}>{resolvedCancelLabel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.confirmButton, {backgroundColor: confirmBg}]}
               onPress={onConfirm}
               activeOpacity={0.8}>
-              <Text style={styles.confirmText}>{confirmLabel}</Text>
+              <Text style={styles.confirmText}>{resolvedConfirmLabel}</Text>
             </TouchableOpacity>
           </View>
         </View>

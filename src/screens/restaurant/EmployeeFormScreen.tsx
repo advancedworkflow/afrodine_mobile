@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import {Colors} from '../../utils/colors';
@@ -22,16 +23,14 @@ import {
 } from '../../services/restaurantManagement';
 import {formatAxiosError} from '../../utils/formatApiError';
 
-const ROLES: {value: EmployeeRole; label: string}[] = [
-  {value: 'manager', label: 'Manager'},
-  {value: 'kitchen', label: 'Cuisine'},
-  {value: 'service', label: 'Service'},
-  {value: 'cashier', label: 'Caisse'},
-  {value: 'delivery', label: 'Livraison'},
-  {value: 'staff', label: 'Staff'},
-];
+const ROLE_VALUES: EmployeeRole[] = ['manager', 'kitchen', 'service', 'cashier', 'delivery', 'staff'];
 
 const EmployeeFormScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
+  const ROLES: {value: EmployeeRole; label: string}[] = ROLE_VALUES.map((value) => ({
+    value,
+    label: t(`restaurantEmployeeForm.roles.${value}`),
+  }));
   const employee = route.params?.employee as ManagementEmployee | undefined;
   const isEdit = employee != null;
 
@@ -59,15 +58,15 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
 
   const handleSubmit = async () => {
     if (!email.trim() || !firstName.trim() || !lastName.trim()) {
-      alert('Champs requis', 'Renseignez au minimum l’email, le prénom et le nom.');
+      alert(t('restaurantEmployeeForm.requiredFieldsTitle'), t('restaurantEmployeeForm.requiredFieldsMessage'));
       return;
     }
     if (!isEdit && !password.trim()) {
-      alert('Champ requis', 'Un mot de passe est requis pour créer un employé.');
+      alert(t('restaurantEmployeeForm.requiredFieldTitle'), t('restaurantEmployeeForm.passwordRequired'));
       return;
     }
     if (!isEdit && !hireDate.trim()) {
-      alert('Champ requis', 'Saisissez la date d’embauche (AAAA-MM-JJ).');
+      alert(t('restaurantEmployeeForm.requiredFieldTitle'), t('restaurantEmployeeForm.hireDateRequired'));
       return;
     }
 
@@ -83,7 +82,7 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
           hire_date: hireDate.trim() || undefined,
           salary: salary.trim() ? parseFloat(salary.replace(',', '.')) : undefined,
         });
-        alert('Succès', 'Employé mis à jour.', [{text: 'OK', onPress: () => navigation.goBack()}]);
+        alert(t('restaurantEmployeeForm.successTitle'), t('restaurantEmployeeForm.updateSuccess'), [{text: 'OK', onPress: () => navigation.goBack()}]);
       } else {
         await createEmployee({
           email: email.trim(),
@@ -95,10 +94,10 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
           hire_date: hireDate.trim(),
           salary: salary.trim() ? parseFloat(salary.replace(',', '.')) : undefined,
         });
-        alert('Succès', 'Employé créé.', [{text: 'OK', onPress: () => navigation.goBack()}]);
+        alert(t('restaurantEmployeeForm.successTitle'), t('restaurantEmployeeForm.createSuccess'), [{text: 'OK', onPress: () => navigation.goBack()}]);
       }
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Erreur lors de l\'enregistrement'));
+      alert(t('restaurantEmployeeForm.errorTitle'), formatAxiosError(e, t('restaurantEmployeeForm.saveFailed')));
     } finally {
       setSubmitting(false);
     }
@@ -108,33 +107,33 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title={isEdit ? 'Modifier l’employé' : 'Nouvel employé'}
+        title={isEdit ? t('restaurantEmployeeForm.editTitle') : t('restaurantEmployeeForm.createTitle')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={styles.sectionTitle}>Informations</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantEmployeeForm.infoSection')}</Text>
 
-          <Text style={styles.label}>Prénom *</Text>
+          <Text style={styles.label}>{t('restaurantEmployeeForm.firstNameLabel')}</Text>
           <TextInput
             style={styles.input}
             value={firstName}
             onChangeText={setFirstName}
-            placeholder="Prénom"
+            placeholder={t('restaurantEmployeeForm.firstNamePlaceholder')}
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.label}>Nom *</Text>
+          <Text style={styles.label}>{t('restaurantEmployeeForm.lastNameLabel')}</Text>
           <TextInput
             style={styles.input}
             value={lastName}
             onChangeText={setLastName}
-            placeholder="Nom"
+            placeholder={t('restaurantEmployeeForm.lastNamePlaceholder')}
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.label}>Email *</Text>
+          <Text style={styles.label}>{t('restaurantEmployeeForm.emailLabel')}</Text>
           <TextInput
             style={styles.input}
             value={email}
@@ -148,12 +147,12 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
 
           {!isEdit && (
             <>
-              <Text style={styles.label}>Mot de passe *</Text>
+              <Text style={styles.label}>{t('restaurantEmployeeForm.passwordLabel')}</Text>
               <TextInput
                 style={styles.input}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Mot de passe temporaire"
+                placeholder={t('restaurantEmployeeForm.passwordPlaceholder')}
                 placeholderTextColor={Colors.textLight}
                 secureTextEntry
                 autoCapitalize="none"
@@ -161,7 +160,7 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
             </>
           )}
 
-          <Text style={styles.label}>Téléphone</Text>
+          <Text style={styles.label}>{t('restaurantEmployeeForm.phoneLabel')}</Text>
           <TextInput
             style={styles.input}
             value={phone}
@@ -171,7 +170,7 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
             keyboardType="phone-pad"
           />
 
-          <Text style={styles.sectionTitle}>Rôle</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantEmployeeForm.roleSection')}</Text>
           <View style={styles.roleGrid}>
             {ROLES.map((r) => (
               <TouchableOpacity
@@ -183,8 +182,8 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
             ))}
           </View>
 
-          <Text style={styles.sectionTitle}>Emploi</Text>
-          <Text style={styles.label}>Date d’embauche {!isEdit ? '*' : ''}</Text>
+          <Text style={styles.sectionTitle}>{t('restaurantEmployeeForm.employmentSection')}</Text>
+          <Text style={styles.label}>{t('restaurantEmployeeForm.hireDateLabel')} {!isEdit ? '*' : ''}</Text>
           <TextInput
             style={styles.input}
             value={hireDate}
@@ -193,12 +192,12 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
             placeholderTextColor={Colors.textLight}
           />
 
-          <Text style={styles.label}>Salaire (€)</Text>
+          <Text style={styles.label}>{t('restaurantEmployeeForm.salaryLabel')}</Text>
           <TextInput
             style={styles.input}
             value={salary}
             onChangeText={setSalary}
-            placeholder="Optionnel"
+            placeholder={t('restaurantEmployeeForm.optional')}
             placeholderTextColor={Colors.textLight}
             keyboardType="decimal-pad"
           />
@@ -210,7 +209,7 @@ const EmployeeFormScreen = ({navigation, route}: any) => {
             {submitting ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
-              <Text style={styles.submitBtnText}>{isEdit ? 'Enregistrer' : 'Créer l’employé'}</Text>
+              <Text style={styles.submitBtnText}>{isEdit ? t('restaurantEmployeeForm.save') : t('restaurantEmployeeForm.createButton')}</Text>
             )}
           </TouchableOpacity>
         </ScrollView>

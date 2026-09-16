@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
@@ -23,15 +24,15 @@ import {
 import ConfirmModal from '../../components/ConfirmModal';
 import {formatAxiosError} from '../../utils/formatApiError';
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Brouillon',
-  active: 'Active',
-  paused: 'En pause',
-  expired: 'Expirée',
-  cancelled: 'Annulée',
-};
-
 const PromotionsManagementScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+  const STATUS_LABELS: Record<string, string> = {
+    draft: t('restaurantPromotionsManagement.status.draft'),
+    active: t('restaurantPromotionsManagement.status.active'),
+    paused: t('restaurantPromotionsManagement.status.paused'),
+    expired: t('restaurantPromotionsManagement.status.expired'),
+    cancelled: t('restaurantPromotionsManagement.status.cancelled'),
+  };
   const [promotions, setPromotions] = useState<ManagementPromotion[]>([]);
   const [stats, setStats] = useState<PromotionStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,9 +71,9 @@ const PromotionsManagementScreen = ({navigation}: any) => {
     try {
       await deleteManagementPromotion(id);
       setPromotions((prev) => prev.filter((p) => p.id !== id));
-      alert('Succès', 'Promotion supprimée.');
+      alert(t('restaurantPromotionsManagement.successTitle'), t('restaurantPromotionsManagement.deletedMessage'));
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible de supprimer.'));
+      alert(t('restaurantPromotionsManagement.errorTitle'), formatAxiosError(e, t('restaurantPromotionsManagement.deleteError')));
     }
   };
 
@@ -83,7 +84,7 @@ const PromotionsManagementScreen = ({navigation}: any) => {
       <View style={styles.container}>
         <TopBar
           navigation={navigation}
-          title="Promotions"
+          title={t('restaurantPromotionsManagement.title')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -98,7 +99,7 @@ const PromotionsManagementScreen = ({navigation}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title="Promotions"
+        title={t('restaurantPromotionsManagement.title')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
@@ -112,15 +113,15 @@ const PromotionsManagementScreen = ({navigation}: any) => {
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.total_promotions ?? 0}</Text>
-              <Text style={styles.statLabel}>Total</Text>
+              <Text style={styles.statLabel}>{t('restaurantPromotionsManagement.statTotal')}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.active_promotions ?? 0}</Text>
-              <Text style={styles.statLabel}>Actives</Text>
+              <Text style={styles.statLabel}>{t('restaurantPromotionsManagement.statActive')}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.total_uses ?? 0}</Text>
-              <Text style={styles.statLabel}>Utilisations</Text>
+              <Text style={styles.statLabel}>{t('restaurantPromotionsManagement.statUses')}</Text>
             </View>
           </View>
         )}
@@ -130,15 +131,15 @@ const PromotionsManagementScreen = ({navigation}: any) => {
           onPress={() => navigation.navigate('PromotionForm', {promotion: undefined})}
           activeOpacity={0.8}>
           <IconWrapper name="add-circle-outline" size={24} color={Colors.white} />
-          <Text style={styles.addButtonText}>Nouvelle promotion</Text>
+          <Text style={styles.addButtonText}>{t('restaurantPromotionsManagement.newPromotion')}</Text>
         </TouchableOpacity>
 
         {promotions.length === 0 ? (
           <View style={styles.empty}>
             <IconWrapper name="pricetag-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>Aucune promotion</Text>
+            <Text style={styles.emptyTitle}>{t('restaurantPromotionsManagement.noPromotions')}</Text>
             <Text style={styles.emptyText}>
-              Créez une promotion pour mettre en avant vos plats ou menus.
+              {t('restaurantPromotionsManagement.noPromotionsSubtitle')}
             </Text>
           </View>
         ) : (
@@ -178,9 +179,9 @@ const PromotionsManagementScreen = ({navigation}: any) => {
 
       <ConfirmModal
         visible={deleteTarget != null}
-        title="Supprimer la promotion"
-        message={`Supprimer « ${deleteTarget?.title} » ?`}
-        confirmLabel="Supprimer"
+        title={t('restaurantPromotionsManagement.deleteTitle')}
+        message={t('restaurantPromotionsManagement.deleteMessage', {title: deleteTarget?.title})}
+        confirmLabel={t('restaurantPromotionsManagement.deleteConfirm')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         variant="danger"

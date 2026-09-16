@@ -11,6 +11,7 @@ import {
   Switch,
   ActivityIndicator,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import {Colors} from '../../utils/colors';
@@ -24,14 +25,14 @@ import {
 } from '../../services/restaurantManagement';
 import {formatAxiosError} from '../../utils/formatApiError';
 
-const SERVICE_TYPES = [
-  { value: 'buffet', label: 'Buffet' },
-  { value: 'cocktail', label: 'Cocktail' },
-  { value: 'seated_dinner', label: 'Dîner assis' },
-  { value: 'catering_delivery', label: 'Livraison traiteur' },
-];
+const SERVICE_TYPE_VALUES = ['buffet', 'cocktail', 'seated_dinner', 'catering_delivery'];
 
 const CateringOfferDetailScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
+  const SERVICE_TYPES = SERVICE_TYPE_VALUES.map((value) => ({
+    value,
+    label: t(`restaurantCateringOfferDetail.serviceTypes.${value}`),
+  }));
   const serviceId = route.params?.serviceId as number | undefined;
   const isEdit = serviceId != null;
 
@@ -75,7 +76,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
         setFeatured(s.featured ?? false);
       }
     } catch {
-      alert('Erreur', 'Impossible de charger l\'offre.');
+      alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.loadFailed'));
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -108,34 +109,34 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
 
   const handleSave = async () => {
     if (!service_name.trim()) {
-      alert('Erreur', 'Nom de l\'offre requis.');
+      alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.nameRequired'));
       return;
     }
     const base = parseFloat(base_price.replace(',', '.'));
     if (!Number.isFinite(base) || base < 0) {
-      alert('Erreur', 'Prix de base invalide.');
+      alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.invalidBasePrice'));
       return;
     }
     const min = parseInt(min_guests, 10);
     if (!Number.isInteger(min) || min < 1) {
-      alert('Erreur', 'Nombre min. de convives invalide (≥ 1).');
+      alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.invalidMinGuests'));
       return;
     }
     setSubmitting(true);
     try {
       if (isEdit && serviceId) {
         await updateManagementCateringService(serviceId, buildPayload());
-        alert('Succès', 'Offre mise à jour.', [
+        alert(t('restaurantCateringOfferDetail.successTitle'), t('restaurantCateringOfferDetail.updateSuccess'), [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       } else {
         await createManagementCateringService(buildPayload());
-        alert('Succès', 'Offre créée.', [
+        alert(t('restaurantCateringOfferDetail.successTitle'), t('restaurantCateringOfferDetail.createSuccess'), [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       }
     } catch (e: any) {
-      alert('Erreur', formatAxiosError(e, 'Impossible d\'enregistrer.'));
+      alert(t('restaurantCateringOfferDetail.errorTitle'), formatAxiosError(e, t('restaurantCateringOfferDetail.saveFailed')));
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +147,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
       <View style={styles.container}>
         <TopBar
           navigation={navigation}
-          title={isEdit ? 'Modifier l\'offre' : 'Nouvelle offre traiteur'}
+          title={isEdit ? t('restaurantCateringOfferDetail.editTitle') : t('restaurantCateringOfferDetail.createTitle')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -161,7 +162,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
     <View style={styles.container}>
       <TopBar
         navigation={navigation}
-        title={isEdit ? 'Modifier l\'offre' : 'Nouvelle offre traiteur'}
+        title={isEdit ? t('restaurantCateringOfferDetail.editTitle') : t('restaurantCateringOfferDetail.createTitle')}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
@@ -174,38 +175,38 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
           contentContainerStyle={styles.contentContainer}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <Text style={styles.label}>Nom de l'offre *</Text>
+          <Text style={styles.label}>{t('restaurantCateringOfferDetail.nameLabel')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ex. Menu mariage, Buffet séminaire"
+            placeholder={t('restaurantCateringOfferDetail.namePlaceholder')}
             placeholderTextColor={Colors.textLight}
             value={service_name}
             onChangeText={setServiceName}
           />
-          <Text style={styles.label}>Type</Text>
+          <Text style={styles.label}>{t('restaurantCateringOfferDetail.typeLabel')}</Text>
           <View style={styles.typeRow}>
-            {SERVICE_TYPES.map((t) => (
+            {SERVICE_TYPES.map((type) => (
               <TouchableOpacity
-                key={t.value}
+                key={type.value}
                 style={[
                   styles.typeChip,
-                  service_type === t.value && styles.typeChipActive,
+                  service_type === type.value && styles.typeChipActive,
                 ]}
-                onPress={() => setServiceType(service_type === t.value ? '' : t.value)}>
+                onPress={() => setServiceType(service_type === type.value ? '' : type.value)}>
                 <Text
                   style={[
                     styles.typeChipText,
-                    service_type === t.value && styles.typeChipTextActive,
+                    service_type === type.value && styles.typeChipTextActive,
                   ]}>
-                  {t.label}
+                  {type.label}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('restaurantCateringOfferDetail.descriptionLabel')}</Text>
           <TextInput
             style={[styles.input, styles.inputArea]}
-            placeholder="Décrivez votre offre (formule, prestations…)"
+            placeholder={t('restaurantCateringOfferDetail.descriptionPlaceholder')}
             placeholderTextColor={Colors.textLight}
             value={service_description}
             onChangeText={setServiceDescription}
@@ -214,7 +215,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
           />
           <View style={styles.row}>
             <View style={styles.half}>
-              <Text style={styles.label}>Prix de base (€) *</Text>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.basePriceLabel')}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="0"
@@ -225,10 +226,10 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               />
             </View>
             <View style={styles.half}>
-              <Text style={styles.label}>Prix / personne (€)</Text>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.pricePerPersonLabel')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Optionnel"
+                placeholder={t('restaurantCateringOfferDetail.optional')}
                 placeholderTextColor={Colors.textLight}
                 keyboardType="decimal-pad"
                 value={price_per_person}
@@ -238,7 +239,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
           </View>
           <View style={styles.row}>
             <View style={styles.half}>
-              <Text style={styles.label}>Convives min. *</Text>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.minGuestsLabel')}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="10"
@@ -249,10 +250,10 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               />
             </View>
             <View style={styles.half}>
-              <Text style={styles.label}>Convives max.</Text>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.maxGuestsLabel')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Optionnel"
+                placeholder={t('restaurantCateringOfferDetail.optional')}
                 placeholderTextColor={Colors.textLight}
                 keyboardType="number-pad"
                 value={max_guests}
@@ -260,17 +261,17 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               />
             </View>
           </View>
-          <Text style={styles.label}>Politique d'annulation</Text>
+          <Text style={styles.label}>{t('restaurantCateringOfferDetail.cancellationPolicyLabel')}</Text>
           <TextInput
             style={[styles.input, styles.inputArea]}
-            placeholder="Ex. Annulation gratuite jusqu'à 7 jours avant"
+            placeholder={t('restaurantCateringOfferDetail.cancellationPolicyPlaceholder')}
             placeholderTextColor={Colors.textLight}
             value={cancellation_policy}
             onChangeText={setCancellationPolicy}
             multiline
           />
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Livraison possible</Text>
+            <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.deliveryAvailable')}</Text>
             <Switch
               value={delivery_available}
               onValueChange={setDeliveryAvailable}
@@ -279,7 +280,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Installation sur place</Text>
+            <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.setupAvailable')}</Text>
             <Switch
               value={setup_available}
               onValueChange={setSetupAvailable}
@@ -288,7 +289,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Personnel fourni</Text>
+            <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.staffAvailable')}</Text>
             <Switch
               value={staff_available}
               onValueChange={setStaffAvailable}
@@ -297,7 +298,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Location matériel</Text>
+            <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.equipmentRental')}</Text>
             <Switch
               value={equipment_rental}
               onValueChange={setEquipmentRental}
@@ -306,7 +307,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Offre active</Text>
+            <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.isActive')}</Text>
             <Switch
               value={is_active}
               onValueChange={setIsActive}
@@ -315,7 +316,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Mise en avant</Text>
+            <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.featured')}</Text>
             <Switch
               value={featured}
               onValueChange={setFeatured}
@@ -328,7 +329,11 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
             onPress={handleSave}
             disabled={submitting}>
             <Text style={styles.saveBtnText}>
-              {submitting ? 'Enregistrement...' : isEdit ? 'Enregistrer' : 'Créer l\'offre'}
+              {submitting
+                ? t('restaurantCateringOfferDetail.saving')
+                : isEdit
+                ? t('restaurantCateringOfferDetail.save')
+                : t('restaurantCateringOfferDetail.createButton')}
             </Text>
           </TouchableOpacity>
         </ScrollView>

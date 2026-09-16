@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -13,6 +14,7 @@ import {
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
 import {secondaryFont, fontButton, fontDisplay, fontHeading} from '../utils/fonts';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import * as dishesApi from '../services/dishes';
 import * as supplementsApi from '../services/supplements';
 import * as restaurantsApi from '../services/restaurants';
@@ -28,6 +30,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
   route,
   navigation,
 }) => {
+  const {t} = useTranslation();
   const {dishId, restaurantId} = route.params || {};
   const {addItem} = useCart();
   const [dish, setDish] = useState<dishesApi.DishForDetail | null>(null);
@@ -117,7 +120,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
         <StatusBar barStyle="light-content" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('dishDetails.loading')}</Text>
         </View>
       </View>
     );
@@ -127,7 +130,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Plat introuvable</Text>
+          <Text style={styles.loadingText}>{t('dishDetails.notFound')}</Text>
         </View>
       </View>
     );
@@ -177,7 +180,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
           {/* Ingredients */}
           {dish.ingredients && dish.ingredients.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ingrédients</Text>
+              <Text style={styles.sectionTitle}>{t('dishDetails.ingredients')}</Text>
               <View style={styles.ingredientsList}>
                 {dish.ingredients.map((ingredient: string, index: number) => (
                   <View key={index} style={styles.ingredientTag}>
@@ -191,7 +194,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
           {/* Allergens */}
           {dish.allergens && dish.allergens.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Allergènes</Text>
+              <Text style={styles.sectionTitle}>{t('dishDetails.allergens')}</Text>
               <View style={styles.allergensList}>
                 {dish.allergens.map((allergen: string, index: number) => (
                   <View key={index} style={styles.allergenTag}>
@@ -206,7 +209,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
           {/* Suppléments (depuis la base de données) */}
           {supplements.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Accompagnements</Text>
+              <Text style={styles.sectionTitle}>{t('dishDetails.sideDishes')}</Text>
               {supplements.map(sup => (
                 <TouchableOpacity
                   key={sup.id}
@@ -275,8 +278,8 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
             navigation.navigate('Cart');
           }}>
           <Text style={styles.addToCartText} numberOfLines={1}>
-            Ajouter · {totalPrice.toFixed(2)} €
-            {deliveryFee > 0 ? ` (+ ${deliveryFee.toFixed(2)} € livr.)` : ''}
+            {t('dishDetails.addToCartPrice', {price: totalPrice.toFixed(2)})}
+            {deliveryFee > 0 ? ` ${t('dishDetails.plusDeliveryFee', {fee: deliveryFee.toFixed(2)})}` : ''}
           </Text>
         </TouchableOpacity>
       </View>
@@ -462,7 +465,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: 'absolute',
-    bottom: 0,
+    bottom: GLOBAL_TAB_BAR_HEIGHT,
     left: 0,
     right: 0,
     flexDirection: 'row',

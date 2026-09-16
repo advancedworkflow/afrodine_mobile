@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Image,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import TopBar from '../components/TopBar';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius, Shadows} from '../utils/colors';
@@ -20,6 +21,7 @@ import {
 } from '../services/catering';
 
 const CateringServiceDetailScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
   const restaurantId = route.params?.restaurantId ?? route.params?.restaurant_id;
   const [restaurant, setRestaurant] = useState<any>(null);
   const [services, setServices] = useState<CateringServiceApi[]>([]);
@@ -30,7 +32,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
 
   const load = async (isRefresh = false) => {
     if (!restaurantId) {
-      setError('Restaurant manquant');
+      setError(t('catering.serviceDetail.missingRestaurant'));
       setLoading(false);
       return;
     }
@@ -59,7 +61,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
       setServices(Array.isArray(servicesData) ? servicesData : []);
       setDishes(Array.isArray(dishesData) ? dishesData : []);
     } catch (e: any) {
-      setError(e?.message || 'Erreur chargement');
+      setError(e?.message || t('catering.serviceDetail.loadError'));
       setServices([]);
       setDishes([]);
     } finally {
@@ -77,24 +79,24 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
     load(true);
   };
 
-  const typeLabel = (t?: string) => {
-    if (!t) return 'Traiteur';
+  const typeLabel = (serviceType?: string) => {
+    if (!serviceType) return t('catering.serviceDetail.types.default');
     const map: Record<string, string> = {
-      buffet: 'Buffet',
-      cocktail: 'Cocktail',
-      seated_dinner: 'Dîner assis',
-      catering_delivery: 'Livraison traiteur',
-      wedding: 'Mariage',
-      enterprise: 'Entreprise',
+      buffet: t('catering.serviceDetail.types.buffet'),
+      cocktail: t('catering.serviceDetail.types.cocktail'),
+      seated_dinner: t('catering.serviceDetail.types.seatedDinner'),
+      catering_delivery: t('catering.serviceDetail.types.cateringDelivery'),
+      wedding: t('catering.serviceDetail.types.wedding'),
+      enterprise: t('catering.serviceDetail.types.enterprise'),
     };
-    return map[t] ?? t;
+    return map[serviceType] ?? serviceType;
   };
 
   const commoditésLabels: { key: keyof CateringServiceApi; label: string }[] = [
-    { key: 'delivery_available', label: 'Livraison' },
-    { key: 'setup_available', label: 'Mise en place' },
-    { key: 'staff_available', label: 'Personnel' },
-    { key: 'equipment_rental', label: 'Location matériel' },
+    { key: 'delivery_available', label: t('catering.serviceDetail.amenities.delivery') },
+    { key: 'setup_available', label: t('catering.serviceDetail.amenities.setup') },
+    { key: 'staff_available', label: t('catering.serviceDetail.amenities.staff') },
+    { key: 'equipment_rental', label: t('catering.serviceDetail.amenities.equipmentRental') },
   ];
 
   const renderCommodités = (s: CateringServiceApi) => {
@@ -104,7 +106,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
     if (items.length === 0) return null;
     return (
       <View style={styles.commoditesWrap}>
-        <Text style={styles.commoditesTitle}>Commodités</Text>
+        <Text style={styles.commoditesTitle}>{t('catering.serviceDetail.amenitiesTitle')}</Text>
         <View style={styles.commoditesRow}>
           {items.map((label) => (
             <View key={label} style={styles.commoditeChip}>
@@ -122,7 +124,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
       <View style={styles.container}>
         <TopBar
           navigation={navigation}
-          title="Détail traiteur"
+          title={t('catering.serviceDetail.title')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -138,13 +140,13 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
       <View style={styles.container}>
         <TopBar
           navigation={navigation}
-          title="Détail traiteur"
+          title={t('catering.serviceDetail.title')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
         <View style={styles.centered}>
           <IconWrapper name="alert-circle-outline" size={48} color={Colors.textLight} />
-          <Text style={styles.errorText}>{error || 'Restaurant introuvable'}</Text>
+          <Text style={styles.errorText}>{error || t('catering.serviceDetail.restaurantNotFound')}</Text>
         </View>
       </View>
     );
@@ -176,7 +178,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
             source={{uri: heroImageUri}}
             style={styles.heroImage}
             resizeMode="cover"
-            accessibilityLabel="Visuel traiteur"
+            accessibilityLabel={t('catering.serviceDetail.heroImageAlt')}
           />
         ) : null}
         <View style={styles.hero}>
@@ -194,14 +196,14 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
         {!hasOffers ? (
           <View style={styles.empty}>
             <IconWrapper name="restaurant-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>Aucune offre traiteur</Text>
-            <Text style={styles.emptyText}>Ce restaurant n'a pas d'offres traiteur publiées.</Text>
+            <Text style={styles.emptyTitle}>{t('catering.serviceDetail.noOffersTitle')}</Text>
+            <Text style={styles.emptyText}>{t('catering.serviceDetail.noOffersText')}</Text>
           </View>
         ) : (
           <>
             {services.length > 0 ? (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Services traiteur</Text>
+                <Text style={styles.sectionTitle}>{t('catering.serviceDetail.servicesTitle')}</Text>
                 {services.map((s) => (
                   <View key={s.id} style={styles.card}>
                     {s.image_url ? (
@@ -225,10 +227,12 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
                       ) : null}
                       <View style={styles.cardMeta}>
                         <Text style={styles.cardPrice}>
-                          À partir de {Number(s.base_price).toFixed(0)} €
+                          {t('catering.serviceDetail.startingFrom', {price: Number(s.base_price).toFixed(0)})}
                         </Text>
                         <Text style={styles.cardGuests}>
-                          {s.min_guests}–{s.max_guests ?? '+'} pers.
+                          {s.max_guests != null
+                            ? t('catering.serviceDetail.guestsRange', {min: s.min_guests, max: s.max_guests})
+                            : t('catering.serviceDetail.guestsRangeOpen', {min: s.min_guests})}
                         </Text>
                       </View>
                       {renderCommodités(s)}
@@ -243,7 +247,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
 
         {dishes.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Plats disponibles</Text>
+            <Text style={styles.sectionTitle}>{t('catering.serviceDetail.availableDishes')}</Text>
             {dishes.map((d) => (
               <TouchableOpacity
                 key={d.id}
@@ -280,7 +284,7 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
             navigation.navigate('RestaurantDetails', {restaurantId: restaurant.id})
           }
           activeOpacity={0.8}>
-          <Text style={styles.ctaButtonText}>Voir la fiche restaurant</Text>
+          <Text style={styles.ctaButtonText}>{t('catering.serviceDetail.viewRestaurant')}</Text>
           <IconWrapper name="arrow-forward-circle" size={24} color={Colors.white} />
         </TouchableOpacity>
       </ScrollView>

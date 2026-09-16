@@ -9,7 +9,9 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import {getCateringFormulas, type CateringFormulaApi} from '../services/catering';
 import {getAbsoluteImageUrl} from '../utils/api';
@@ -17,6 +19,7 @@ import {getAbsoluteImageUrl} from '../utils/api';
 const namkeFallback = require('../assets/namke-fallback.png');
 
 const CateringScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const [formulas, setFormulas] = useState<CateringFormulaApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,10 +61,10 @@ const CateringScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.heroEyebrow}>Service traiteur</Text>
-        <Text style={styles.heroTitle}>Vous êtes nombreux à table ?</Text>
+        <Text style={styles.heroEyebrow}>{t('catering.eyebrow')}</Text>
+        <Text style={styles.heroTitle}>{t('catering.heroTitle')}</Text>
         <Text style={styles.heroSubtitle}>
-          {formulas.length} formule{formulas.length > 1 ? 's' : ''}, portées par des cuisiniers de votre quartier. Devis sous 24 h.
+          {t('catering.heroSubtitle', {count: formulas.length})}
         </Text>
       </View>
 
@@ -72,7 +75,7 @@ const CateringScreen = ({navigation}: any) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
         }>
         {formulas.length === 0 ? (
-          <Text style={styles.emptyText}>Aucune formule traiteur pour le moment.</Text>
+          <Text style={styles.emptyText}>{t('catering.noFormulas')}</Text>
         ) : (
           <>
             {featured && (
@@ -98,17 +101,17 @@ const CateringScreen = ({navigation}: any) => {
                     <Text style={styles.featuredDescription} numberOfLines={2}>{featured.description}</Text>
                   ) : null}
                   <Text style={styles.featuredMeta}>
-                    {featured.min_guests}–{featured.max_guests} convives
+                    {t('catering.guestsRange', {min: featured.min_guests, max: featured.max_guests})}
                   </Text>
                   <View style={styles.featuredPriceRow}>
                     <Text style={styles.featuredPrice}>
-                      {featured.is_custom_price ? 'Sur devis' : `${Number(featured.price_per_person).toFixed(0)} €`}
+                      {featured.is_custom_price ? t('catering.onQuote') : `${Number(featured.price_per_person).toFixed(0)} €`}
                     </Text>
-                    {!featured.is_custom_price && <Text style={styles.featuredPriceUnit}>/ pers.</Text>}
+                    {!featured.is_custom_price && <Text style={styles.featuredPriceUnit}>{t('catering.perPerson')}</Text>}
                     <TouchableOpacity
                       style={styles.detailButton}
                       onPress={() => navigation.navigate('CateringFormulaDetail', {slug: featured.slug})}>
-                      <Text style={styles.detailButtonText}>Détail</Text>
+                      <Text style={styles.detailButtonText}>{t('catering.detail')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -129,14 +132,14 @@ const CateringScreen = ({navigation}: any) => {
                 <View style={styles.compactInfo}>
                   <Text style={styles.compactName} numberOfLines={1}>{f.name}</Text>
                   <Text style={styles.compactMeta} numberOfLines={1}>
-                    {f.min_guests}–{f.max_guests} convives
+                    {t('catering.guestsRange', {min: f.min_guests, max: f.max_guests})}
                   </Text>
                 </View>
                 <View style={styles.compactPriceWrap}>
                   <Text style={styles.compactPrice}>
-                    {f.is_custom_price ? 'Devis' : `${Number(f.price_per_person).toFixed(0)} €`}
+                    {f.is_custom_price ? t('catering.quote') : `${Number(f.price_per_person).toFixed(0)} €`}
                   </Text>
-                  {!f.is_custom_price && <Text style={styles.compactPriceUnit}>/ pers.</Text>}
+                  {!f.is_custom_price && <Text style={styles.compactPriceUnit}>{t('catering.perPerson')}</Text>}
                 </View>
               </TouchableOpacity>
             ))}
@@ -187,7 +190,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 22,
-    paddingBottom: 40,
+    paddingBottom: GLOBAL_TAB_BAR_HEIGHT + 40,
   },
   emptyText: {
     fontSize: 15,

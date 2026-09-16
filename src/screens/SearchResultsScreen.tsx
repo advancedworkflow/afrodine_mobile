@@ -1,4 +1,5 @@
 import React, {useCallback, useState, useRef, useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -20,6 +21,7 @@ import * as restaurantsApi from '../services/restaurants';
 import * as dishesApi from '../services/dishes';
 
 const SearchResultsScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
   const {searchQuery, searchResults, setSearchResults, setSearchQuery, isSearching, setIsSearching} = useSearch();
   const [displayResults, setDisplayResults] = useState<{dishes: any[]; restaurants: any[]}>(() => ({
     dishes: [...searchResults.dishes],
@@ -132,7 +134,7 @@ const SearchResultsScreen = ({navigation}: any) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SearchBar
-        placeholder="Rechercher un plat ou restaurant..."
+        placeholder={t('searchResults.placeholder')}
         onSearch={handleSearch}
         onLiveQueryChange={() => {}}
         suggestions={liveSuggestions}
@@ -169,24 +171,24 @@ const SearchResultsScreen = ({navigation}: any) => {
           <View style={styles.emptyContainer}>
             <IconWrapper name="search-outline" size={64} color={Colors.textLight} />
             <Text style={styles.emptyText}>
-              Aucun résultat pour "{searchQuery}"
+              {t('searchResults.noResultsFor', {query: searchQuery})}
             </Text>
             <Text style={styles.emptySubtext}>
-              Essayez avec d'autres mots-clés
+              {t('searchResults.tryOtherKeywords')}
             </Text>
           </View>
         )}
         {showEmpty && searchQuery.length === 0 && (
           <View style={styles.emptyContainer}>
             <IconWrapper name="search-outline" size={64} color={Colors.textLight} />
-            <Text style={styles.emptyText}>Recherchez un plat ou restaurant</Text>
+            <Text style={styles.emptyText}>{t('searchResults.promptSearch')}</Text>
           </View>
         )}
         {showResults && (
           <>
             {displayResults.dishes.length > 0 && (
               <View style={styles.section}>
-                <SectionHeader title={`Plats (${displayResults.dishes.length})`} />
+                <SectionHeader title={t('searchResults.dishesCount', {count: displayResults.dishes.length})} />
                 {displayResults.dishes.map(dish => (
                   <DishCard
                     key={dish.id}
@@ -205,7 +207,7 @@ const SearchResultsScreen = ({navigation}: any) => {
             )}
             {displayResults.restaurants.length > 0 && (
               <View style={styles.section}>
-                <SectionHeader title={`Restaurants (${displayResults.restaurants.length})`} />
+                <SectionHeader title={t('searchResults.restaurantsCount', {count: displayResults.restaurants.length})} />
                 {displayResults.restaurants.map(restaurant => (
                   <RestaurantCard
                     key={restaurant.id}
@@ -224,7 +226,7 @@ const SearchResultsScreen = ({navigation}: any) => {
         {isSearching && (
           <View style={styles.loadingInlay}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.loadingText}>Recherche en cours...</Text>
+            <Text style={styles.loadingText}>{t('searchResults.searching')}</Text>
           </View>
         )}
       </ScrollView>

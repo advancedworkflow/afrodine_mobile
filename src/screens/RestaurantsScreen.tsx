@@ -1,7 +1,9 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {useTranslation} from 'react-i18next';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl} from 'react-native';
 import FilterModal, {type FilterOptions, type SelectedFilters} from '../components/FilterModal';
 import {Colors, Radius} from '../utils/colors';
+import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontHeading, fontUI} from '../utils/fonts';
 import IconWrapper from '../components/IconWrapper';
 import RestaurantCard from '../components/home/RestaurantCard';
@@ -20,6 +22,7 @@ const defaultFilterOptions: FilterOptions = {
 };
 
 const RestaurantsScreen = ({navigation, route}: any) => {
+  const {t} = useTranslation();
   const {setSearchQuery, setSearchResults, setIsSearching} = useSearch();
   const initialCategory = route.params?.categoryName ?? route.params?.category ?? null;
   const initialFilters = route.params?.initialFilters as SelectedFilters | undefined;
@@ -79,7 +82,7 @@ const RestaurantsScreen = ({navigation, route}: any) => {
         setRestaurants(list);
       } catch (e: any) {
         if (getIsCancelled?.()) return;
-        setError(formatAxiosError(e, 'Erreur de chargement'));
+        setError(formatAxiosError(e, t('restaurantsList.loadError')));
         setRestaurants([]);
       } finally {
         if (!getIsCancelled?.()) {
@@ -179,10 +182,10 @@ const RestaurantsScreen = ({navigation, route}: any) => {
         onFilterChange={onFilterChange}
       />
       <View style={styles.header}>
-        <Text style={styles.title}>Cuisiniers</Text>
+        <Text style={styles.title}>{t('restaurantsList.title')}</Text>
       </View>
       <SearchBar
-        placeholder="Nom, cuisine, quartier…"
+        placeholder={t('restaurantsList.searchPlaceholder')}
         onSearch={handleSearch}
         onPress={() => navigation.navigate('SearchResults')}
       />
@@ -205,7 +208,7 @@ const RestaurantsScreen = ({navigation, route}: any) => {
             style={[styles.chip, !selectedFilters.cuisine_type && styles.chipActive]}
             onPress={() => selectCuisineChip(null)}
             activeOpacity={0.8}>
-            <Text style={[styles.chipText, !selectedFilters.cuisine_type && styles.chipTextActive]}>Toutes</Text>
+            <Text style={[styles.chipText, !selectedFilters.cuisine_type && styles.chipTextActive]}>{t('restaurantsList.allCuisines')}</Text>
           </TouchableOpacity>
           {filterOptions.cuisine_types.map(c => (
             <TouchableOpacity
@@ -218,12 +221,12 @@ const RestaurantsScreen = ({navigation, route}: any) => {
           ))}
           <TouchableOpacity style={styles.filterChip} onPress={() => setFilterModalVisible(true)} activeOpacity={0.8}>
             <IconWrapper name="options-outline" size={15} color={Colors.text} />
-            <Text style={styles.chipText}>Filtres</Text>
+            <Text style={styles.chipText}>{t('restaurantsList.filters')}</Text>
           </TouchableOpacity>
         </ScrollView>
 
         <Text style={styles.countText}>
-          {loading ? 'Chargement…' : `${restaurants.length} cuisinier${restaurants.length > 1 ? 's' : ''} disponible${restaurants.length > 1 ? 's' : ''}`}
+          {loading ? t('restaurantsList.loading') : t('restaurantsList.availableCount', {count: restaurants.length})}
         </Text>
 
         <View style={styles.restaurantsList}>
@@ -235,11 +238,11 @@ const RestaurantsScreen = ({navigation, route}: any) => {
             <View style={styles.errorWrap}>
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={() => loadRestaurants()}>
-                <Text style={styles.retryText}>Réessayer</Text>
+                <Text style={styles.retryText}>{t('restaurantsList.retry')}</Text>
               </TouchableOpacity>
             </View>
           ) : restaurants.length === 0 ? (
-            <Text style={styles.emptyText}>Aucun cuisinier</Text>
+            <Text style={styles.emptyText}>{t('restaurantsList.empty')}</Text>
           ) : (
             restaurants.map(restaurant => (
               <RestaurantCard
@@ -316,7 +319,7 @@ const styles = StyleSheet.create({
   },
   restaurantsList: {
     paddingHorizontal: 22,
-    paddingBottom: 24,
+    paddingBottom: GLOBAL_TAB_BAR_HEIGHT + 24,
   },
   loadingWrap: {
     padding: 40,
