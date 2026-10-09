@@ -157,7 +157,7 @@ const OrderHistoryScreen = ({navigation}: any) => {
           </Text>
           <TouchableOpacity
             style={styles.browseButton}
-            onPress={() => navigation.navigate('Restaurants')}>
+            onPress={() => navigation.popTo('MainTabs', {screen: 'Restaurants'})}>
             <Text style={styles.browseButtonText}>{t('orderHistory.discoverRestaurants')}</Text>
           </TouchableOpacity>
         </View>

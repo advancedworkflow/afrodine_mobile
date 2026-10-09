@@ -73,11 +73,13 @@ export interface CateringBookingCreatePayload {
   event_date: string;
   event_time: string;
   guest_count: number;
-  customer_id?: number;
+  occasion?: string;
   contact_email: string;
   contact_phone?: string;
+  delivery_address?: string;
   special_requests?: string;
   selected_dishes?: string[];
+  dietary_requirements?: string[];
 }
 
 export interface CateringFormulaMenuOption {

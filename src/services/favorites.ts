@@ -25,6 +25,7 @@ export interface RestaurantSummaryApi {
   price_range?: string;
   cuisine_type?: string;
   is_open?: boolean;
+  is_certified?: boolean;
 }
 
 function toRestaurantForList(r: RestaurantSummaryApi): RestaurantForList {
@@ -37,6 +38,7 @@ function toRestaurantForList(r: RestaurantSummaryApi): RestaurantForList {
     deliveryTime: '—',
     deliveryFee: undefined,
     imageUrl: undefined,
+    isCertified: r.is_certified === true,
   };
 }
 

@@ -25,6 +25,7 @@ import {
 import {getAbsoluteImageUrl} from '../utils/api';
 import {useAuth} from '../contexts/AuthContext';
 import {formatAxiosError} from '../utils/formatApiError';
+import {CATERING_OCCASION_IDS, DIETARY_IDS} from '../utils/catering';
 
 const namkeFallback = require('../assets/namke-fallback.png');
 
@@ -42,6 +43,9 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
+  const [occasion, setOccasion] = useState<string>('birthday');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [dietary, setDietary] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -116,7 +120,16 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
   const pricePerPerson = Number(formula.price_per_person);
   const estimatedTotal = pricePerPerson * guestCount;
 
+  const toggleDietary = (id: string) =>
+    setDietary(prev => (prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]));
+
   const handleSubmit = async () => {
+    // La demande est rattachée au compte client : connexion obligatoire
+    if (!isAuthenticated) {
+      alert(t('catering.formula.loginRequiredTitle'), t('catering.formula.loginRequiredMessage'));
+      navigation.navigate('Login');
+      return;
+    }
     if (choiceCount > 0 && selectedDishes.length < choiceCount) {
       alert(t('catering.formula.incompleteMenuTitle'), t('catering.formula.incompleteMenuMessage', {count: choiceCount}));
       return;
@@ -136,10 +149,12 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
         event_date: eventDate.trim(),
         event_time: eventTime.trim(),
         guest_count: guestCount,
-        customer_id: isAuthenticated && user?.id ? user.id : undefined,
+        occasion,
         contact_email: contactEmail.trim(),
         contact_phone: contactPhone.trim() || undefined,
+        delivery_address: deliveryAddress.trim() || undefined,
         special_requests: specialRequests.trim() || undefined,
+        dietary_requirements: dietary.length > 0 ? dietary : undefined,
         selected_dishes: selectedDishes.length > 0 ? selectedDishes : undefined,
       });
       alert(t('catering.formula.requestSentTitle'), t('catering.formula.requestSentMessage'));
@@ -292,6 +307,23 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
           </View>
 
           <View style={styles.block}>
+            <Text style={styles.blockLabel}>{t('catering.formula.occasionLabel')}</Text>
+            <View style={styles.chipRow}>
+              {CATERING_OCCASION_IDS.map(id => (
+                <TouchableOpacity
+                  key={id}
+                  style={[styles.chip, occasion === id && styles.chipActive]}
+                  onPress={() => setOccasion(id)}
+                  activeOpacity={0.85}>
+                  <Text style={[styles.chipText, occasion === id && styles.chipTextActive]}>
+                    {t(`catering.occasions.${id}`)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.block}>
             <Text style={styles.blockLabel}>{t('catering.formula.yourEvent')}</Text>
             <View style={styles.fieldRow}>
               <View style={[styles.fieldPill, styles.fieldPillHalf]}>
@@ -334,6 +366,15 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
                 keyboardType="phone-pad"
               />
             </View>
+            <View style={styles.fieldPill}>
+              <TextInput
+                style={styles.fieldInput}
+                placeholder={t('catering.formula.addressPlaceholder')}
+                placeholderTextColor={Colors.textLight}
+                value={deliveryAddress}
+                onChangeText={setDeliveryAddress}
+              />
+            </View>
             <View style={[styles.fieldPill, styles.fieldPillArea]}>
               <TextInput
                 style={[styles.fieldInput, styles.fieldTextArea]}
@@ -344,6 +385,23 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
                 multiline
                 numberOfLines={3}
               />
+            </View>
+          </View>
+
+          <View style={styles.block}>
+            <Text style={styles.blockLabel}>{t('catering.formula.dietaryLabel')}</Text>
+            <View style={styles.chipRow}>
+              {DIETARY_IDS.map(id => (
+                <TouchableOpacity
+                  key={id}
+                  style={[styles.chip, dietary.includes(id) && styles.chipActive]}
+                  onPress={() => toggleDietary(id)}
+                  activeOpacity={0.85}>
+                  <Text style={[styles.chipText, dietary.includes(id) && styles.chipTextActive]}>
+                    {t(`catering.dietaryOptions.${id}`)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
 
@@ -358,6 +416,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
               <Text style={styles.estimateTotalLabel}>{t('catering.formula.estimate')}</Text>
               <Text style={styles.estimateTotalValue}>{estimatedTotal.toFixed(2)} €</Text>
             </View>
+            <Text style={styles.estimateNote}>{t('catering.formula.priceNote')}</Text>
           </View>
         </View>
       </ScrollView>
@@ -380,6 +439,37 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
 };
 
 const styles = StyleSheet.create({
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+    borderColor: Colors.gray[300],
+    backgroundColor: Colors.white,
+  },
+  chipActive: {
+    backgroundColor: Colors.darkGreen,
+    borderColor: Colors.darkGreen,
+  },
+  chipText: {
+    fontFamily: fontUI,
+    fontSize: 13,
+    color: Colors.text,
+  },
+  chipTextActive: {
+    color: Colors.cream,
+  },
+  estimateNote: {
+    fontFamily: fontUI,
+    fontSize: 12,
+    color: Colors.textLight,
+    marginTop: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,

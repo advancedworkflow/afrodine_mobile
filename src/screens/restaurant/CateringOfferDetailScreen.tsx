@@ -24,6 +24,10 @@ import {
   type CateringServiceCreatePayload,
 } from '../../services/restaurantManagement';
 import {formatAxiosError} from '../../utils/formatApiError';
+import {getCateringFormulas, type CateringFormulaApi} from '../../services/catering';
+import {DIETARY_IDS} from '../../utils/catering';
+
+const toAmount = (value: string) => parseFloat(value.replace(',', '.')) || 0;
 
 const SERVICE_TYPE_VALUES = ['buffet', 'cocktail', 'seated_dinner', 'catering_delivery'];
 
@@ -52,6 +56,19 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
   const [cancellation_policy, setCancellationPolicy] = useState('');
   const [is_active, setIsActive] = useState(true);
   const [featured, setFeatured] = useState(false);
+  const [delivery_fee, setDeliveryFee] = useState('0');
+  const [setup_fee, setSetupFee] = useState('0');
+  const [equipment_fee, setEquipmentFee] = useState('0');
+  const [staff_fee_per_hour, setStaffFeePerHour] = useState('0');
+  const [min_notice_hours, setMinNoticeHours] = useState('24');
+  const [deposit_percentage, setDepositPercentage] = useState('30');
+  const [dietary_options, setDietaryOptions] = useState<string[]>([]);
+  const [formula_id, setFormulaId] = useState<number | null>(null);
+  const [formulas, setFormulas] = useState<CateringFormulaApi[]>([]);
+
+  useEffect(() => {
+    getCateringFormulas().then(setFormulas).catch(() => setFormulas([]));
+  }, []);
 
   const loadService = useCallback(async () => {
     if (!serviceId) return;
@@ -74,6 +91,14 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
         setCancellationPolicy(s.cancellation_policy ?? '');
         setIsActive(s.is_active !== false);
         setFeatured(s.featured ?? false);
+        setDeliveryFee(String(Number(s.delivery_fee ?? 0)));
+        setSetupFee(String(Number(s.setup_fee ?? 0)));
+        setEquipmentFee(String(Number(s.equipment_fee ?? 0)));
+        setStaffFeePerHour(String(Number(s.staff_fee_per_hour ?? 0)));
+        setMinNoticeHours(String(s.min_notice_hours ?? 24));
+        setDepositPercentage(String(Number(s.deposit_percentage ?? 30)));
+        setDietaryOptions(Array.isArray(s.dietary_options) ? s.dietary_options : []);
+        setFormulaId(s.formula_id ?? null);
       }
     } catch {
       alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.loadFailed'));
@@ -102,10 +127,37 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
     setup_available,
     staff_available,
     equipment_rental,
+    // Frais facturés au client si l'option est proposée (0 sinon, comme sur le web)
+    delivery_fee: delivery_available ? toAmount(delivery_fee) : 0,
+    setup_fee: setup_available ? toAmount(setup_fee) : 0,
+    equipment_fee: equipment_rental ? toAmount(equipment_fee) : 0,
+    staff_fee_per_hour: staff_available ? toAmount(staff_fee_per_hour) : 0,
+    min_notice_hours: Math.max(0, parseInt(min_notice_hours, 10) || 0),
+    deposit_percentage: toAmount(deposit_percentage),
+    dietary_options,
+    formula_id,
     cancellation_policy: cancellation_policy.trim() || undefined,
     is_active,
     featured,
   });
+
+  const toggleDietary = (id: string) =>
+    setDietaryOptions((prev) => (prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]));
+
+  // Champ de frais affiché sous l'interrupteur de l'option quand elle est proposée
+  const renderFeeInput = (value: string, onChange: (v: string) => void, labelKey: string) => (
+    <View style={styles.feeRow}>
+      <Text style={styles.feeLabel}>{t(labelKey)}</Text>
+      <TextInput
+        style={[styles.input, styles.feeInput]}
+        placeholder="0"
+        placeholderTextColor={Colors.textLight}
+        keyboardType="decimal-pad"
+        value={value}
+        onChangeText={onChange}
+      />
+    </View>
+  );
 
   const handleSave = async () => {
     if (!service_name.trim()) {
@@ -120,6 +172,11 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
     const min = parseInt(min_guests, 10);
     if (!Number.isInteger(min) || min < 1) {
       alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.invalidMinGuests'));
+      return;
+    }
+    const deposit = parseFloat(deposit_percentage.replace(',', '.'));
+    if (!Number.isFinite(deposit) || deposit < 0 || deposit > 100) {
+      alert(t('restaurantCateringOfferDetail.errorTitle'), t('restaurantCateringOfferDetail.invalidDeposit'));
       return;
     }
     setSubmitting(true);
@@ -261,6 +318,59 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               />
             </View>
           </View>
+          <View style={styles.row}>
+            <View style={styles.half}>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.minNoticeLabel')}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="24"
+                placeholderTextColor={Colors.textLight}
+                keyboardType="number-pad"
+                value={min_notice_hours}
+                onChangeText={setMinNoticeHours}
+              />
+            </View>
+            <View style={styles.half}>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.depositLabel')}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="30"
+                placeholderTextColor={Colors.textLight}
+                keyboardType="decimal-pad"
+                value={deposit_percentage}
+                onChangeText={setDepositPercentage}
+              />
+            </View>
+          </View>
+          {formulas.length > 0 && (
+            <>
+              <Text style={styles.label}>{t('restaurantCateringOfferDetail.formulaLabel')}</Text>
+              <View style={styles.typeRow}>
+                {formulas.map((f) => (
+                  <TouchableOpacity
+                    key={f.id}
+                    style={[styles.typeChip, formula_id === f.id && styles.typeChipActive]}
+                    onPress={() => setFormulaId(formula_id === f.id ? null : f.id)}>
+                    <Text style={[styles.typeChipText, formula_id === f.id && styles.typeChipTextActive]}>{f.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.hint}>{t('restaurantCateringOfferDetail.formulaHint')}</Text>
+            </>
+          )}
+          <Text style={styles.label}>{t('restaurantCateringOfferDetail.dietaryLabel')}</Text>
+          <View style={styles.typeRow}>
+            {DIETARY_IDS.map((id) => (
+              <TouchableOpacity
+                key={id}
+                style={[styles.typeChip, dietary_options.includes(id) && styles.typeChipActive]}
+                onPress={() => toggleDietary(id)}>
+                <Text style={[styles.typeChipText, dietary_options.includes(id) && styles.typeChipTextActive]}>
+                  {t(`catering.dietaryOptions.${id}`)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           <Text style={styles.label}>{t('restaurantCateringOfferDetail.cancellationPolicyLabel')}</Text>
           <TextInput
             style={[styles.input, styles.inputArea]}
@@ -279,6 +389,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               thumbColor={delivery_available ? Colors.darkGreen : Colors.textLight}
             />
           </View>
+          {delivery_available && renderFeeInput(delivery_fee, setDeliveryFee, 'restaurantCateringOfferDetail.deliveryFeeLabel')}
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.setupAvailable')}</Text>
             <Switch
@@ -288,6 +399,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               thumbColor={setup_available ? Colors.darkGreen : Colors.textLight}
             />
           </View>
+          {setup_available && renderFeeInput(setup_fee, setSetupFee, 'restaurantCateringOfferDetail.setupFeeLabel')}
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.staffAvailable')}</Text>
             <Switch
@@ -297,6 +409,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               thumbColor={staff_available ? Colors.darkGreen : Colors.textLight}
             />
           </View>
+          {staff_available && renderFeeInput(staff_fee_per_hour, setStaffFeePerHour, 'restaurantCateringOfferDetail.staffFeeLabel')}
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.equipmentRental')}</Text>
             <Switch
@@ -306,6 +419,7 @@ const CateringOfferDetailScreen = ({navigation, route}: any) => {
               thumbColor={equipment_rental ? Colors.darkGreen : Colors.textLight}
             />
           </View>
+          {equipment_rental && renderFeeInput(equipment_fee, setEquipmentFee, 'restaurantCateringOfferDetail.equipmentFeeLabel')}
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>{t('restaurantCateringOfferDetail.isActive')}</Text>
             <Switch
@@ -446,6 +560,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,
+  },
+  feeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 8,
+    paddingLeft: 8,
+  },
+  feeLabel: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.textLight,
+    fontFamily: secondaryFont,
+  },
+  feeInput: {
+    width: 110,
+    marginBottom: 0,
+  },
+  hint: {
+    fontSize: 12,
+    color: Colors.textLight,
+    fontFamily: secondaryFont,
+    marginTop: 6,
   },
 });
 

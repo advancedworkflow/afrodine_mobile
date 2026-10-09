@@ -26,6 +26,7 @@ import * as ordersApi from '../services/orders';
 import * as restaurantsApi from '../services/restaurants';
 import {getClientProfile} from '../services/clientProfile';
 import {formatAxiosError} from '../utils/formatApiError';
+import {mergeAddressLines} from '../utils/address';
 import {useStripeBootstrap} from '../contexts/StripeBootstrapContext';
 
 const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
@@ -43,7 +44,9 @@ const CartScreen = ({navigation}: any) => {
   const isClientUser = isAuthenticated && !isRestaurant;
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [addressLine3, setAddressLine3] = useState('');
   const [deliveryPhone, setDeliveryPhone] = useState('');
   const [deliveryEmail, setDeliveryEmail] = useState('');
   const [restaurantInfo, setRestaurantInfo] = useState<{name: string; city?: string} | null>(null);
@@ -59,7 +62,7 @@ const CartScreen = ({navigation}: any) => {
       try {
         const profile = await getClientProfile();
         if (cancelled || !profile) return;
-        if (profile.address && !deliveryAddress) setDeliveryAddress(profile.address);
+        if (profile.address && !addressLine1) setAddressLine1(profile.address);
         if (profile.phone && !deliveryPhone) setDeliveryPhone(profile.phone);
       } catch {
         // profil optionnel — l'utilisateur peut toujours saisir l'adresse manuellement
@@ -118,9 +121,9 @@ const CartScreen = ({navigation}: any) => {
   };
 
   const submitCheckout = async () => {
-    const address = deliveryAddress.trim();
+    const address = mergeAddressLines(addressLine1, addressLine2, addressLine3);
     const phone = deliveryPhone.trim();
-    if (!address) {
+    if (!addressLine1.trim()) {
       alert(t('cart.requiredFieldTitle'), t('cart.missingAddress'));
       return;
     }
@@ -174,7 +177,9 @@ const CartScreen = ({navigation}: any) => {
         ? await ordersApi.createOrder(payload)
         : await ordersApi.createGuestOrder(payload);
       clearCart();
-      setDeliveryAddress('');
+      setAddressLine1('');
+      setAddressLine2('');
+      setAddressLine3('');
       setDeliveryPhone('');
       const orderId = orderResponse?.id;
       const stripeClientSecret = orderResponse?.stripe_client_secret as string | undefined;
@@ -409,7 +414,9 @@ const CartScreen = ({navigation}: any) => {
               <IconWrapper name="location-outline" size={17} color={Colors.darkGreen} />
             </View>
             <View style={styles.infoTextWrap}>
-              <Text style={styles.infoTitle} numberOfLines={1}>{deliveryAddress || t('cart.addAddress')}</Text>
+              <Text style={styles.infoTitle} numberOfLines={1}>
+                {mergeAddressLines(addressLine1, addressLine2, addressLine3) || t('cart.addAddress')}
+              </Text>
               <Text style={styles.infoSubtitle} numberOfLines={1}>{deliveryPhone || t('cart.phoneRequired')}</Text>
             </View>
             <Text style={styles.infoAction}>{t('cart.change')}</Text>
@@ -480,10 +487,26 @@ const CartScreen = ({navigation}: any) => {
               <Text style={styles.checkoutModalSectionTitle}>{t('cart.deliveryAddress')}</Text>
               <TextInput
                 style={styles.checkoutInput}
-                placeholder={t('cart.fullAddressPlaceholder')}
+                placeholder={t('cart.addressLine1Placeholder')}
                 placeholderTextColor={Colors.textLight}
-                value={deliveryAddress}
-                onChangeText={setDeliveryAddress}
+                value={addressLine1}
+                onChangeText={setAddressLine1}
+                autoCapitalize="words"
+              />
+              <TextInput
+                style={styles.checkoutInput}
+                placeholder={t('cart.addressLine2Placeholder')}
+                placeholderTextColor={Colors.textLight}
+                value={addressLine2}
+                onChangeText={setAddressLine2}
+                autoCapitalize="words"
+              />
+              <TextInput
+                style={styles.checkoutInput}
+                placeholder={t('cart.addressLine3Placeholder')}
+                placeholderTextColor={Colors.textLight}
+                value={addressLine3}
+                onChangeText={setAddressLine3}
                 autoCapitalize="words"
               />
               <TextInput

@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/react-native/tsconfig.json",
+  "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
@@ -7,7 +7,6 @@
     "isolatedModules": true,
     "jsx": "react-native",
     "lib": ["es2017", "dom"],
-    "moduleResolution": "node",
     "moduleSuffixes": [".native", ""],
     "noEmit": true,
     "strict": true,

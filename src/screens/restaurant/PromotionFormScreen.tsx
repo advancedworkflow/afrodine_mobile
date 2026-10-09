@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -21,6 +22,8 @@ import {
   updateManagementPromotion,
   getRestaurantDishes,
   getRestaurantMenus,
+  uploadManagementImage,
+  uploadManagementImageFile,
   type ManagementPromotion,
   type ManagementDish,
   type MenuRead,
@@ -36,6 +39,10 @@ import {
   type DisplayFormat,
   type MediaType,
 } from '../../utils/promotionPricing';
+
+// react-native-image-picker n'existe pas sur le build web (react-native-web) — chargé
+// uniquement sur Android/iOS, comme pour notificationService.ts.
+const ImagePicker = Platform.OS !== 'web' ? require('react-native-image-picker') : null;
 
 const PromotionFormScreen = ({navigation, route}: any) => {
   const {t} = useTranslation();
@@ -76,6 +83,8 @@ const PromotionFormScreen = ({navigation, route}: any) => {
   const [menus, setMenus] = useState<MenuRead[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<any>(null);
 
   const canUseVideo = displayFormat === 'floating_left' || displayFormat === 'section';
   const effectiveMediaType = canUseVideo ? mediaType : 'image';
@@ -162,6 +171,69 @@ const PromotionFormScreen = ({navigation, route}: any) => {
       cancelled = true;
     };
   }, []);
+
+  // Web (react-native-web) : input file caché, comme dans GroceryProductFormScreen.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const doc = (globalThis as any).document;
+    if (!doc?.createElement) return;
+    const input = doc.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    input.onchange = async (e: any) => {
+      const target = e?.target;
+      const file: File | undefined = target?.files?.[0];
+      if (!file || !file.type?.startsWith('image/')) return;
+      setUploadingImage(true);
+      try {
+        const {image_url} = await uploadManagementImageFile(file, 'promotions');
+        setImageUrl(image_url || '');
+      } catch {
+        alert(t('restaurantPromotionForm.errorTitle'), t('restaurantPromotionForm.uploadError'));
+      } finally {
+        setUploadingImage(false);
+        if (target) target.value = '';
+      }
+    };
+    doc.body.appendChild(input);
+    fileInputRef.current = input;
+    return () => {
+      try {
+        doc.body.removeChild(input);
+      } catch (_) {}
+      fileInputRef.current = null;
+    };
+  }, []);
+
+  const handlePickImage = () => {
+    if (Platform.OS === 'web') {
+      fileInputRef.current?.click();
+      return;
+    }
+    ImagePicker.launchImageLibrary(
+      {mediaType: 'photo', quality: 0.8},
+      async (response: any) => {
+        if (response.didCancel || response.errorCode) return;
+        const asset = response.assets?.[0];
+        if (!asset?.uri) return;
+        setUploadingImage(true);
+        try {
+          const {image_url} = await uploadManagementImage(
+            asset.uri,
+            asset.fileName || 'promotion.jpg',
+            asset.type || 'image/jpeg',
+            'promotions',
+          );
+          setImageUrl(image_url || '');
+        } catch {
+          alert(t('restaurantPromotionForm.errorTitle'), t('restaurantPromotionForm.uploadError'));
+        } finally {
+          setUploadingImage(false);
+        }
+      },
+    );
+  };
 
   const selectDish = (id: number) => {
     setDishIds(prev => (prev.includes(id) ? [] : [id]));
@@ -284,15 +356,34 @@ const PromotionFormScreen = ({navigation, route}: any) => {
 
           <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.media')}</Text>
           <Text style={styles.label}>{t('restaurantPromotionForm.imageUrl')}</Text>
-          <TextInput
-            style={styles.input}
-            value={imageUrl}
-            onChangeText={setImageUrl}
-            placeholder="https://..."
-            placeholderTextColor={Colors.textLight}
-            keyboardType="url"
-            autoCapitalize="none"
-          />
+          <TouchableOpacity
+            style={styles.imagePicker}
+            onPress={handlePickImage}
+            activeOpacity={0.8}
+            disabled={uploadingImage}>
+            {imageUrl ? (
+              <Image source={{uri: imageUrl}} style={styles.imagePreview} resizeMode="cover" />
+            ) : (
+              <>
+                <IconWrapper name="image-outline" size={28} color={Colors.textLight} />
+                <Text style={styles.imagePickerText} numberOfLines={1}>
+                  {t('restaurantPromotionForm.uploadImage')}
+                </Text>
+              </>
+            )}
+            {uploadingImage && (
+              <View style={styles.imagePickerLoading}>
+                <ActivityIndicator size="small" color={Colors.white} />
+              </View>
+            )}
+            {!!imageUrl && !uploadingImage && (
+              <View style={styles.imagePickerBadge}>
+                <Text style={styles.imagePickerBadgeText} numberOfLines={1}>
+                  {t('restaurantPromotionForm.changeImage')}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
           {canUseVideo && (
             <>
               <Text style={styles.label}>{t('restaurantPromotionForm.videoUrl')}</Text>
@@ -644,6 +735,51 @@ const styles = StyleSheet.create({
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  imagePicker: {
+    height: 160,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+  },
+  imagePickerText: {
+    fontSize: 13,
+    color: Colors.textLight,
+    marginTop: 8,
+    fontFamily: secondaryFont,
+    maxWidth: '90%',
+  },
+  imagePickerLoading: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(5,16,4,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagePickerBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    maxWidth: '70%',
+    backgroundColor: 'rgba(5,16,4,0.75)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  imagePickerBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.white,
+    fontFamily: secondaryFont,
   },
   row: {
     flexDirection: 'row',

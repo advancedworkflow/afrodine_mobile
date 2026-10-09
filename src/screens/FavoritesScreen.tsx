@@ -42,7 +42,7 @@ const FavoritesScreen = ({navigation}: any) => {
           </Text>
           <TouchableOpacity
             style={styles.browseButton}
-            onPress={() => navigation.navigate('Restaurants')}>
+            onPress={() => navigation.popTo('MainTabs', {screen: 'Restaurants'})}>
             <Text style={styles.browseButtonText}>{t('favorites.browseRestaurants')}</Text>
           </TouchableOpacity>
         </View>
@@ -72,6 +72,7 @@ const FavoritesScreen = ({navigation}: any) => {
                 deliveryFee={restaurant.deliveryFee}
                 imageUrl={restaurant.imageUrl}
                 restaurantImageUrl={restaurant.restaurantImageUrl}
+                isCertified={restaurant.isCertified}
                 onPress={() =>
                   navigation.navigate('RestaurantDetails', {
                     restaurantId: restaurant.id,

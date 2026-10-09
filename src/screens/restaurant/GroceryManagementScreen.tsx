@@ -264,6 +264,14 @@ const GroceryManagementScreen = ({navigation}: any) => {
             </View>
 
             <TouchableOpacity
+              style={[styles.addButton, styles.ordersButton]}
+              onPress={() => navigation.navigate('GroceryOrders')}
+              activeOpacity={0.8}>
+              <IconWrapper name="receipt-outline" size={22} color={Colors.darkGreen} />
+              <Text style={[styles.addButtonText, styles.ordersButtonText]}>{t('restaurantGroceryManagement.viewOrders')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={styles.addButton}
               onPress={() => navigation.navigate('GroceryProductForm', {shopId: shop!.id})}
               activeOpacity={0.8}>
@@ -538,6 +546,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: secondaryFont,
+  },
+  ordersButton: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.darkGreen,
+  },
+  ordersButtonText: {
+    color: Colors.darkGreen,
   },
   empty: {
     alignItems: 'center',

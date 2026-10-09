@@ -156,6 +156,8 @@
       "email": "Email",
       "password": "Password",
       "address": "Address",
+      "addressLine2": "Address line 2 (optional)",
+      "addressLine3": "Address line 3 (optional)",
       "phone": "Phone",
       "city": "City",
       "cuisineType": "Cuisine type (optional)",
@@ -169,6 +171,8 @@
       "email": "you@example.com",
       "password": "8 characters minimum",
       "fullAddress": "Full address",
+      "addressLine2": "E.g. 2nd floor",
+      "addressLine3": "E.g. Access code, building B",
       "city": "Berlin",
       "cuisineType": "Cameroonian, Senegalese…",
       "description": "Introduce your establishment…",
@@ -415,7 +419,13 @@
       "specialRequestsPlaceholder": "Special requests (optional)",
       "mealLine": "Meal · {{count}} × {{price}} €",
       "estimate": "Estimate",
-      "requestQuote": "Request this quote"
+      "requestQuote": "Request this quote",
+      "occasionLabel": "Occasion",
+      "addressPlaceholder": "Event location (optional)",
+      "dietaryLabel": "Dietary requirements",
+      "loginRequiredTitle": "Login required",
+      "loginRequiredMessage": "Please log in to send your catering request.",
+      "priceNote": "Indicative formula price — the selected cook confirms the final price."
     },
     "serviceDetail": {
       "title": "Catering details",
@@ -447,7 +457,24 @@
         "staff": "Staff",
         "equipmentRental": "Equipment rental"
       }
-    }
+    },
+    "occasions": {
+      "birthday": "Birthday",
+      "christening": "Christening",
+      "wedding": "Wedding",
+      "corporate": "Corporate event",
+      "other": "Other"
+    },
+    "dietaryOptions": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "halal": "Halal",
+      "no_pork": "No pork",
+      "gluten_free": "Gluten-free",
+      "dairy_free": "Dairy-free",
+      "no_peanut": "Peanut-free"
+    },
+    "packagePrice": "flat rate"
   },
   "groceryShops": {
     "title": "Grocery shops",
@@ -599,7 +626,9 @@
     "pay": "Pay",
     "checkout": "Checkout",
     "deliveryAddress": "Delivery address",
-    "fullAddressPlaceholder": "Full address",
+    "addressLine1Placeholder": "Address (street, number)",
+    "addressLine2Placeholder": "Address line 2 (optional)",
+    "addressLine3Placeholder": "Address line 3 (optional)",
     "phonePlaceholder": "Phone",
     "emailOptionalPlaceholder": "Email (optional)",
     "payment": "Payment",
@@ -804,7 +833,33 @@
     "deleteConfirmTitle": "Delete this offer?",
     "deleteConfirmMessage": "\"{{name}}\" will be permanently deleted.",
     "deleteConfirmButton": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "statusFailed": "Could not update the status.",
+    "options": {
+      "delivery": "Delivery",
+      "setup": "Setup",
+      "equipment": "Equipment",
+      "staffHours": "Staff ({{hours}} h)"
+    },
+    "detail": {
+      "client": "Customer",
+      "address": "Location",
+      "options": "Selected options",
+      "dietary": "Dietary",
+      "dishes": "Selected dishes",
+      "message": "Customer message",
+      "deposit": "Deposit",
+      "depositPaid": "received",
+      "depositUnpaid": "not paid"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "complete": "Mark as completed",
+      "cancel": "Cancel booking"
+    },
+    "cancelBookingTitle": "Cancel this booking?",
+    "cancelBookingMessage": "The customer will be notified immediately.",
+    "back": "Back"
   },
   "restaurantCateringOfferDetail": {
     "editTitle": "Edit offer",
@@ -844,7 +899,17 @@
     "featured": "Featured",
     "saving": "Saving...",
     "save": "Save",
-    "createButton": "Create offer"
+    "createButton": "Create offer",
+    "invalidDeposit": "The deposit must be between 0 and 100%.",
+    "minNoticeLabel": "Minimum notice (h)",
+    "depositLabel": "Deposit (%)",
+    "formulaLabel": "namke formula (optional)",
+    "formulaHint": "Link the offer to a formula to receive requests made for that formula.",
+    "dietaryLabel": "Dietary options supported",
+    "deliveryFeeLabel": "Delivery fee (€)",
+    "setupFeeLabel": "Setup fee (€)",
+    "staffFeeLabel": "Staff (€ / hour)",
+    "equipmentFeeLabel": "Equipment fee (€)"
   },
   "restaurantDashboard": {
     "title": "Dashboard",
@@ -1013,7 +1078,8 @@
     "noProductsText": "Add your first grocery products.",
     "deleteConfirmTitle": "Delete product",
     "deleteConfirmMessage": "Delete \"{{name}}\"?",
-    "deleteConfirmButton": "Delete"
+    "deleteConfirmButton": "Delete",
+    "viewOrders": "View orders"
   },
   "restaurantOrders": {
     "title": "Orders",
@@ -1038,7 +1104,9 @@
       "delivered": "Delivered",
       "paid": "Paid",
       "cancelled": "Cancelled"
-    }
+    },
+    "groceryTitle": "Grocery orders",
+    "noGroceryOrders": "No product orders yet."
   },
   "restaurantProfile": {
     "title": "Restaurant profile",
@@ -1204,8 +1272,12 @@
     "titleRequired": "Enter a title.",
     "dishRequired": "Select a dish.",
     "menuRequired": "Select a menu.",
-    "imageUrlRequired": "Enter the image URL or upload an image from the web dashboard.",
+    "imageUrlRequired": "Add an image for this promotion.",
     "videoUrlRequired": "Enter the video URL or upload from the web dashboard.",
+    "uploadImage": "Add an image",
+    "changeImage": "Change image",
+    "uploading": "Uploading...",
+    "uploadError": "Error while uploading the image.",
     "successTitle": "Success",
     "updatedMessage": "Promotion updated.",
     "createdMessage": "Promotion created. Payment required for activation.",
@@ -1220,7 +1292,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Detailed description",
     "media": "Media",
-    "imageUrl": "Image URL",
+    "imageUrl": "Image",
     "videoUrl": "Video URL (if type Video)",
     "promote": "Promote",
     "dishes": "Dishes",

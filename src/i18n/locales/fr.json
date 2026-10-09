@@ -156,6 +156,8 @@
       "email": "E-mail",
       "password": "Mot de passe",
       "address": "Adresse",
+      "addressLine2": "Complément d'adresse (optionnel)",
+      "addressLine3": "Complément d'adresse 2 (optionnel)",
       "phone": "Téléphone",
       "city": "Ville",
       "cuisineType": "Type de cuisine (optionnel)",
@@ -169,6 +171,8 @@
       "email": "vous@exemple.com",
       "password": "8 caractères minimum",
       "fullAddress": "Adresse complète",
+      "addressLine2": "Ex. 2ᵉ étage",
+      "addressLine3": "Ex. Code d'accès, bâtiment B",
       "city": "Berlin",
       "cuisineType": "Camerounaise, sénégalaise…",
       "description": "Présentez votre établissement…",
@@ -415,7 +419,13 @@
       "specialRequestsPlaceholder": "Demandes particulières (optionnel)",
       "mealLine": "Repas · {{count}} × {{price}} €",
       "estimate": "Estimation",
-      "requestQuote": "Demander ce devis"
+      "requestQuote": "Demander ce devis",
+      "occasionLabel": "Occasion",
+      "addressPlaceholder": "Lieu de l'événement (optionnel)",
+      "dietaryLabel": "Régimes alimentaires",
+      "loginRequiredTitle": "Connexion requise",
+      "loginRequiredMessage": "Connectez-vous pour envoyer votre demande traiteur.",
+      "priceNote": "Prix indicatif de la formule — le cuisinier retenu confirme le tarif final."
     },
     "serviceDetail": {
       "title": "Détail traiteur",
@@ -447,7 +457,24 @@
         "staff": "Personnel",
         "equipmentRental": "Location matériel"
       }
-    }
+    },
+    "occasions": {
+      "birthday": "Anniversaire",
+      "christening": "Baptême",
+      "wedding": "Mariage",
+      "corporate": "Événement pro",
+      "other": "Autre"
+    },
+    "dietaryOptions": {
+      "vegetarian": "Végétarien",
+      "vegan": "Végan",
+      "halal": "Halal",
+      "no_pork": "Sans porc",
+      "gluten_free": "Sans gluten",
+      "dairy_free": "Sans lactose",
+      "no_peanut": "Sans arachide"
+    },
+    "packagePrice": "forfait"
   },
   "groceryShops": {
     "title": "Épiceries",
@@ -599,7 +626,9 @@
     "pay": "Payer",
     "checkout": "Checkout",
     "deliveryAddress": "Adresse de livraison",
-    "fullAddressPlaceholder": "Adresse complète",
+    "addressLine1Placeholder": "Adresse (rue, numéro)",
+    "addressLine2Placeholder": "Complément d'adresse (optionnel)",
+    "addressLine3Placeholder": "Complément d'adresse 2 (optionnel)",
     "phonePlaceholder": "Téléphone",
     "emailOptionalPlaceholder": "Email (optionnel)",
     "payment": "Paiement",
@@ -804,7 +833,33 @@
     "deleteConfirmTitle": "Supprimer cette offre ?",
     "deleteConfirmMessage": "« {{name}} » sera définitivement supprimée.",
     "deleteConfirmButton": "Supprimer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "statusFailed": "Impossible de modifier le statut.",
+    "options": {
+      "delivery": "Livraison",
+      "setup": "Installation",
+      "equipment": "Matériel",
+      "staffHours": "Personnel ({{hours}} h)"
+    },
+    "detail": {
+      "client": "Client",
+      "address": "Lieu",
+      "options": "Options choisies",
+      "dietary": "Régimes",
+      "dishes": "Plats choisis",
+      "message": "Message du client",
+      "deposit": "Acompte",
+      "depositPaid": "reçu",
+      "depositUnpaid": "non versé"
+    },
+    "actions": {
+      "confirm": "Confirmer",
+      "complete": "Marquer terminée",
+      "cancel": "Annuler la réservation"
+    },
+    "cancelBookingTitle": "Annuler cette réservation ?",
+    "cancelBookingMessage": "Le client sera prévenu immédiatement.",
+    "back": "Retour"
   },
   "restaurantCateringOfferDetail": {
     "editTitle": "Modifier l'offre",
@@ -844,7 +899,17 @@
     "featured": "Mise en avant",
     "saving": "Enregistrement...",
     "save": "Enregistrer",
-    "createButton": "Créer l'offre"
+    "createButton": "Créer l'offre",
+    "invalidDeposit": "L'acompte doit être compris entre 0 et 100 %.",
+    "minNoticeLabel": "Délai de prévenance (h)",
+    "depositLabel": "Acompte (%)",
+    "formulaLabel": "Formule namke (optionnel)",
+    "formulaHint": "Rattachez l'offre à une formule pour recevoir les demandes faites sur cette formule.",
+    "dietaryLabel": "Régimes pris en charge",
+    "deliveryFeeLabel": "Frais de livraison (€)",
+    "setupFeeLabel": "Frais d'installation (€)",
+    "staffFeeLabel": "Personnel (€ / heure)",
+    "equipmentFeeLabel": "Frais de matériel (€)"
   },
   "restaurantDashboard": {
     "title": "Tableau de bord",
@@ -1013,7 +1078,8 @@
     "noProductsText": "Ajoutez vos premiers produits d'épicerie.",
     "deleteConfirmTitle": "Supprimer le produit",
     "deleteConfirmMessage": "Supprimer \"{{name}}\" ?",
-    "deleteConfirmButton": "Supprimer"
+    "deleteConfirmButton": "Supprimer",
+    "viewOrders": "Voir les commandes"
   },
   "restaurantOrders": {
     "title": "Commandes",
@@ -1038,7 +1104,9 @@
       "delivered": "Livrée",
       "paid": "Payée",
       "cancelled": "Annulée"
-    }
+    },
+    "groceryTitle": "Commandes grocery",
+    "noGroceryOrders": "Aucune commande de produits pour le moment."
   },
   "restaurantProfile": {
     "title": "Profil restaurant",
@@ -1204,8 +1272,12 @@
     "titleRequired": "Saisissez un titre.",
     "dishRequired": "Sélectionnez un plat.",
     "menuRequired": "Sélectionnez un menu.",
-    "imageUrlRequired": "Saisissez l'URL de l'image ou uploadez une image depuis le tableau de bord web.",
+    "imageUrlRequired": "Ajoutez une image pour cette promotion.",
     "videoUrlRequired": "Saisissez l'URL de la vidéo ou uploadez depuis le tableau de bord web.",
+    "uploadImage": "Ajouter une image",
+    "changeImage": "Changer l'image",
+    "uploading": "Envoi en cours...",
+    "uploadError": "Erreur lors de l'envoi de l'image.",
     "successTitle": "Succès",
     "updatedMessage": "Promotion mise à jour.",
     "createdMessage": "Promotion créée. Paiement requis pour activation.",
@@ -1220,7 +1292,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Description détaillée",
     "media": "Média",
-    "imageUrl": "URL de l'image",
+    "imageUrl": "Image",
     "videoUrl": "URL de la vidéo (si type Vidéo)",
     "promote": "Promouvoir",
     "dishes": "Plats",

@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-native';
-import {Colors, Radius} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
 import {fontDisplayMedium, fontHeading, fontSub} from '../../utils/fonts';
 import api, {getAbsoluteImageUrl, getJpegFallbackUrl} from '../../utils/api';
+import IconWrapper from '../IconWrapper';
 
 const namkeFallback = require('../../assets/namke-fallback.png');
 
@@ -17,6 +18,8 @@ interface RestaurantCardProps {
   imageUrl?: string | null;
   restaurantImageUrl?: string | null;
   hasCatering?: boolean;
+  description?: string;
+  isCertified?: boolean;
   onPress?: () => void;
 }
 
@@ -38,6 +41,8 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
   deliveryFee = '2.5€',
   imageUrl,
   restaurantImageUrl,
+  description,
+  isCertified,
   onPress,
 }) => {
   const [resolvedCandidates, setResolvedCandidates] = useState<string[]>([]);
@@ -130,11 +135,30 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name} numberOfLines={1}>{name}</Text>
-          {rating != null && <Text style={styles.rating}>★ {rating}</Text>}
+          {isCertified ? (
+            <IconWrapper name="shield-checkmark" size={16} color={Colors.darkGreen} />
+          ) : null}
+          {rating != null && (
+            <View style={styles.ratingPill}>
+              <Text style={styles.rating}>★ {rating}</Text>
+            </View>
+          )}
         </View>
-        <Text style={styles.meta} numberOfLines={1}>
-          {[cuisine, deliveryTime, deliveryFee].filter(Boolean).join(' · ')}
-        </Text>
+        <View style={styles.tagsRow}>
+          {cuisine ? (
+            <View style={styles.cuisineTag}>
+              <Text style={styles.cuisineTagText} numberOfLines={1}>{cuisine}</Text>
+            </View>
+          ) : null}
+          <Text style={styles.meta} numberOfLines={1}>
+            {[deliveryTime, deliveryFee].filter(Boolean).join(' · ')}
+          </Text>
+        </View>
+        {description ? (
+          <Text style={styles.description} numberOfLines={2}>
+            {description}
+          </Text>
+        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -142,12 +166,11 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     overflow: 'hidden',
     marginBottom: 14,
+    ...Shadows.sm,
   },
   image: {
     width: '100%',
@@ -156,29 +179,57 @@ const styles = StyleSheet.create({
   content: {
     padding: 14,
     paddingTop: 12,
-    gap: 5,
+    gap: 8,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     gap: 10,
   },
   name: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
-  rating: {
+  ratingPill: {
     marginLeft: 'auto',
-    fontSize: 12.5,
+    backgroundColor: Colors.mustard,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: Radius.pill,
+  },
+  rating: {
+    fontSize: 13.5,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
+  tagsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  cuisineTag: {
+    backgroundColor: 'rgba(239,76,35,0.12)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
+  },
+  cuisineTagText: {
+    fontSize: 13,
+    fontFamily: fontHeading,
+    color: Colors.terracotta,
+  },
   meta: {
-    fontSize: 12.5,
+    fontSize: 14,
     fontFamily: fontSub,
     color: Colors.textLight,
+  },
+  description: {
+    fontSize: 13,
+    fontFamily: fontSub,
+    color: Colors.textLight,
+    lineHeight: 18,
   },
 });
 

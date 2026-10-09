@@ -1,11 +1,11 @@
 import {Platform, PermissionsAndroid} from 'react-native';
-import type {FirebaseMessagingTypes} from '@react-native-firebase/messaging';
+import type {RemoteMessage} from '@react-native-firebase/messaging';
 import api from '../utils/api';
 
 // react-native-push-notification et Firebase Messaging n'existent pas sur le build web
 // (react-native-web) — chargés uniquement sur Android/iOS.
 const PushNotification = Platform.OS !== 'web' ? require('react-native-push-notification').default : null;
-const messaging = Platform.OS !== 'web' ? require('@react-native-firebase/messaging').default : null;
+const firebaseMessaging = Platform.OS !== 'web' ? require('@react-native-firebase/messaging') : null;
 
 class NotificationService {
   private tokenRefreshUnsubscribe: (() => void) | null = null;
@@ -48,8 +48,8 @@ class NotificationService {
 
     // Affiche localement les notifications push reçues pendant que l'app est au premier plan
     // (Android/iOS n'affichent pas nativement une notif FCM "data+notification" en foreground).
-    if (messaging && !this.foregroundMessageUnsubscribe) {
-      this.foregroundMessageUnsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+    if (firebaseMessaging && !this.foregroundMessageUnsubscribe) {
+      this.foregroundMessageUnsubscribe = firebaseMessaging.onMessage(firebaseMessaging.getMessaging(), async (remoteMessage: RemoteMessage) => {
         const title = remoteMessage.notification?.title || 'Afrodine';
         const body = remoteMessage.notification?.body || '';
         this.localNotification(title, body);
@@ -59,7 +59,7 @@ class NotificationService {
 
   /** Demande la permission d'envoyer des notifications (Android 13+ et iOS). */
   requestPermission = async (): Promise<boolean> => {
-    if (!messaging) {
+    if (!firebaseMessaging) {
       return false;
     }
 
@@ -73,10 +73,10 @@ class NotificationService {
     }
 
     if (Platform.OS === 'ios') {
-      const authStatus = await messaging().requestPermission();
+      const authStatus = await firebaseMessaging.requestPermission(firebaseMessaging.getMessaging());
       const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        authStatus === firebaseMessaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === firebaseMessaging.AuthorizationStatus.PROVISIONAL;
       if (!enabled) {
         return false;
       }
@@ -91,7 +91,7 @@ class NotificationService {
    * d'être authentifié).
    */
   registerDeviceToken = async (): Promise<void> => {
-    if (!messaging) {
+    if (!firebaseMessaging) {
       return;
     }
 
@@ -101,7 +101,7 @@ class NotificationService {
         return;
       }
 
-      const fcmToken = await messaging().getToken();
+      const fcmToken = await firebaseMessaging.getToken(firebaseMessaging.getMessaging());
       if (fcmToken) {
         await api.post('/users/me/device-tokens', {
           fcm_token: fcmToken,
@@ -110,7 +110,7 @@ class NotificationService {
       }
 
       if (!this.tokenRefreshUnsubscribe) {
-        this.tokenRefreshUnsubscribe = messaging().onTokenRefresh(async (newToken: string) => {
+        this.tokenRefreshUnsubscribe = firebaseMessaging.onTokenRefresh(firebaseMessaging.getMessaging(), async (newToken: string) => {
           try {
             await api.post('/users/me/device-tokens', {
               fcm_token: newToken,

@@ -18,11 +18,13 @@ import {
   getManagementCateringServices,
   deleteManagementCateringService,
   getCateringBookings,
+  updateCateringBookingStatus,
   type ManagementCateringService,
   type CateringBookingItem,
 } from '../../services/restaurantManagement';
 import ConfirmModal from '../../components/ConfirmModal';
 import {formatAxiosError} from '../../utils/formatApiError';
+import {CATERING_PAID_OPTIONS, getOfferStartingPrice} from '../../utils/catering';
 
 const SERVICE_TYPE_KEYS = ['buffet', 'cocktail', 'seated_dinner', 'catering_delivery'];
 const BOOKING_STATUS_KEYS = ['pending', 'confirmed', 'cancelled', 'completed'];
@@ -37,6 +39,9 @@ const CateringManagementScreen = ({navigation}: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ManagementCateringService | null>(null);
+  const [expandedBookingId, setExpandedBookingId] = useState<number | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<CateringBookingItem | null>(null);
+  const [updatingBookingId, setUpdatingBookingId] = useState<number | null>(null);
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -74,6 +79,38 @@ const CateringManagementScreen = ({navigation}: any) => {
     } catch (e: any) {
       alert(t('restaurantCateringManagement.errorTitle'), formatAxiosError(e, t('restaurantCateringManagement.deleteFailed')));
     }
+  };
+
+  const changeBookingStatus = async (booking: CateringBookingItem, status: 'confirmed' | 'completed' | 'cancelled') => {
+    setUpdatingBookingId(booking.id);
+    try {
+      await updateCateringBookingStatus(booking.id, status);
+      setBookings((prev) => prev.map((b) => (b.id === booking.id ? {...b, status} : b)));
+    } catch (e: any) {
+      alert(t('restaurantCateringManagement.errorTitle'), formatAxiosError(e, t('restaurantCateringManagement.statusFailed')));
+    } finally {
+      setUpdatingBookingId(null);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    if (!cancelTarget) return;
+    const booking = cancelTarget;
+    setCancelTarget(null);
+    await changeBookingStatus(booking, 'cancelled');
+  };
+
+  // Une prestation ne peut être terminée qu'à partir du jour de l'événement (règle de l'API)
+  const eventHasStarted = (b: CateringBookingItem) => new Date(`${b.event_date}T00:00:00`) <= new Date();
+
+  const chosenOptionLabels = (b: CateringBookingItem) => {
+    const selected = b.selected_options;
+    if (!selected) return [];
+    return CATERING_PAID_OPTIONS.filter((o) => (o.id === 'staff' ? (selected.staff_hours ?? 0) > 0 : selected[o.id])).map((o) =>
+      o.id === 'staff'
+        ? t('restaurantCateringManagement.options.staffHours', {hours: selected.staff_hours})
+        : t(`restaurantCateringManagement.options.${o.id}`),
+    );
   };
 
   const typeLabel = (serviceType?: string) =>
@@ -162,7 +199,10 @@ const CateringManagementScreen = ({navigation}: any) => {
                   <Text style={styles.cardPriceLine}>
                     <Text style={styles.cardPriceLabel}>{t('restaurantCateringManagement.startingFrom')} </Text>
                     <Text style={styles.cardPriceValue}>
-                      {Number(s.base_price).toFixed(0)} €
+                      {getOfferStartingPrice(s).amount.toFixed(0)} €
+                    </Text>
+                    <Text style={styles.cardPriceLabel}>
+                      {getOfferStartingPrice(s).perPerson ? ` ${t('catering.perPerson')}` : ` (${t('catering.packagePrice')})`}
                     </Text>
                   </Text>
                   <Text style={styles.cardGuests}>
@@ -209,14 +249,21 @@ const CateringManagementScreen = ({navigation}: any) => {
                 <Text style={[styles.tableHeadCell, styles.tableColGuests]}>{t('restaurantCateringManagement.tableGuestsAbbr')}</Text>
                 <Text style={[styles.tableHeadCell, styles.tableColAmount]}>{t('restaurantCateringManagement.tableAmount')}</Text>
               </View>
-              {bookings.map((b, index) => (
+              {bookings.map((b, index) => {
+                const expanded = expandedBookingId === b.id;
+                const options = chosenOptionLabels(b);
+                const busy = updatingBookingId === b.id;
+                return (
                 <View
                   key={b.id}
                   style={[
                     styles.tableRowGroup,
                     index === bookings.length - 1 && styles.tableRowGroupLast,
                   ]}>
-                  <View style={styles.tableRow}>
+                  <TouchableOpacity
+                    style={styles.tableRow}
+                    onPress={() => setExpandedBookingId(expanded ? null : b.id)}
+                    activeOpacity={0.7}>
                     <Text style={[styles.tableCell, styles.tableColDate]} numberOfLines={2}>
                       {formatBookingDateTime(b)}
                     </Text>
@@ -244,14 +291,91 @@ const CateringManagementScreen = ({navigation}: any) => {
                     <Text style={[styles.tableCell, styles.tableColAmount, styles.tableCellAmount]}>
                       {Number(b.total_amount).toFixed(0)} {b.currency || '€'}
                     </Text>
-                  </View>
-                  {(b.contact_email || b.contact_phone) && (
-                    <Text style={styles.tableRowMeta} numberOfLines={2}>
-                      {[b.contact_email, b.contact_phone].filter(Boolean).join(' · ')}
+                  </TouchableOpacity>
+                  {!expanded && (b.service_name || b.customer_name) ? (
+                    <Text style={styles.tableRowMeta} numberOfLines={1}>
+                      {[b.service_name, b.customer_name].filter(Boolean).join(' · ')}
                     </Text>
+                  ) : null}
+                  {expanded && (
+                    <View style={styles.bookingDetail}>
+                      {b.service_name ? <Text style={styles.detailTitle}>{b.service_name}</Text> : null}
+                      {b.occasion || b.formula_name ? (
+                        <Text style={styles.detailLine}>
+                          {[b.occasion ? t(`catering.occasions.${b.occasion}`) : null, b.formula_name].filter(Boolean).join(' · ')}
+                        </Text>
+                      ) : null}
+                      <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.client')}</Text>
+                      {b.customer_name ? <Text style={styles.detailLine}>{b.customer_name}</Text> : null}
+                      {[b.contact_email, b.contact_phone].filter(Boolean).map((c) => (
+                        <Text key={c} style={styles.detailLine}>{c}</Text>
+                      ))}
+                      {b.delivery_address ? (
+                        <>
+                          <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.address')}</Text>
+                          <Text style={styles.detailLine}>{b.delivery_address}</Text>
+                        </>
+                      ) : null}
+                      {options.length > 0 && (
+                        <>
+                          <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.options')}</Text>
+                          <Text style={styles.detailLine}>{options.join(' · ')}</Text>
+                        </>
+                      )}
+                      {b.dietary_requirements && b.dietary_requirements.length > 0 ? (
+                        <>
+                          <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.dietary')}</Text>
+                          <Text style={styles.detailLine}>
+                            {b.dietary_requirements.map((d) => t(`catering.dietaryOptions.${d}`)).join(' · ')}
+                          </Text>
+                        </>
+                      ) : null}
+                      {b.selected_dish_names && b.selected_dish_names.length > 0 ? (
+                        <>
+                          <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.dishes')}</Text>
+                          <Text style={styles.detailLine}>{b.selected_dish_names.join(' · ')}</Text>
+                        </>
+                      ) : null}
+                      {b.special_requests ? (
+                        <>
+                          <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.message')}</Text>
+                          <Text style={styles.detailLine}>{b.special_requests}</Text>
+                        </>
+                      ) : null}
+                      <Text style={styles.detailLabel}>{t('restaurantCateringManagement.detail.deposit')}</Text>
+                      <Text style={styles.detailLine}>
+                        {`${Number(b.deposit_amount ?? 0).toFixed(2)} € · ${
+                          b.deposit_paid ? t('restaurantCateringManagement.detail.depositPaid') : t('restaurantCateringManagement.detail.depositUnpaid')
+                        }`}
+                      </Text>
+                      <View style={styles.bookingActions}>
+                        {busy ? (
+                          <ActivityIndicator size="small" color={Colors.darkGreen} />
+                        ) : (
+                          <>
+                            {b.status === 'pending' && (
+                              <TouchableOpacity style={styles.actionPrimary} onPress={() => changeBookingStatus(b, 'confirmed')}>
+                                <Text style={styles.actionPrimaryText}>{t('restaurantCateringManagement.actions.confirm')}</Text>
+                              </TouchableOpacity>
+                            )}
+                            {b.status === 'confirmed' && eventHasStarted(b) && (
+                              <TouchableOpacity style={styles.actionPrimary} onPress={() => changeBookingStatus(b, 'completed')}>
+                                <Text style={styles.actionPrimaryText}>{t('restaurantCateringManagement.actions.complete')}</Text>
+                              </TouchableOpacity>
+                            )}
+                            {(b.status === 'pending' || b.status === 'confirmed') && (
+                              <TouchableOpacity style={styles.actionDanger} onPress={() => setCancelTarget(b)}>
+                                <Text style={styles.actionDangerText}>{t('restaurantCateringManagement.actions.cancel')}</Text>
+                              </TouchableOpacity>
+                            )}
+                          </>
+                        )}
+                      </View>
+                    </View>
                   )}
                 </View>
-              ))}
+                );
+              })}
             </View>
           )}
         </View>
@@ -270,6 +394,17 @@ const CateringManagementScreen = ({navigation}: any) => {
         variant="danger"
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmModal
+        visible={cancelTarget !== null}
+        title={t('restaurantCateringManagement.cancelBookingTitle')}
+        message={t('restaurantCateringManagement.cancelBookingMessage')}
+        confirmLabel={t('restaurantCateringManagement.actions.cancel')}
+        cancelLabel={t('restaurantCateringManagement.back')}
+        variant="danger"
+        onConfirm={handleCancelBooking}
+        onCancel={() => setCancelTarget(null)}
       />
     </View>
   );
@@ -517,6 +652,63 @@ const styles = StyleSheet.create({
   },
   bookingStatusTextCancelled: {
     color: Colors.error,
+  },
+  bookingDetail: {
+    paddingHorizontal: 12,
+    paddingBottom: 14,
+    backgroundColor: Colors.gray[50],
+  },
+  detailTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.darkGreen,
+    fontFamily: secondaryFont,
+    marginTop: 10,
+  },
+  detailLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.textLight,
+    fontFamily: fontSub,
+    marginTop: 10,
+  },
+  detailLine: {
+    fontSize: 13,
+    color: Colors.text,
+    fontFamily: secondaryFont,
+    marginTop: 2,
+  },
+  bookingActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 14,
+  },
+  actionPrimary: {
+    backgroundColor: Colors.darkGreen,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  actionPrimaryText: {
+    color: Colors.white,
+    fontWeight: '600',
+    fontSize: 13,
+    fontFamily: secondaryFont,
+  },
+  actionDanger: {
+    borderWidth: 1,
+    borderColor: Colors.error,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  actionDangerText: {
+    color: Colors.error,
+    fontWeight: '600',
+    fontSize: 13,
+    fontFamily: secondaryFont,
   },
 });
 

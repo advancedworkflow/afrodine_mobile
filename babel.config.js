@@ -24,7 +24,7 @@ module.exports = function (api) {
           ],
           '@babel/preset-typescript',
         ]
-      : ['module:metro-react-native-babel-preset'],
+      : ['module:@react-native/babel-preset'],
     plugins: [
       [
         'module-resolver',

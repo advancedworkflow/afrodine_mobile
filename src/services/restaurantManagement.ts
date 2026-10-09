@@ -32,6 +32,8 @@ export interface RestaurantOrderItem {
   quantity: number;
   price: number;
   unit_price: number;
+  /** Unité du produit grocery (kg, piece...) ; null pour un plat */
+  unit?: string | null;
 }
 
 export interface RestaurantOrder {
@@ -56,6 +58,14 @@ export interface RestaurantOrder {
 
 export async function getRestaurantOrders(status?: string): Promise<RestaurantOrder[]> {
   const { data } = await api.get<RestaurantOrder[]>(`${BASE}/orders`, {
+    params: status ? { status } : undefined,
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+/** Commandes contenant des produits du grocery shop (lignes limitées aux produits grocery). */
+export async function getGroceryShopOrders(status?: string): Promise<RestaurantOrder[]> {
+  const { data } = await api.get<RestaurantOrder[]>(`${BASE}/grocery-shop/orders`, {
     params: status ? { status } : undefined,
   });
   return Array.isArray(data) ? data : [];
@@ -408,6 +418,14 @@ export interface ManagementCateringService {
   setup_available?: boolean;
   staff_available?: boolean;
   equipment_rental?: boolean;
+  delivery_fee?: number;
+  setup_fee?: number;
+  equipment_fee?: number;
+  staff_fee_per_hour?: number;
+  min_notice_hours?: number;
+  deposit_percentage?: number;
+  dietary_options?: string[] | null;
+  formula_id?: number | null;
   cancellation_policy?: string;
   is_active?: boolean;
   featured?: boolean;
@@ -431,6 +449,14 @@ export interface CateringServiceCreatePayload {
   setup_available?: boolean;
   staff_available?: boolean;
   equipment_rental?: boolean;
+  delivery_fee?: number;
+  setup_fee?: number;
+  equipment_fee?: number;
+  staff_fee_per_hour?: number;
+  min_notice_hours?: number;
+  deposit_percentage?: number;
+  dietary_options?: string[] | null;
+  formula_id?: number | null;
   cancellation_policy?: string;
   is_active?: boolean;
   featured?: boolean;
@@ -484,13 +510,23 @@ export interface CateringBookingItem {
   event_time: string;
   guest_count: number;
   total_amount: number;
+  deposit_amount?: number;
+  deposit_paid?: boolean;
   currency: string;
   status: string;
   payment_status?: string;
+  occasion?: string | null;
+  service_name?: string | null;
+  formula_name?: string | null;
+  customer_name?: string | null;
   contact_email?: string;
   contact_phone?: string;
   delivery_address?: string;
+  delivery_instructions?: string | null;
   special_requests?: string;
+  selected_options?: {delivery?: boolean; setup?: boolean; equipment?: boolean; staff_hours?: number} | null;
+  selected_dish_names?: string[] | null;
+  dietary_requirements?: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -500,6 +536,16 @@ export async function getCateringBookings(statusFilter?: string | null): Promise
     statusFilter && statusFilter !== 'all' ? { status_filter: statusFilter } : undefined;
   const { data } = await api.get<CateringBookingItem[]>('/catering/bookings', { params });
   return Array.isArray(data) ? data : [];
+}
+
+/** Le backend attend le statut en champ de formulaire (Form "status"). */
+export async function updateCateringBookingStatus(
+  bookingId: number,
+  status: 'confirmed' | 'completed' | 'cancelled',
+): Promise<void> {
+  await api.put(`/catering/bookings/${bookingId}/status`, `status=${encodeURIComponent(status)}`, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
 }
 
 // --- Promotions (management) ---

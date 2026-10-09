@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity, Linking, Platform} from 'react
 import {useTranslation} from 'react-i18next';
 import IconWrapper from './IconWrapper';
 import {Colors} from '../utils/colors';
+import {mergeAddressLines} from '../utils/address';
 
 // react-native-webview n'a pas de variante web — chargé uniquement sur Android/iOS
 // (le build web de cette app utilise react-native-web et ne peut pas le résoudre).
@@ -21,22 +22,22 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({latitude, longitude, addre
   const lng = longitude != null ? Number(longitude) : null;
   const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
 
-  const fullAddress = [address, city].filter(Boolean).join(', ');
+  const fullAddress = mergeAddressLines(address, city);
   const directionsUrl = hasCoords
     ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
 
-  // Même formule que le web (RestaurantLocation.jsx) : bbox ~1km autour du point
-  const delta = 0.01;
-  const osmEmbedUrl = hasCoords
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng! - delta}%2C${lat! - delta}%2C${lng! + delta}%2C${lat! + delta}&layer=mapnik&marker=${lat}%2C${lng}`
+  // Vue Google Maps privilégiée sur mobile (le web garde OpenStreetMap, cf. RestaurantLocation.jsx).
+  // URL "output=embed" sans clé API — fonctionne dans une simple WebView.
+  const mapEmbedUrl = hasCoords
+    ? `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`
     : null;
 
   return (
     <View style={styles.container}>
       {hasCoords && WebView ? (
         <View style={styles.mapWrapper}>
-          <WebView source={{uri: osmEmbedUrl!}} style={styles.map} />
+          <WebView source={{uri: mapEmbedUrl!}} style={styles.map} />
         </View>
       ) : (
         <View style={styles.mapFallback}>

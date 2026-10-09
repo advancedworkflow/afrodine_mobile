@@ -15,6 +15,7 @@ import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius, Shadows} from '../utils/colors';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import * as restaurantsApi from '../services/restaurants';
+import {getOfferStartingPrice} from '../utils/catering';
 import {
   getCateringServicesByRestaurant,
   type CateringServiceApi,
@@ -227,7 +228,8 @@ const CateringServiceDetailScreen = ({navigation, route}: any) => {
                       ) : null}
                       <View style={styles.cardMeta}>
                         <Text style={styles.cardPrice}>
-                          {t('catering.serviceDetail.startingFrom', {price: Number(s.base_price).toFixed(0)})}
+                          {t('catering.serviceDetail.startingFrom', {price: getOfferStartingPrice(s).amount.toFixed(0)})}
+                          {getOfferStartingPrice(s).perPerson ? ` ${t('catering.perPerson')}` : ` (${t('catering.packagePrice')})`}
                         </Text>
                         <Text style={styles.cardGuests}>
                           {s.max_guests != null

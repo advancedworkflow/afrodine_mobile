@@ -52,8 +52,11 @@ import CartScreen from '../screens/CartScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import TwoFactorAuthScreen from '../screens/TwoFactorAuthScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import NotificationDetailScreen from '../screens/NotificationDetailScreen';
+import HelpScreen from '../screens/HelpScreen';
+import TermsScreen from '../screens/TermsScreen';
 import RestaurantDashboardScreen from '../screens/restaurant/DashboardScreen';
 import RestaurantOrdersScreen from '../screens/restaurant/OrdersScreen';
 import RestaurantMenuScreen from '../screens/restaurant/MenuScreen';
@@ -145,16 +148,11 @@ const MainTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: Colors.darkGreen,
+        tabBarActiveTintColor: Colors.terracotta,
         tabBarInactiveTintColor: Colors.textLight,
-        tabBarStyle: {
-          backgroundColor: Colors.background,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
+        // Barre native masquée : remplacée par <GlobalTabBar> (App.tsx / WebAppRoot.tsx),
+        // rendue par-dessus toute l'app pour rester visible sur les écrans de détail empilés.
+        tabBarStyle: {display: 'none'},
         tabBarShowLabel: false,
         headerShown: false,
       }}>
@@ -225,7 +223,7 @@ const RestaurantTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: Colors.darkGreen,
+        tabBarActiveTintColor: Colors.terracotta,
         tabBarInactiveTintColor: Colors.textLight,
         tabBarStyle: {
           backgroundColor: Colors.background,
@@ -428,6 +426,21 @@ const AppNavigator = () => {
             options={modalScreenOptions('Paramètres', false)}
           />
           <Stack.Screen
+            name="TwoFactorAuth"
+            component={TwoFactorAuthScreen}
+            options={modalScreenOptions('Double authentification', false)}
+          />
+          <Stack.Screen
+            name="Help"
+            component={HelpScreen}
+            options={modalScreenOptions('Aide', false)}
+          />
+          <Stack.Screen
+            name="Terms"
+            component={TermsScreen}
+            options={modalScreenOptions("Conditions d'utilisation", false)}
+          />
+          <Stack.Screen
             name="Notifications"
             component={NotificationsScreen}
             options={modalScreenOptions('Notifications', false, Colors.darkGreen)}
@@ -460,6 +473,12 @@ const AppNavigator = () => {
           <Stack.Screen
             name="GroceryProductForm"
             component={GroceryProductFormScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="GroceryOrders"
+            component={RestaurantOrdersScreen}
+            initialParams={{grocery: true}}
             options={{headerShown: false}}
           />
           <Stack.Screen
@@ -560,6 +579,21 @@ const AppNavigator = () => {
                 </TouchableOpacity>
               ),
             })}
+          />
+          <Stack.Screen
+            name="TwoFactorAuth"
+            component={TwoFactorAuthScreen}
+            options={modalScreenOptions('Double authentification', false)}
+          />
+          <Stack.Screen
+            name="Help"
+            component={HelpScreen}
+            options={modalScreenOptions('Aide', false)}
+          />
+          <Stack.Screen
+            name="Terms"
+            component={TermsScreen}
+            options={modalScreenOptions("Conditions d'utilisation", false)}
           />
           <Stack.Screen
             name="EditProfile"

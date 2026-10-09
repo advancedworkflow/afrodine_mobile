@@ -30,7 +30,7 @@ const getDevBaseUrl = () => {
   return Platform.OS === 'android' ? `http://10.0.2.2:8000` : DEFAULT_API_URL;
 };
 
-const API_BASE_URL = (__DEV__ ? getDevBaseUrl() : 'https://api.afrodine.com').replace(
+const API_BASE_URL = (__DEV__ ? getDevBaseUrl() : 'https://api.namke.de').replace(
   /\/+$/,
   '',
 );

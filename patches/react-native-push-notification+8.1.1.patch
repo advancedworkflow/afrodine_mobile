@@ -1,8 +1,24 @@
 diff --git a/node_modules/react-native-push-notification/android/build.gradle b/node_modules/react-native-push-notification/android/build.gradle
-index d6019f6..6ab7570 100644
+index d6019f6..4b33691 100644
 --- a/node_modules/react-native-push-notification/android/build.gradle
 +++ b/node_modules/react-native-push-notification/android/build.gradle
-@@ -24,8 +24,9 @@ def safeExtGet(prop, fallback) {
+@@ -2,7 +2,6 @@ buildscript {
+     repositories {
+         mavenCentral()
+         google()
+-        jcenter()
+     }
+     dependencies {
+         classpath 'com.android.tools.build:gradle:3.2.0'
+@@ -13,7 +12,6 @@ allprojects {
+     repositories {
+         mavenCentral()
+         google()
+-        jcenter()
+     }
+ }
+ 
+@@ -24,8 +22,9 @@ def safeExtGet(prop, fallback) {
  }
  
  android {
@@ -14,3 +30,12 @@ index d6019f6..6ab7570 100644
  
      compileOptions {
          sourceCompatibility JavaVersion.VERSION_1_8
+@@ -44,7 +43,7 @@ android {
+     buildTypes {
+         release {
+             minifyEnabled false
+-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
++            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+         }
+     }
+ }

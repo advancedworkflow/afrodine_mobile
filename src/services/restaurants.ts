@@ -41,6 +41,7 @@ export interface RestaurantApi {
   delivery_fee?: number;
   minimum_order?: number;
   is_active?: boolean;
+  is_certified?: boolean;
   // Certains endpoints renvoient ces URLs au niveau racine
   banner_image_url?: string;
   logo_url?: string;
@@ -65,6 +66,8 @@ export interface RestaurantForList {
   deliveryFee?: string;
   imageUrl?: string;
   restaurantImageUrl?: string;
+  description?: string;
+  isCertified?: boolean;
 }
 
 function toRestaurantForList(
@@ -141,6 +144,8 @@ function toRestaurantForList(
         : undefined,
     imageUrl: finalImageUrl || undefined,
     restaurantImageUrl: finalRestaurantImageUrl || undefined,
+    description: r.description || undefined,
+    isCertified: r.is_certified === true,
   };
 }
 

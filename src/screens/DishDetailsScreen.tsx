@@ -275,7 +275,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
               extras: cartExtras.length > 0 ? cartExtras : undefined,
               deliveryFee: deliveryFee > 0 ? deliveryFee : undefined,
             });
-            navigation.navigate('Cart');
+            navigation.popTo('MainTabs', {screen: 'Cart'});
           }}>
           <Text style={styles.addToCartText} numberOfLines={1}>
             {t('dishDetails.addToCartPrice', {price: totalPrice.toFixed(2)})}
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   headerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: Colors.black + '40',
   },
   backButton: {

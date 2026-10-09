@@ -283,10 +283,11 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
     cuisine_type?: string,
   ) => {
     try {
-      await api.post('/users/create/restaurant', {
+      // Même route que l'inscription web : crée le compte ET le restaurant
+      // (/users/create/restaurant ne crée que l'utilisateur, la connexion échouait ensuite)
+      await api.post('/restaurants/', {
         email,
         password,
-        profile_type: 'restaurant',
         name,
         address,
         phone,

@@ -79,6 +79,9 @@ server_pid.txt
 android/app/google-services.json
 ios/**/GoogleService-Info.plist
 
+# Keystore de signature release (secret, jamais commit)
+android/keystore.properties
+
 # Build de la variante web (webpack) — artefact généré, pas du code source
 web-build/
 

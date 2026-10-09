@@ -21,6 +21,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import type {SignupType} from '../contexts/AuthContext';
 import {getReferenceCountries, GeoCountry} from '../services/reference';
+import {mergeAddressLines} from '../utils/address';
 
 type Step = 'type' | 'form';
 
@@ -47,6 +48,8 @@ const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [addressLine3, setAddressLine3] = useState('');
   const [city, setCity] = useState('');
   const [description, setDescription] = useState('');
   const [cuisineType, setCuisineType] = useState('');
@@ -131,7 +134,7 @@ const SignupScreen = () => {
         email,
         password,
         name.trim(),
-        address.trim(),
+        mergeAddressLines(address, addressLine2, addressLine3),
         buildFullPhone(phone),
         city.trim(),
         description.trim() || undefined,
@@ -301,6 +304,18 @@ const SignupScreen = () => {
               <Text style={styles.fieldLabel}>{t('signup.fields.address')}</Text>
               <View style={styles.inputPill}>
                 <TextInput style={styles.input} placeholder={t('signup.placeholders.fullAddress')} placeholderTextColor={Colors.textLight} value={address} onChangeText={setAddress} autoCapitalize="words" />
+              </View>
+            </View>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>{t('signup.fields.addressLine2')}</Text>
+              <View style={styles.inputPill}>
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.addressLine2')} placeholderTextColor={Colors.textLight} value={addressLine2} onChangeText={setAddressLine2} autoCapitalize="words" />
+              </View>
+            </View>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>{t('signup.fields.addressLine3')}</Text>
+              <View style={styles.inputPill}>
+                <TextInput style={styles.input} placeholder={t('signup.placeholders.addressLine3')} placeholderTextColor={Colors.textLight} value={addressLine3} onChangeText={setAddressLine3} autoCapitalize="words" />
               </View>
             </View>
             <View style={styles.phoneRow}>

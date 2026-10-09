@@ -188,6 +188,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
             phone: restData.phone,
             hours: hoursDisplay,
             minimumOrder: restData.minimum_order ?? undefined,
+            isCertified: restData.is_certified === true,
             loyaltyEnabled: restData.loyalty_enabled !== false,
             loyaltyTrancheEuros:
               restData.loyalty_tranche_euros != null
@@ -427,7 +428,12 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
 
           {/* Titre + meta */}
           <View style={styles.header}>
-            <Text style={styles.name}>{restaurant.name}</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{restaurant.name}</Text>
+              {restaurant.isCertified ? (
+                <IconWrapper name="shield-checkmark" size={20} color={Colors.darkGreen} />
+              ) : null}
+            </View>
             <Text style={styles.metaLine}>
               ★ {displayRating} · {t('restaurantDetails.reviewsCount', {count: reviews.length})} · {restaurant.cuisine}
               {restaurant.city ? ` · ${restaurant.city}` : ''}
@@ -805,7 +811,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
         <View style={styles.cartBar}>
           <TouchableOpacity
             style={styles.cartBarButton}
-            onPress={() => navigation.navigate('Cart')}
+            onPress={() => navigation.popTo('MainTabs', {screen: 'Cart'})}
             activeOpacity={0.85}>
             <Text style={styles.cartBarText}>
               {t('restaurantDetails.viewCart', {count: cartForRestaurant.count})}
@@ -916,7 +922,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     gap: 5,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   name: {
+    flexShrink: 1,
     fontSize: 26,
     color: Colors.text,
     fontFamily: fontDisplay,

@@ -17,14 +17,20 @@ import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
 import {
   getRestaurantOrders,
+  getGroceryShopOrders,
   updateOrderStatus,
   type RestaurantOrder,
 } from '../../services/restaurantManagement';
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
 
-const RestaurantOrdersScreen = ({navigation}: any) => {
+// Onglet « Commandes » (plats) ou écran « Commandes grocery » (route GroceryOrders, params.grocery)
+const RestaurantOrdersScreen = ({navigation, route}: any) => {
   const {t} = useTranslation();
+  const grocery = route?.params?.grocery === true;
+  const fetchOrders = grocery ? getGroceryShopOrders : getRestaurantOrders;
+  const title = grocery ? t('restaurantOrders.groceryTitle') : t('restaurantOrders.title');
+  const topBarBack = grocery ? {showBackButton: true, onBackPress: () => navigation.goBack()} : {};
   const statusLabels: Record<string, string> = {
     pending: t('restaurantOrders.status.pending'),
     confirmed: t('restaurantOrders.status.confirmed'),
@@ -45,7 +51,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
-      const data = await getRestaurantOrders(statusFilter || undefined);
+      const data = await fetchOrders(statusFilter || undefined);
       setOrders(data);
     } catch (e) {
       setOrders([]);
@@ -60,7 +66,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
     (async () => {
       setLoading(true);
       try {
-        const data = await getRestaurantOrders(statusFilter || undefined);
+        const data = await fetchOrders(statusFilter || undefined);
         if (!cancelled) setOrders(data);
       } catch (e) {
         if (!cancelled) setOrders([]);
@@ -74,7 +80,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
     return () => {
       cancelled = true;
     };
-  }, [statusFilter]);
+  }, [statusFilter, fetchOrders]);
 
   const onRefresh = () => {
     load(true);
@@ -125,7 +131,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopBar navigation={navigation} title={t('restaurantOrders.title')} />
+        <TopBar navigation={navigation} title={title} {...topBarBack} />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.darkGreen} />
         </View>
@@ -135,7 +141,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <TopBar navigation={navigation} title={t('restaurantOrders.title')} />
+      <TopBar navigation={navigation} title={title} {...topBarBack} />
       <View style={styles.filters}>
         <TouchableOpacity
           style={[styles.filterChip, !statusFilter && styles.filterChipActive]}
@@ -166,7 +172,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
         ListEmptyComponent={
           <View style={styles.empty}>
             <IconWrapper name="receipt-outline" size={48} color={Colors.textLight} />
-            <Text style={styles.emptyText}>{t('restaurantOrders.noOrders')}</Text>
+            <Text style={styles.emptyText}>{grocery ? t('restaurantOrders.noGroceryOrders') : t('restaurantOrders.noOrders')}</Text>
           </View>
         }
       />
@@ -195,7 +201,7 @@ const RestaurantOrdersScreen = ({navigation}: any) => {
                 <Text style={styles.modalLabel}>{t('restaurantOrders.items')}</Text>
                 {selectedOrder.items?.map((i) => (
                   <Text key={i.id} style={styles.modalText}>
-                    {i.quantity}× {i.name} — {i.price.toFixed(2)} €
+                    {i.quantity}{i.unit && i.unit !== 'piece' ? ` ${i.unit}` : '×'} {i.name} — {i.price.toFixed(2)} €
                   </Text>
                 ))}
                 <Text style={styles.modalTotal}>{t('restaurantOrders.totalLabel', {amount: (selectedOrder.total?.toFixed(2) ?? selectedOrder.restaurant_total?.toFixed(2))})}</Text>

@@ -325,7 +325,7 @@ const GroceryShopDetailsScreen = ({route, navigation}: any) => {
 
       {cartCount > 0 && (
         <View style={styles.cartBar}>
-          <TouchableOpacity style={styles.cartButton} activeOpacity={0.9} onPress={() => navigation.navigate('Cart')}>
+          <TouchableOpacity style={styles.cartButton} activeOpacity={0.9} onPress={() => navigation.popTo('MainTabs', {screen: 'Cart'})}>
             <Text style={styles.cartButtonText}>
               {t('groceryShopDetails.viewCart', {count: cartCount})}
             </Text>
