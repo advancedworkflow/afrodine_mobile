@@ -7,9 +7,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
-  Modal,
-  TextInput,
   Linking,
+  AppState,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
@@ -19,35 +18,31 @@ import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
 import {formatAxiosError} from '../../utils/formatApiError';
 import {
-  getWalletInfo,
-  requestPayout,
+  getLedgerBalance,
+  getLedgerPayouts,
+  requestLedgerWithdrawal,
   getStripeConnectStatus,
-  getStripeConnectBalance,
-  getStripeConnectPayouts,
   createStripeConnectOnboardingLink,
+  createStripeConnectDashboardLink,
   type StripeConnectStatus,
-  type StripeConnectBalance,
-  type StripeConnectPayout,
+  type LedgerBalance,
+  type LedgerPayout,
 } from '../../services/restaurantManagement';
 
 const WalletScreen = ({navigation}: any) => {
   const {t, i18n} = useTranslation();
   const PAYOUT_STATUS_LABELS: Record<string, string> = {
-    pending: t('restaurantWallet.payoutStatus.pending'),
-    in_transit: t('restaurantWallet.payoutStatus.inTransit'),
-    paid: t('restaurantWallet.payoutStatus.paid'),
-    failed: t('restaurantWallet.payoutStatus.failed'),
-    canceled: t('restaurantWallet.payoutStatus.canceled'),
+    en_attente: t('restaurantWallet.payoutStatus.pending'),
+    envoye: t('restaurantWallet.payoutStatus.inTransit'),
+    confirme: t('restaurantWallet.payoutStatus.paid'),
+    echoue: t('restaurantWallet.payoutStatus.failed'),
   };
   const dateLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
-  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<LedgerBalance | null>(null);
   const [connectStatus, setConnectStatus] = useState<StripeConnectStatus | null>(null);
-  const [connectBalance, setConnectBalance] = useState<StripeConnectBalance | null>(null);
-  const [payouts, setPayouts] = useState<StripeConnectPayout[]>([]);
+  const [payouts, setPayouts] = useState<LedgerPayout[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [payoutModalVisible, setPayoutModalVisible] = useState(false);
-  const [payoutAmount, setPayoutAmount] = useState('');
   const [payoutLoading, setPayoutLoading] = useState(false);
   const [connectLoading, setConnectLoading] = useState(false);
 
@@ -55,31 +50,17 @@ const WalletScreen = ({navigation}: any) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
-      const [info, statusData] = await Promise.all([getWalletInfo(), getStripeConnectStatus()]);
-      setWalletBalance(info?.balance ?? info?.available_balance ?? 0);
+      const [balanceData, statusData, payoutsData] = await Promise.all([
+        getLedgerBalance(),
+        getStripeConnectStatus(),
+        getLedgerPayouts(30),
+      ]);
+      setBalance(balanceData);
       setConnectStatus(statusData);
-
-      const shouldLoadStripeDetails =
-        !!statusData &&
-        (statusData.charges_enabled === true ||
-          statusData.payouts_enabled === true ||
-          statusData.details_submitted === true);
-
-      if (shouldLoadStripeDetails) {
-        const [balanceData, payoutsData] = await Promise.all([
-          getStripeConnectBalance(),
-          getStripeConnectPayouts(30),
-        ]);
-        setConnectBalance(balanceData);
-        setPayouts(Array.isArray(payoutsData) ? payoutsData : []);
-      } else {
-        setConnectBalance(null);
-        setPayouts([]);
-      }
+      setPayouts(payoutsData);
     } catch {
-      setWalletBalance(0);
+      setBalance(null);
       setConnectStatus(null);
-      setConnectBalance(null);
       setPayouts([]);
     } finally {
       setLoading(false);
@@ -91,27 +72,25 @@ const WalletScreen = ({navigation}: any) => {
     load();
   }, [load]);
 
-  const onConfirmPayout = async () => {
-    const amount = parseFloat(payoutAmount.replace(',', '.'));
-    if (!Number.isFinite(amount) || amount <= 0) {
-      alert(t('restaurantWallet.invalidAmountTitle'), t('restaurantWallet.invalidAmountMessage'));
-      return;
-    }
-    if (amount > walletBalance) {
-      alert(t('restaurantWallet.insufficientBalanceTitle'), t('restaurantWallet.availableBalance', {amount: walletBalance.toFixed(2)}));
-      return;
-    }
+  // Retour depuis l'onboarding Stripe (navigateur) : on resynchronise le statut
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') load(true);
+    });
+    return () => sub.remove();
+  }, [load]);
+
+  const available = balance?.available_balance ?? 0;
+  const threshold = balance?.payout_threshold ?? 0;
+  const payoutsReady = connectStatus?.payouts_enabled === true;
+  const canWithdraw = payoutsReady && threshold > 0 && available >= threshold;
+
+  const doWithdraw = async () => {
     setPayoutLoading(true);
     try {
-      const result = await requestPayout(amount, 'Retrait manuel');
-      if (result?.success) {
-        setPayoutModalVisible(false);
-        setPayoutAmount('');
-        alert(t('restaurantWallet.successTitle'), t('restaurantWallet.payoutRequestedMessage', {amount: amount.toFixed(2)}));
-        load(true);
-      } else {
-        alert(t('restaurantWallet.errorTitle'), (result as any)?.message ?? t('restaurantWallet.payoutError'));
-      }
+      const payout = await requestLedgerWithdrawal();
+      alert(t('restaurantWallet.successTitle'), t('restaurantWallet.payoutRequestedMessage', {amount: Number(payout.amount).toFixed(2)}));
+      load(true);
     } catch (e) {
       alert(t('restaurantWallet.errorTitle'), formatAxiosError(e, t('restaurantWallet.payoutError')));
     } finally {
@@ -119,28 +98,37 @@ const WalletScreen = ({navigation}: any) => {
     }
   };
 
-  const onOpenConnectOnboarding = async () => {
+  const onWithdraw = () => {
+    alert(t('restaurantWallet.makePayout'), t('restaurantWallet.confirmWithdrawMessage', {amount: available.toFixed(2)}), [
+      {text: t('restaurantWallet.cancel'), style: 'cancel'},
+      {text: t('restaurantWallet.confirm'), onPress: doWithdraw},
+    ]);
+  };
+
+  const onOpenStripe = async () => {
     setConnectLoading(true);
     try {
-      const link = await createStripeConnectOnboardingLink();
-      if (!link?.url) {
-        alert('Stripe Connect', t('restaurantWallet.onboardingLinkError'));
-        return;
-      }
+      const link = payoutsReady
+        ? await createStripeConnectDashboardLink()
+        : await createStripeConnectOnboardingLink();
       const canOpen = await Linking.canOpenURL(link.url);
       if (!canOpen) {
-        alert('Stripe Connect', t('restaurantWallet.cannotOpenBrowser'));
+        alert('Stripe', t('restaurantWallet.cannotOpenBrowser'));
         return;
       }
       await Linking.openURL(link.url);
-    } catch {
-      alert('Stripe Connect', t('restaurantWallet.onboardingOpenError'));
+    } catch (e) {
+      alert('Stripe', formatAxiosError(e, t('restaurantWallet.onboardingOpenError')));
     } finally {
       setConnectLoading(false);
     }
   };
 
-  const connectActive = connectStatus?.charges_enabled && connectStatus?.payouts_enabled;
+  const connectStatusLabel = payoutsReady
+    ? t('restaurantWallet.statusActive')
+    : connectStatus?.details_submitted
+      ? t('restaurantWallet.statusPendingVerification')
+      : t('restaurantWallet.statusNotConfigured');
 
   if (loading) {
     return (
@@ -167,43 +155,53 @@ const WalletScreen = ({navigation}: any) => {
             <IconWrapper name="wallet-outline" size={22} color={Colors.darkGreen} />
             <Text style={styles.sectionTitle}>{t('restaurantWallet.balance')}</Text>
           </View>
-          <Text style={styles.walletBalance}>{t('restaurantWallet.balanceAvailable', {amount: walletBalance.toFixed(2)})}</Text>
+          <Text style={styles.walletBalance}>{t('restaurantWallet.balanceAvailable', {amount: available.toFixed(2)})}</Text>
+          <View style={[styles.connectRow, styles.connectRowLast]}>
+            <Text style={styles.connectLabel}>{t('restaurantWallet.pendingBalance')}</Text>
+            <Text style={styles.connectValue}>{(balance?.pending_balance ?? 0).toFixed(2)} €</Text>
+          </View>
           <TouchableOpacity
-            style={[styles.payoutButton, walletBalance <= 0 && styles.payoutButtonDisabled]}
-            onPress={() => setPayoutModalVisible(true)}
+            style={[styles.payoutButton, (!canWithdraw || payoutLoading) && styles.payoutButtonDisabled]}
+            onPress={onWithdraw}
             activeOpacity={0.8}
-            disabled={walletBalance <= 0}>
-            <IconWrapper name="card-outline" size={20} color={Colors.white} />
-            <Text style={styles.payoutButtonText}>{t('restaurantWallet.makePayout')}</Text>
+            disabled={!canWithdraw || payoutLoading}>
+            {payoutLoading ? (
+              <ActivityIndicator size="small" color={Colors.white} />
+            ) : (
+              <>
+                <IconWrapper name="card-outline" size={20} color={Colors.white} />
+                <Text style={styles.payoutButtonText}>{t('restaurantWallet.makePayout')}</Text>
+              </>
+            )}
           </TouchableOpacity>
+          {payoutsReady && !canWithdraw && (
+            <Text style={styles.hintText}>{t('restaurantWallet.belowThreshold', {amount: threshold.toFixed(2)})}</Text>
+          )}
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <IconWrapper name="card-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Stripe Connect</Text>
-          </View>
-          <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>{t('restaurantWallet.status')}</Text>
-            <Text style={styles.connectValue}>{connectActive ? t('restaurantWallet.statusActive') : connectStatus?.status || t('restaurantWallet.statusNotConfigured')}</Text>
-          </View>
-          <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>{t('restaurantWallet.connectAvailable')}</Text>
-            <Text style={styles.connectValue}>{(connectBalance?.available_balance ?? 0).toFixed(2)} €</Text>
+            <Text style={styles.sectionTitle}>{t('restaurantWallet.payoutAccount')}</Text>
           </View>
           <View style={[styles.connectRow, styles.connectRowLast]}>
-            <Text style={styles.connectLabel}>{t('restaurantWallet.connectPending')}</Text>
-            <Text style={styles.connectValue}>{(connectBalance?.pending_balance ?? 0).toFixed(2)} €</Text>
+            <Text style={styles.connectLabel}>{t('restaurantWallet.status')}</Text>
+            <Text style={styles.connectValue}>{connectStatusLabel}</Text>
           </View>
+          {!payoutsReady && (
+            <Text style={styles.hintText}>{t('restaurantWallet.configureHint')}</Text>
+          )}
           <TouchableOpacity
             style={styles.connectButton}
-            onPress={onOpenConnectOnboarding}
+            onPress={onOpenStripe}
             activeOpacity={0.8}
             disabled={connectLoading}>
             {connectLoading ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
-              <Text style={styles.connectButtonText}>{t('restaurantWallet.activateUpdateConnect')}</Text>
+              <Text style={styles.connectButtonText}>
+                {payoutsReady ? t('restaurantWallet.manageOnStripe') : t('restaurantWallet.activateUpdateConnect')}
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -213,65 +211,22 @@ const WalletScreen = ({navigation}: any) => {
           {payouts.length === 0 ? (
             <Text style={styles.mutedText}>{t('restaurantWallet.noPayouts')}</Text>
           ) : (
-            payouts.map((payout, index) => (
-              <View key={payout.id ?? payout.stripe_payout_id ?? index} style={styles.payoutRow}>
+            payouts.map(payout => (
+              <View key={payout.id} style={styles.payoutRow}>
                 <View style={styles.payoutRowLeft}>
                   <Text style={styles.payoutDate}>
                     {payout.created_at ? new Date(payout.created_at).toLocaleDateString(dateLocale) : '—'}
                   </Text>
                   <Text style={styles.payoutStatus}>
-                    {PAYOUT_STATUS_LABELS[payout.status ?? ''] ?? payout.status ?? '—'}
+                    {PAYOUT_STATUS_LABELS[payout.status] ?? payout.status}
                   </Text>
                 </View>
-                <Text style={styles.payoutAmount}>
-                  {payout.amount != null ? `${Number(payout.amount).toFixed(2)} €` : '—'}
-                </Text>
+                <Text style={styles.payoutAmount}>{Number(payout.amount).toFixed(2)} €</Text>
               </View>
             ))
           )}
         </View>
       </ScrollView>
-
-      <Modal
-        visible={payoutModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => !payoutLoading && setPayoutModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>{t('restaurantWallet.makePayout')}</Text>
-            <Text style={styles.modalHint}>{t('restaurantWallet.amountToWithdraw')}</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={payoutAmount}
-              onChangeText={setPayoutAmount}
-              placeholder="0.00"
-              placeholderTextColor={Colors.textLight}
-              keyboardType="decimal-pad"
-              editable={!payoutLoading}
-            />
-            <Text style={styles.modalBalance}>{t('restaurantWallet.balanceLabel', {amount: walletBalance.toFixed(2)})}</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalBtn, styles.modalBtnCancel]}
-                onPress={() => !payoutLoading && setPayoutModalVisible(false)}
-                disabled={payoutLoading}>
-                <Text style={styles.modalBtnCancelText}>{t('restaurantWallet.cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalBtn, styles.modalBtnConfirm]}
-                onPress={onConfirmPayout}
-                disabled={payoutLoading}>
-                {payoutLoading ? (
-                  <ActivityIndicator size="small" color={Colors.white} />
-                ) : (
-                  <Text style={styles.modalBtnConfirmText}>{t('restaurantWallet.confirm')}</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -376,6 +331,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: secondaryFont,
   },
+  hintText: {
+    fontSize: 13,
+    color: Colors.textLight,
+    fontFamily: secondaryFont,
+    marginTop: 8,
+  },
   mutedText: {
     fontSize: 14,
     color: Colors.textLight,
@@ -405,76 +366,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: Colors.darkGreen,
-    fontFamily: secondaryFont,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalBox: {
-    width: '100%',
-    maxWidth: 320,
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.darkGreen,
-    fontFamily: secondaryFont,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalHint: {
-    fontSize: 14,
-    color: Colors.textLight,
-    marginBottom: 8,
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 18,
-    color: Colors.darkGreen,
-    marginBottom: 8,
-  },
-  modalBalance: {
-    fontSize: 13,
-    color: Colors.textLight,
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalBtnCancel: {
-    backgroundColor: Colors.border,
-  },
-  modalBtnConfirm: {
-    backgroundColor: Colors.darkGreen,
-  },
-  modalBtnCancelText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGreen,
-    fontFamily: secondaryFont,
-  },
-  modalBtnConfirmText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.white,
     fontFamily: secondaryFont,
   },
 });

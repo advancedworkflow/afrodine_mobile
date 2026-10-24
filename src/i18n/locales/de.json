@@ -1188,7 +1188,7 @@
     "statusNotConfigured": "Nicht konfiguriert",
     "connectAvailable": "Connect verfügbar",
     "connectPending": "Connect ausstehend",
-    "activateUpdateConnect": "Connect aktivieren / aktualisieren",
+    "activateUpdateConnect": "Auszahlungen einrichten",
     "payoutHistory": "Auszahlungsverlauf",
     "noPayouts": "Noch keine Auszahlungen.",
     "invalidAmountTitle": "Ungültiger Betrag",
@@ -1212,7 +1212,14 @@
       "paid": "Bezahlt",
       "failed": "Fehlgeschlagen",
       "canceled": "Storniert"
-    }
+    },
+    "pendingBalance": "Ausstehend (Prüfung)",
+    "payoutAccount": "Auszahlungskonto",
+    "statusPendingVerification": "Prüfung läuft",
+    "configureHint": "Geben Sie Ihre Identität und IBAN über unseren Zahlungspartner Stripe an, um Ihre Einnahmen zu erhalten.",
+    "manageOnStripe": "Bei Stripe verwalten",
+    "confirmWithdrawMessage": "Die verfügbaren {{amount}} € abheben?",
+    "belowThreshold": "Auszahlung ab {{amount}} € verfügbarem Guthaben möglich."
   },
   "restaurantGroceryProductForm": {
     "editTitle": "Produkt bearbeiten",

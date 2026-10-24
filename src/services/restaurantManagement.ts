@@ -1,5 +1,4 @@
 import api from '../utils/api';
-import {formatApiErrorDetail} from '../utils/formatApiError';
 
 const BASE = '/management';
 
@@ -907,38 +906,27 @@ export async function getWalletInfo(): Promise<WalletInfo> {
   return data ?? { balance: 0, available_balance: 0, pending_balance: 0, transactions: [] };
 }
 
-export interface PayoutResult {
-  success: boolean;
-  transfer_id?: string;
-  payout_id?: string;
-  amount?: number;
-  new_balance?: number;
-  arrival_date?: number;
-}
-
 export interface StripeConnectStatus {
-  id?: number;
-  restaurant_id?: number;
-  status?: string;
-  charges_enabled?: boolean;
-  payouts_enabled?: boolean;
-  details_submitted?: boolean;
+  connected: boolean;
+  details_submitted: boolean;
+  payouts_enabled: boolean;
+  status: string;
 }
 
-export interface StripeConnectBalance {
-  success?: boolean;
-  available_balance?: number;
-  pending_balance?: number;
-  total_balance?: number;
+export interface LedgerBalance {
+  restaurant_id: number;
+  available_balance: number;
+  pending_balance: number;
+  payout_threshold: number;
 }
 
-export interface StripeConnectPayout {
-  id?: number;
-  stripe_payout_id?: string;
-  amount?: number;
-  status?: string;
+export interface LedgerPayout {
+  id: number;
+  amount: number;
+  reference: string;
+  status: string;
   created_at?: string;
-  arrival_date?: string;
+  confirmed_at?: string;
 }
 
 async function getCurrentRestaurantId(): Promise<number> {
@@ -952,79 +940,37 @@ async function getCurrentRestaurantId(): Promise<number> {
 
 export async function getStripeConnectStatus(): Promise<StripeConnectStatus | null> {
   try {
-    const restaurantId = await getCurrentRestaurantId();
-    const { data } = await api.get<StripeConnectStatus>(
-      `/stripe-connect/accounts/${restaurantId}/status`,
-      { silentError: true } as any,
-    );
-    return data ?? null;
-  } catch {
-    return null;
-  }
-}
-
-export async function getStripeConnectBalance(): Promise<StripeConnectBalance | null> {
-  try {
-    const restaurantId = await getCurrentRestaurantId();
-    const { data } = await api.get<StripeConnectBalance>(
-      `/stripe-connect/balance/${restaurantId}`,
-      { silentError: true } as any,
-    );
-    return data ?? null;
-  } catch {
-    return null;
-  }
-}
-
-export async function getStripeConnectPayouts(limit: number = 20): Promise<StripeConnectPayout[]> {
-  try {
-    const restaurantId = await getCurrentRestaurantId();
-    const { data } = await api.get<StripeConnectPayout[]>(`/stripe-connect/payouts/${restaurantId}`, {
-      params: { limit },
+    const { data } = await api.get<StripeConnectStatus>(`${BASE}/stripe-connect/status`, {
       silentError: true,
-    });
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
-
-export async function createStripeConnectOnboardingLink(): Promise<{ url?: string; expires_at?: number } | null> {
-  try {
-    const restaurantId = await getCurrentRestaurantId();
-    const refreshUrl = 'afrodine://restaurant/dashboard?connect=refresh';
-    const returnUrl = 'afrodine://restaurant/dashboard?connect=done';
-    try {
-      await api.post('/stripe-connect/accounts', { restaurant_id: restaurantId });
-    } catch (createErr: any) {
-      const msg = formatApiErrorDetail(createErr?.response?.data?.detail);
-      if (!msg.toLowerCase().includes('already exists')) {
-        throw createErr;
-      }
-    }
-    const { data } = await api.post(`/stripe-connect/accounts/${restaurantId}/link`, {
-      restaurant_id: restaurantId,
-      refresh_url: refreshUrl,
-      return_url: returnUrl,
-    });
+    } as any);
     return data ?? null;
   } catch {
     return null;
   }
 }
 
-export async function requestPayout(
-  amount: number,
-  description: string = 'Retrait manuel',
-): Promise<PayoutResult> {
-  try {
-    const restaurantId = await getCurrentRestaurantId();
-    const { data } = await api.post<PayoutResult>(`/stripe-connect/withdraw/${restaurantId}`, {
-      amount,
-      reason: description,
-    });
-    return data ?? { success: false };
-  } catch {
-    return { success: false };
-  }
+export async function createStripeConnectOnboardingLink(): Promise<{ url: string; expires_at?: number }> {
+  const { data } = await api.post(`${BASE}/stripe-connect/onboarding-link`);
+  return data;
+}
+
+export async function createStripeConnectDashboardLink(): Promise<{ url: string }> {
+  const { data } = await api.post(`${BASE}/stripe-connect/dashboard-link`);
+  return data;
+}
+
+export async function getLedgerBalance(): Promise<LedgerBalance> {
+  const { data } = await api.get<LedgerBalance>(`${BASE}/ledger/balance`);
+  return data;
+}
+
+export async function getLedgerPayouts(limit: number = 30): Promise<LedgerPayout[]> {
+  const { data } = await api.get<LedgerPayout[]>(`${BASE}/ledger/payouts`, { params: { limit } });
+  return Array.isArray(data) ? data : [];
+}
+
+/** Retrait de tout le solde disponible (hors batch hebdomadaire), soumis au seuil minimum. */
+export async function requestLedgerWithdrawal(): Promise<LedgerPayout> {
+  const { data } = await api.post<LedgerPayout>(`${BASE}/ledger/withdraw`);
+  return data;
 }

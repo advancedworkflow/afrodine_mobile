@@ -1188,7 +1188,7 @@
     "statusNotConfigured": "Not configured",
     "connectAvailable": "Connect available",
     "connectPending": "Connect pending",
-    "activateUpdateConnect": "Activate / Update Connect",
+    "activateUpdateConnect": "Set up my payouts",
     "payoutHistory": "Payout history",
     "noPayouts": "No payouts yet.",
     "invalidAmountTitle": "Invalid amount",
@@ -1212,7 +1212,14 @@
       "paid": "Paid",
       "failed": "Failed",
       "canceled": "Canceled"
-    }
+    },
+    "pendingBalance": "Pending (verification)",
+    "payoutAccount": "Payout account",
+    "statusPendingVerification": "Verification in progress",
+    "configureHint": "Provide your identity and IBAN through our payment partner Stripe to receive your earnings.",
+    "manageOnStripe": "Manage on Stripe",
+    "confirmWithdrawMessage": "Withdraw the available {{amount}} €?",
+    "belowThreshold": "Withdrawal possible from {{amount}} € available."
   },
   "restaurantGroceryProductForm": {
     "editTitle": "Edit product",

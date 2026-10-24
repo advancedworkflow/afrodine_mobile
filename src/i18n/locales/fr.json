@@ -1188,7 +1188,7 @@
     "statusNotConfigured": "Non configuré",
     "connectAvailable": "Disponible Connect",
     "connectPending": "En attente Connect",
-    "activateUpdateConnect": "Activer / Mettre à jour Connect",
+    "activateUpdateConnect": "Configurer mes versements",
     "payoutHistory": "Historique des virements",
     "noPayouts": "Aucun virement pour le moment.",
     "invalidAmountTitle": "Montant invalide",
@@ -1212,7 +1212,14 @@
       "paid": "Payé",
       "failed": "Échoué",
       "canceled": "Annulé"
-    }
+    },
+    "pendingBalance": "En attente (vérification)",
+    "payoutAccount": "Compte de versement",
+    "statusPendingVerification": "Vérification en cours",
+    "configureHint": "Renseignez votre identité et votre IBAN via notre partenaire de paiement Stripe pour recevoir vos gains.",
+    "manageOnStripe": "Gérer sur Stripe",
+    "confirmWithdrawMessage": "Retirer les {{amount}} € disponibles ?",
+    "belowThreshold": "Retrait possible à partir de {{amount}} € disponibles."
   },
   "restaurantGroceryProductForm": {
     "editTitle": "Modifier le produit",

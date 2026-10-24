@@ -8,35 +8,22 @@ import {
   ActivityIndicator,
   Dimensions,
   TouchableOpacity,
-  Modal,
-  TextInput,
-  Linking,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
-import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import {Colors} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
-import {formatAxiosError} from '../../utils/formatApiError';
 import {
   getDashboardStats,
   getRevenueAnalytics,
   getOrdersAnalytics,
   getManagementReviews,
-  getWalletInfo,
-  requestPayout,
-  getStripeConnectStatus,
-  getStripeConnectBalance,
-  getStripeConnectPayouts,
-  createStripeConnectOnboardingLink,
+  getLedgerBalance,
   type DashboardStats,
   type RevenueDataPoint,
   type OrdersDataPoint,
   type ManagementReview,
-  type StripeConnectStatus,
-  type StripeConnectBalance,
-  type StripeConnectPayout,
 } from '../../services/restaurantManagement';
 
 import LineChartCard from '../../components/charts/LineChartCard';
@@ -221,12 +208,6 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
   const [ordersData, setOrdersData] = useState<OrdersDataPoint[]>([]);
   const [recentReviews, setRecentReviews] = useState<ManagementReview[]>([]);
   const [walletBalance, setWalletBalance] = useState<number>(0);
-  const [connectStatus, setConnectStatus] = useState<StripeConnectStatus | null>(null);
-  const [connectBalance, setConnectBalance] = useState<StripeConnectBalance | null>(null);
-  const [lastPayout, setLastPayout] = useState<StripeConnectPayout | null>(null);
-  const [payoutModalVisible, setPayoutModalVisible] = useState(false);
-  const [payoutAmount, setPayoutAmount] = useState('');
-  const [payoutLoading, setPayoutLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('7d');
@@ -234,27 +215,10 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
 
   const loadWallet = async () => {
     try {
-      const [info, statusData] = await Promise.all([
-        getWalletInfo(),
-        getStripeConnectStatus(),
-      ]);
-      const shouldLoadStripeDetails =
-        !!statusData &&
-        (statusData.charges_enabled === true ||
-          statusData.payouts_enabled === true ||
-          statusData.details_submitted === true);
-      const [balanceData, payoutsData] = shouldLoadStripeDetails
-        ? await Promise.all([getStripeConnectBalance(), getStripeConnectPayouts(1)])
-        : [null, []];
-      setWalletBalance(info?.balance ?? info?.available_balance ?? 0);
-      setConnectStatus(statusData);
-      setConnectBalance(balanceData);
-      setLastPayout(Array.isArray(payoutsData) && payoutsData.length > 0 ? payoutsData[0] : null);
+      const balance = await getLedgerBalance();
+      setWalletBalance(balance?.available_balance ?? 0);
     } catch {
       setWalletBalance(0);
-      setConnectStatus(null);
-      setConnectBalance(null);
-      setLastPayout(null);
     }
   };
 
@@ -280,31 +244,10 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
           if (!cancelled) setRecentReviews([]);
         }
         try {
-          const [info, statusData] = await Promise.all([
-            getWalletInfo(),
-            getStripeConnectStatus(),
-          ]);
-          const shouldLoadStripeDetails =
-            !!statusData &&
-            (statusData.charges_enabled === true ||
-              statusData.payouts_enabled === true ||
-              statusData.details_submitted === true);
-          const [balanceData, payoutsData] = shouldLoadStripeDetails
-            ? await Promise.all([getStripeConnectBalance(), getStripeConnectPayouts(1)])
-            : [null, []];
-          if (!cancelled) {
-            setWalletBalance(info?.balance ?? info?.available_balance ?? 0);
-            setConnectStatus(statusData);
-            setConnectBalance(balanceData);
-            setLastPayout(Array.isArray(payoutsData) && payoutsData.length > 0 ? payoutsData[0] : null);
-          }
+          const balance = await getLedgerBalance();
+          if (!cancelled) setWalletBalance(balance?.available_balance ?? 0);
         } catch {
-          if (!cancelled) {
-            setWalletBalance(0);
-            setConnectStatus(null);
-            setConnectBalance(null);
-            setLastPayout(null);
-          }
+          if (!cancelled) setWalletBalance(0);
         }
       } catch (e) {
         if (!cancelled) {
@@ -352,52 +295,6 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
       setRecentReviews([]);
     } finally {
       setRefreshing(false);
-    }
-  };
-
-  const onConfirmPayout = async () => {
-    const amount = parseFloat(payoutAmount.replace(',', '.'));
-    if (!Number.isFinite(amount) || amount <= 0) {
-      alert(t('restaurantDashboard.invalidAmountTitle'), t('restaurantDashboard.invalidAmountMessage'));
-      return;
-    }
-    if (amount > walletBalance) {
-      alert(t('restaurantDashboard.insufficientBalanceTitle'), t('restaurantDashboard.insufficientBalanceMessage', {amount: walletBalance.toFixed(2)}));
-      return;
-    }
-    setPayoutLoading(true);
-    try {
-      const result = await requestPayout(amount, t('restaurantDashboard.manualWithdrawal'));
-      if (result?.success) {
-        setPayoutModalVisible(false);
-        setPayoutAmount('');
-        setWalletBalance(result?.new_balance ?? walletBalance - amount);
-        alert(t('restaurantDashboard.successTitle'), t('restaurantDashboard.payoutRequested', {amount: amount.toFixed(2)}));
-      } else {
-        alert(t('restaurantDashboard.errorTitle'), (result as any)?.message ?? t('restaurantDashboard.payoutFailed'));
-      }
-    } catch (e: any) {
-      alert(t('restaurantDashboard.errorTitle'), formatAxiosError(e, t('restaurantDashboard.payoutFailed')));
-    } finally {
-      setPayoutLoading(false);
-    }
-  };
-
-  const onOpenConnectOnboarding = async () => {
-    const link = await createStripeConnectOnboardingLink();
-    if (!link?.url) {
-      alert('Stripe Connect', t('restaurantDashboard.connectLinkFailed'));
-      return;
-    }
-    try {
-      const canOpen = await Linking.canOpenURL(link.url);
-      if (!canOpen) {
-        alert('Stripe Connect', t('restaurantDashboard.connectCannotOpenBrowser'));
-        return;
-      }
-      await Linking.openURL(link.url);
-    } catch {
-      alert('Stripe Connect', t('restaurantDashboard.connectLinkOpenFailed'));
     }
   };
 
@@ -536,9 +433,8 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
           <Text style={styles.walletBalance}>{t('restaurantDashboard.availableBalance', {amount: walletBalance.toFixed(2)})}</Text>
           <TouchableOpacity
             style={styles.payoutButton}
-            onPress={() => setPayoutModalVisible(true)}
-            activeOpacity={0.8}
-            disabled={walletBalance <= 0}>
+            onPress={() => navigation.navigate('RestaurantWallet')}
+            activeOpacity={0.8}>
             <IconWrapper name="card-outline" size={20} color={Colors.white} />
             <Text style={styles.payoutButtonText}>{t('restaurantDashboard.makePayout')}</Text>
           </TouchableOpacity>
@@ -548,40 +444,6 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
             activeOpacity={0.7}>
             <Text style={styles.linkButtonText}>{t('restaurantDashboard.viewWallet')}</Text>
             <IconWrapper name="chevron-forward" size={18} color={Colors.darkGreen} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <IconWrapper name="card-outline" size={22} color={Colors.darkGreen} />
-            <Text style={styles.sectionTitle}>Stripe Connect</Text>
-          </View>
-          <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>{t('restaurantDashboard.status')}</Text>
-            <Text style={styles.connectValue}>
-              {connectStatus?.charges_enabled && connectStatus?.payouts_enabled
-                ? t('restaurantDashboard.statusActive')
-                : (connectStatus?.status || t('restaurantDashboard.statusNotConfigured'))}
-            </Text>
-          </View>
-          <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>{t('restaurantDashboard.connectAvailable')}</Text>
-            <Text style={styles.connectValue}>{(connectBalance?.available_balance ?? 0).toFixed(2)} €</Text>
-          </View>
-          <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>{t('restaurantDashboard.connectPending')}</Text>
-            <Text style={styles.connectValue}>{(connectBalance?.pending_balance ?? 0).toFixed(2)} €</Text>
-          </View>
-          <View style={styles.connectRow}>
-            <Text style={styles.connectLabel}>{t('restaurantDashboard.lastPayout')}</Text>
-            <Text style={styles.connectValue}>
-              {lastPayout?.amount != null ? `${Number(lastPayout.amount).toFixed(2)} €` : t('restaurantDashboard.none')}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.connectButton}
-            onPress={onOpenConnectOnboarding}
-            activeOpacity={0.8}>
-            <Text style={styles.connectButtonText}>{t('restaurantDashboard.activateConnect')}</Text>
           </TouchableOpacity>
         </View>
         {topDishes.length > 0 && (
@@ -694,46 +556,6 @@ const RestaurantDashboardScreen = ({navigation}: any) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <Modal
-        visible={payoutModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => !payoutLoading && setPayoutModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>{t('restaurantDashboard.makePayout')}</Text>
-            <Text style={styles.modalHint}>{t('restaurantDashboard.amountToWithdraw')}</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={payoutAmount}
-              onChangeText={setPayoutAmount}
-              placeholder="0.00"
-              placeholderTextColor={Colors.textLight}
-              keyboardType="decimal-pad"
-              editable={!payoutLoading}
-            />
-            <Text style={styles.modalBalance}>{t('restaurantDashboard.balance', {amount: walletBalance.toFixed(2)})}</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalBtn, styles.modalBtnCancel]}
-                onPress={() => !payoutLoading && setPayoutModalVisible(false)}
-                disabled={payoutLoading}>
-                <Text style={styles.modalBtnCancelText}>{t('restaurantDashboard.cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalBtn, styles.modalBtnConfirm]}
-                onPress={onConfirmPayout}
-                disabled={payoutLoading}>
-                {payoutLoading ? (
-                  <ActivityIndicator size="small" color={Colors.white} />
-                ) : (
-                  <Text style={styles.modalBtnConfirmText}>{t('restaurantDashboard.confirm')}</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -922,76 +744,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontFamily: secondaryFont,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalBox: {
-    width: '100%',
-    maxWidth: 320,
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.darkGreen,
-    fontFamily: secondaryFont,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalHint: {
-    fontSize: 14,
-    color: Colors.textLight,
-    marginBottom: 8,
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 18,
-    color: Colors.darkGreen,
-    marginBottom: 8,
-  },
-  modalBalance: {
-    fontSize: 13,
-    color: Colors.textLight,
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalBtnCancel: {
-    backgroundColor: Colors.border,
-  },
-  modalBtnConfirm: {
-    backgroundColor: Colors.darkGreen,
-  },
-  modalBtnCancelText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.darkGreen,
-    fontFamily: secondaryFont,
-  },
-  modalBtnConfirmText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.white,
-    fontFamily: secondaryFont,
-  },
   dishRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1073,38 +825,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
-    fontFamily: secondaryFont,
-  },
-  connectRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  connectLabel: {
-    fontSize: 13,
-    color: Colors.textLight,
-    fontFamily: secondaryFont,
-  },
-  connectValue: {
-    fontSize: 14,
-    color: Colors.darkGreen,
-    fontWeight: '600',
-    fontFamily: secondaryFont,
-  },
-  connectButton: {
-    marginTop: 12,
-    backgroundColor: Colors.darkGreen,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  connectButtonText: {
-    color: Colors.white,
-    fontWeight: '600',
-    fontSize: 14,
     fontFamily: secondaryFont,
   },
 });
