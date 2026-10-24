@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from '../i18n';
 
 declare module 'axios' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,6 +78,8 @@ function isPublicAuthPath(url: string | undefined): boolean {
 // Intercepteur : token sauf sur login / inscription (évite Bearer obsolète sur POST /users/login)
 api.interceptors.request.use(
   async config => {
+    // Langue de l'app : le serveur la mémorise sur le compte pour envoyer les emails dans cette langue
+    config.headers['Accept-Language'] = i18n.language;
     if (isPublicAuthPath(config.url)) {
       delete config.headers.Authorization;
       return config;
