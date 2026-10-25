@@ -105,7 +105,7 @@ module.exports = {
     new CopyPwaFilesPlugin(),
     new webpack.DefinePlugin({
       __DEV__: JSON.stringify(true), // Toujours true en mode développement
-      'process.env.NODE_ENV': JSON.stringify('development'),
+      // process.env.NODE_ENV suit --mode (webpack le définit) : React en version production au build
       'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || 'http://localhost:8000'),
     }),
   ],

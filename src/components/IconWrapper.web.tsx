@@ -50,7 +50,7 @@ const IconWrapper: React.FC<IconWrapperProps> = ({name, size = 24, color = '#000
   }
 
   if (iconSource.type === 'expo') {
-    const {Ionicons} = require('@expo/vector-icons');
+    const Ionicons = require('@expo/vector-icons/Ionicons').default;
     return (
       <View style={[{display: 'inline-flex', alignItems: 'center', justifyContent: 'center'}, style]}>
         <Ionicons name={name as any} size={size} color={color} style={{display: 'block'}} />
