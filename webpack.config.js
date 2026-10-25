@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -15,6 +16,26 @@ process.env.BABEL_ENV = 'web';
 
 // URL du backend : REACT_APP_API_URL (défaut http://localhost:8000)
 const API_BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+// Fichiers PWA copiés tels quels à la racine du build (manifest, service worker, icônes)
+const PWA_FILES = ['manifest.webmanifest', 'sw.js', 'icons/icon-192.png', 'icons/icon-512.png',
+  'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
+class CopyPwaFilesPlugin {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap('CopyPwaFilesPlugin', (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {name: 'CopyPwaFilesPlugin', stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL},
+        () => {
+          for (const file of PWA_FILES) {
+            const src = path.resolve(__dirname, 'web', file);
+            compilation.fileDependencies.add(src);
+            compilation.emitAsset(file, new webpack.sources.RawSource(fs.readFileSync(src)));
+          }
+        },
+      );
+    });
+  }
+}
 
 module.exports = {
   mode: 'development',
@@ -34,12 +55,18 @@ module.exports = {
       '@react-native-firebase/messaging': path.resolve(__dirname, 'src/utils/firebaseMessaging.web.js'),
       '@react-native-google-signin/google-signin': path.resolve(__dirname, 'src/utils/googleSignin.web.js'),
       'react-native-webview': path.resolve(__dirname, 'src/utils/webview.web.js'),
+      '@react-native/assets-registry/registry': path.resolve(__dirname, 'src/utils/assetsRegistry.web.js'),
       'react': path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
   module: {
     rules: [
+      {
+        // Paquets ESM (react-navigation, async-storage) : imports relatifs sans extension
+        test: /\.m?js$/,
+        resolve: {fullySpecified: false},
+      },
       {
         test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules\/(?!(react-native-.*|@react-navigation|@react-native-.*)\/)/,
@@ -75,6 +102,7 @@ module.exports = {
       template: './web/index.html',
       filename: 'index.html',
     }),
+    new CopyPwaFilesPlugin(),
     new webpack.DefinePlugin({
       __DEV__: JSON.stringify(true), // Toujours true en mode développement
       'process.env.NODE_ENV': JSON.stringify('development'),

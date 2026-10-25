@@ -2,7 +2,16 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#054625">
+    <meta name="description" content="Restaurants et épicerie africaine livrés chez vous">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="namke">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>namke</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,6 +32,7 @@
             width: 100%;
             max-width: 480px;
             height: 100vh;
+            height: 100dvh; /* hauteur visible réelle sur mobile (barre d'adresse exclue) */
             display: flex;
             flex-direction: column;
             margin: 0 auto;
@@ -36,11 +46,18 @@
             height: 100%;
             overflow: hidden;
             background: #E9E4C9;
+            overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
         }
         /* Styles pour les icônes @expo/vector-icons sur le web */
         svg {
             display: inline-block;
             vertical-align: middle;
+        }
+        /* Sur téléphone : plein écran, sans cadre */
+        @media (max-width: 480px) {
+            #root { box-shadow: none; }
+            html, body { background: #FCFBF5; }
         }
     </style>
 </head>
@@ -58,6 +75,14 @@
           }
         });
       })();
+    </script>
+    <script>
+      // PWA : le service worker ne tourne qu'en HTTPS (pas sur le serveur de dev)
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
     </script>
 </body>
 </html>
