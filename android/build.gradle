@@ -6,6 +6,8 @@ buildscript {
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.2.0"
+        // < 20 : react-native-push-notification utilise androidx.appcompat au lieu de la Support Library
+        supportLibVersion = "1.7.0"
     }
     repositories {
         google()

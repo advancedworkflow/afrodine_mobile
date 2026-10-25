@@ -8,10 +8,10 @@ index 1b45e20..531f745 100644
  
 -  // Users need to declare this dependency on their own, otherwise all methods are a no-op
 -  compileOnly "com.stripe:stripe-android-issuing-push-provisioning:1.3.0"
-+  // Omis : nécessite le dépôt Maven privé Google Pay Push Provisioning (partenaires agréés
-+  // uniquement), non accessible publiquement. Non utilisé par cette app (pas de fonctionnalité
-+  // Stripe Issuing / ajout de carte au portefeuille). Code appelant protégé par réflexion (no-op).
-+  // compileOnly "com.stripe:stripe-android-issuing-push-provisioning:1.3.0"
++  // Sans dépendances transitives : play-services-tapandpay n'est disponible que sur le dépôt
++  // Maven privé Google Pay (partenaires agréés). compileOnly suffit à compiler ; rien n'est
++  // embarqué, l'ajout de carte au portefeuille (non utilisé par l'app) reste un no-op.
++  compileOnly("com.stripe:stripe-android-issuing-push-provisioning:1.3.0") { transitive = false }
  
    testImplementation "junit:junit:4.13"
    testImplementation "org.mockito:mockito-inline:3.+"
