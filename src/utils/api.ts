@@ -40,10 +40,9 @@ if (__DEV__) {
   console.log('[API] Base URL:', API_BASE_URL, envApiUrl ? '(surchargée par REACT_APP_API_URL)' : '');
 }
 
-// Secret partagé avec le backend (MOBILE_APP_SECRET dans afrodineapi/.env) : Turnstile n'a
-// pas de SDK React Native, donc l'app mobile ne peut pas produire de token anti-bot. Ce header
-// dit au backend de faire confiance à cette requête à la place (voir turnstile_service.py).
-// Embarqué dans le binaire comme n'importe quelle clé cliente mobile — à régénérer pour la prod.
+// Turnstile n'a pas de SDK React Native, donc l'app mobile ne peut pas produire de token
+// anti-bot : la présence de ce header suffit au backend pour ne pas faire la vérification
+// (voir turnstile_service.py). La valeur n'est plus contrôlée.
 const MOBILE_APP_SECRET = 'namke-mobile-3f8a2c9e7b41d6f0a5c8e2b7d4f19a6c';
 
 const api = axios.create({
