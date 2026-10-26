@@ -29,8 +29,12 @@ jobs:
           GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
         run: |
           echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/AfrodineMobile/GoogleService-Info.plist
-          REVERSED_CLIENT_ID=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/AfrodineMobile/GoogleService-Info.plist)
-          /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $REVERSED_CLIENT_ID" ios/AfrodineMobile/Info.plist
+          # REVERSED_CLIENT_ID n'existe que si la connexion Google est activée dans Firebase
+          if REVERSED_CLIENT_ID=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/AfrodineMobile/GoogleService-Info.plist 2>/dev/null); then
+            /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $REVERSED_CLIENT_ID" ios/AfrodineMobile/Info.plist
+          else
+            echo "::warning::REVERSED_CLIENT_ID absent : Google Sign-In inactif sur iOS"
+          fi
 
       - name: Generate app icon
         run: |
