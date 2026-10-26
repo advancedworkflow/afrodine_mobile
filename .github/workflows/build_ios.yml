@@ -1,0 +1,92 @@
+name: Build — iOS IPA (non signée)
+
+# Produit une .ipa non signée, à installer sur iPhone avec xtool
+# (`xtool install afrodine.ipa`), qui la signe avec le compte Apple Developer.
+
+on:
+  push:
+    branches: [ios-build]
+  workflow_dispatch: {}
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/AfrodineMobile/GoogleService-Info.plist
+          REVERSED_CLIENT_ID=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/AfrodineMobile/GoogleService-Info.plist)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $REVERSED_CLIENT_ID" ios/AfrodineMobile/Info.plist
+
+      - name: Generate app icon
+        run: |
+          ICONSET=ios/AfrodineMobile/Images.xcassets/AppIcon.appiconset
+          sips -z 1024 1024 store-assets/play-store-icon-512.png --out $ICONSET/icon-1024.png
+          cat > $ICONSET/Contents.json <<'EOF'
+          {
+            "images" : [
+              { "filename" : "icon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" }
+            ],
+            "info" : { "author" : "xcode", "version" : 1 }
+          }
+          EOF
+
+      - name: Add fonts and GoogleService-Info.plist to Xcode project
+        working-directory: ios
+        run: |
+          ruby <<'EOF'
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('AfrodineMobile.xcodeproj')
+          target = project.targets.find { |t| t.name == 'AfrodineMobile' }
+          group = project.main_group.find_subpath('AfrodineMobile', true)
+          files = Dir['../src/assets/fonts/*.ttf'] + ['AfrodineMobile/GoogleService-Info.plist']
+          files.each do |path|
+            ref = group.new_reference(File.expand_path(path))
+            target.resources_build_phase.add_file_reference(ref)
+          end
+          project.save
+          EOF
+
+      - name: Install pods
+        working-directory: ios
+        run: pod install
+
+      - name: Build app (Release, sans signature)
+        working-directory: ios
+        run: |
+          xcodebuild \
+            -workspace AfrodineMobile.xcworkspace \
+            -scheme AfrodineMobile \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package IPA
+        run: |
+          mkdir -p ipa/Payload
+          cp -R ios/build/Build/Products/Release-iphoneos/AfrodineMobile.app ipa/Payload/
+          cd ipa && zip -qr ../afrodine.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: afrodine-ios-ipa
+          path: afrodine.ipa
+          retention-days: 30
