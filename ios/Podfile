@@ -10,6 +10,8 @@ prepare_react_native_project!
 
 # Firebase (@react-native-firebase) exige des frameworks statiques
 $RNFirebaseAsStaticFramework = true
+# Firebase via CocoaPods et non SPM : SPM + linkage statique donne des symboles en double
+$RNFirebaseDisableSPM = true
 use_frameworks! :linkage => :static
 
 target 'AfrodineMobile' do
