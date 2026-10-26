@@ -71,7 +71,9 @@ jobs:
 
       - name: Build app (Release, sans signature)
         working-directory: ios
+        # Journal complet dans xcodebuild.log, seules les erreurs sont affichées
         run: |
+          set -o pipefail
           xcodebuild \
             -workspace AfrodineMobile.xcworkspace \
             -scheme AfrodineMobile \
@@ -80,7 +82,19 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build > xcodebuild.log 2>&1 || {
+              grep -nE " error: |fatal error|The following build commands failed" -A3 xcodebuild.log | head -150
+              tail -40 xcodebuild.log
+              exit 1
+            }
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: ios/xcodebuild.log
+          retention-days: 7
 
       - name: Package IPA
         run: |
