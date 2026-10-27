@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
 import {
   getRestaurantOrders,
@@ -23,6 +23,25 @@ import {
 } from '../../services/restaurantManagement';
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'preparing', 'ready', 'delivered'];
+
+// Onglets calqués sur le travail en cuisine : chaque statut appartient à un seul onglet
+type TabKey = 'todo' | 'inProgress' | 'ready' | 'done';
+const TABS: {key: TabKey; statuses: string[]}[] = [
+  {key: 'todo', statuses: ['pending']},
+  {key: 'inProgress', statuses: ['confirmed', 'preparing']},
+  {key: 'ready', statuses: ['ready']},
+  {key: 'done', statuses: ['delivered', 'paid', 'cancelled']},
+];
+
+// Étape suivante proposée sur la carte, selon le statut courant
+const NEXT_STEP: Record<string, {status: string; labelKey: string}> = {
+  pending: {status: 'confirmed', labelKey: 'restaurantOrders.actions.accept'},
+  confirmed: {status: 'preparing', labelKey: 'restaurantOrders.actions.startPreparing'},
+  preparing: {status: 'ready', labelKey: 'restaurantOrders.actions.markReady'},
+  ready: {status: 'delivered', labelKey: 'restaurantOrders.actions.markDelivered'},
+};
+
+const ITEMS_PREVIEW = 2;
 
 // Onglet « Commandes » (plats) ou écran « Commandes grocery » (route GroceryOrders, params.grocery)
 const RestaurantOrdersScreen = ({navigation, route}: any) => {
@@ -43,90 +62,132 @@ const RestaurantOrdersScreen = ({navigation, route}: any) => {
   const [orders, setOrders] = useState<RestaurantOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<TabKey>('todo');
   const [selectedOrder, setSelectedOrder] = useState<RestaurantOrder | null>(null);
-  const [updating, setUpdating] = useState(false);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
-  const load = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  // Toutes les commandes sont chargées d'un coup : les onglets filtrent localement et affichent leurs compteurs
+  const load = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      try {
+        setOrders(await fetchOrders());
+      } catch (e) {
+        setOrders([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [fetchOrders],
+  );
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const applyStatus = async (orderId: number, newStatus: string) => {
+    setUpdatingId(orderId);
     try {
-      const data = await fetchOrders(statusFilter || undefined);
-      setOrders(data);
+      await updateOrderStatus(orderId, newStatus);
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? {...o, status: newStatus} : o)));
+      setSelectedOrder(null);
     } catch (e) {
-      setOrders([]);
+      alert(t('restaurantOrders.errorTitle'), t('restaurantOrders.updateStatusError'));
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setUpdatingId(null);
     }
   };
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await fetchOrders(statusFilter || undefined);
-        if (!cancelled) setOrders(data);
-      } catch (e) {
-        if (!cancelled) setOrders([]);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-          setRefreshing(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [statusFilter, fetchOrders]);
-
-  const onRefresh = () => {
-    load(true);
+  // Les étapes intermédiaires se font d'un geste ; la livraison (qui crédite le restaurant) est confirmée
+  const handleNextStep = (order: RestaurantOrder) => {
+    const next = NEXT_STEP[order.status];
+    if (!next) return;
+    if (next.status !== 'delivered') {
+      applyStatus(order.id, next.status);
+      return;
+    }
+    alert(t('restaurantOrders.deliveredConfirmTitle'), t('restaurantOrders.deliveredConfirmMessage'), [
+      {text: t('restaurantOrders.cancel'), style: 'cancel'},
+      {text: 'OK', onPress: () => applyStatus(order.id, next.status)},
+    ]);
   };
 
+  // Correction manuelle depuis le détail (ex. retour en arrière après une erreur)
   const handleUpdateStatus = (orderId: number, newStatus: string) => {
     alert(
       t('restaurantOrders.changeStatusTitle'),
       t('restaurantOrders.changeStatusMessage', {status: statusLabels[newStatus] || newStatus}),
       [
-        { text: t('restaurantOrders.cancel'), style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: async () => {
-            setUpdating(true);
-            try {
-              await updateOrderStatus(orderId, newStatus);
-              setSelectedOrder(null);
-              load(true);
-            } catch (e) {
-              alert(t('restaurantOrders.errorTitle'), t('restaurantOrders.updateStatusError'));
-            } finally {
-              setUpdating(false);
-            }
-          },
-        },
+        {text: t('restaurantOrders.cancel'), style: 'cancel'},
+        {text: 'OK', onPress: () => applyStatus(orderId, newStatus)},
       ],
     );
   };
 
-  const renderOrder = ({ item }: { item: RestaurantOrder }) => (
-    <TouchableOpacity
-      style={styles.orderCard}
-      onPress={() => setSelectedOrder(item)}
-      activeOpacity={0.7}>
-      <View style={styles.orderHeader}>
-        <Text style={styles.orderNumber}>{item.orderNumber}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) }]}>
-          <Text style={styles.statusText}>{statusLabels[item.status] ?? item.status}</Text>
-        </View>
-      </View>
-      <Text style={styles.orderDate}>{item.orderDate ?? item.created_at}</Text>
-      <Text style={styles.orderTotal}>{item.total?.toFixed(2) ?? item.restaurant_total?.toFixed(2)} €</Text>
-      <Text style={styles.orderItems}>{t('restaurantOrders.itemsCount', {count: item.items_count})}</Text>
-    </TouchableOpacity>
+  const countFor = (tab: (typeof TABS)[number]) => orders.filter((o) => tab.statuses.includes(o.status)).length;
+  const visibleOrders = orders.filter((o) =>
+    TABS.find((tab) => tab.key === activeTab)!.statuses.includes(o.status),
   );
+
+  const renderOrder = ({item}: {item: RestaurantOrder}) => {
+    const next = NEXT_STEP[item.status];
+    const items = item.items ?? [];
+    const total = item.total ?? item.restaurant_total;
+    return (
+      <TouchableOpacity style={styles.orderCard} onPress={() => setSelectedOrder(item)} activeOpacity={0.8}>
+        <View style={styles.orderHeader}>
+          <View style={styles.orderHeaderLeft}>
+            <Text style={styles.orderNumber}>{item.orderNumber}</Text>
+            <Text style={styles.orderDate}>{item.orderTime ?? item.orderDate ?? item.created_at}</Text>
+          </View>
+          <View style={[styles.statusBadge, {backgroundColor: statusColor(item.status)}]}>
+            <Text style={styles.statusText}>{statusLabels[item.status] ?? item.status}</Text>
+          </View>
+        </View>
+
+        {item.customer?.name ? (
+          <View style={styles.customerRow}>
+            <IconWrapper name="person-outline" size={14} color={Colors.textLight} />
+            <Text style={styles.customerName} numberOfLines={1}>
+              {item.customer.name}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.itemsBlock}>
+          {items.slice(0, ITEMS_PREVIEW).map((i) => (
+            <Text key={i.id} style={styles.itemLine} numberOfLines={1}>
+              {i.quantity}
+              {i.unit && i.unit !== 'piece' ? ` ${i.unit}` : '×'} {i.name}
+            </Text>
+          ))}
+          {items.length > ITEMS_PREVIEW ? (
+            <Text style={styles.moreItems}>
+              {t('restaurantOrders.moreItems', {count: items.length - ITEMS_PREVIEW})}
+            </Text>
+          ) : null}
+        </View>
+
+        <View style={styles.orderFooter}>
+          <Text style={styles.orderTotal}>{total?.toFixed(2)} €</Text>
+          {next ? (
+            <TouchableOpacity
+              style={[styles.nextButton, updatingId === item.id && styles.nextButtonDisabled]}
+              onPress={() => handleNextStep(item)}
+              disabled={updatingId === item.id}
+              activeOpacity={0.85}>
+              {updatingId === item.id ? (
+                <ActivityIndicator size="small" color={Colors.white} />
+              ) : (
+                <Text style={styles.nextButtonText}>{t(next.labelKey)}</Text>
+              )}
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -142,37 +203,46 @@ const RestaurantOrdersScreen = ({navigation, route}: any) => {
   return (
     <View style={styles.container}>
       <TopBar navigation={navigation} title={title} {...topBarBack} />
-      <View style={styles.filters}>
-        <TouchableOpacity
-          style={[styles.filterChip, !statusFilter && styles.filterChipActive]}
-          onPress={() => setStatusFilter('')}>
-          <Text style={[styles.filterChipText, !statusFilter && styles.filterChipTextActive]}>
-            {t('restaurantOrders.all')}
-          </Text>
-        </TouchableOpacity>
-        {(['pending', 'confirmed', 'preparing', 'ready'] as const).map((s) => (
-          <TouchableOpacity
-            key={s}
-            style={[styles.filterChip, statusFilter === s && styles.filterChipActive]}
-            onPress={() => setStatusFilter(s)}>
-            <Text style={[styles.filterChipText, statusFilter === s && styles.filterChipTextActive]}>
-              {statusLabels[s]}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.tabs}>
+        {TABS.map((tab) => {
+          const active = tab.key === activeTab;
+          const count = countFor(tab);
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tab, active && styles.tabActive]}
+              onPress={() => setActiveTab(tab.key)}
+              activeOpacity={0.8}>
+              <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={1}>
+                {t(`restaurantOrders.tabs.${tab.key}`)}
+              </Text>
+              {count > 0 ? (
+                <View style={[styles.tabCount, active && styles.tabCountActive]}>
+                  <Text style={[styles.tabCountText, active && styles.tabCountTextActive]}>{count}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          );
+        })}
       </View>
       <FlatList
-        data={orders}
+        data={visibleOrders}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderOrder}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[Colors.darkGreen]} />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
             <IconWrapper name="receipt-outline" size={48} color={Colors.textLight} />
-            <Text style={styles.emptyText}>{grocery ? t('restaurantOrders.noGroceryOrders') : t('restaurantOrders.noOrders')}</Text>
+            <Text style={styles.emptyText}>
+              {orders.length === 0
+                ? grocery
+                  ? t('restaurantOrders.noGroceryOrders')
+                  : t('restaurantOrders.noOrders')
+                : t('restaurantOrders.noOrdersInTab')}
+            </Text>
           </View>
         }
       />
@@ -212,7 +282,7 @@ const RestaurantOrdersScreen = ({navigation, route}: any) => {
                       key={s}
                       style={styles.statusBtn}
                       onPress={() => handleUpdateStatus(selectedOrder.id, s)}
-                      disabled={updating}>
+                      disabled={updatingId !== null}>
                       <Text style={styles.statusBtnText}>{statusLabels[s]}</Text>
                     </TouchableOpacity>
                   ))}
@@ -249,31 +319,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  filters: {
+  tabs: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 4,
+    borderRadius: Radius.pill,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    ...Shadows.sm,
   },
-  filterChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.backgroundLight,
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 9,
+    paddingHorizontal: 4,
+    borderRadius: Radius.pill,
   },
-  filterChipActive: {
+  tabActive: {
     backgroundColor: Colors.darkGreen,
   },
-  filterChipText: {
-    fontSize: 13,
+  tabText: {
+    fontSize: 12,
+    fontFamily: secondaryFont,
     color: Colors.text,
+    flexShrink: 1,
   },
-  filterChipTextActive: {
+  tabTextActive: {
     color: Colors.white,
     fontWeight: '600',
+  },
+  tabCount: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.terracotta,
+  },
+  tabCountActive: {
+    backgroundColor: Colors.white,
+  },
+  tabCountText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  tabCountTextActive: {
+    color: Colors.darkGreen,
   },
   listContent: {
     padding: 16,
@@ -281,48 +377,94 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: Radius.md,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    ...Shadows.sm,
   },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  orderHeaderLeft: {
+    flex: 1,
+    marginRight: 8,
   },
   orderNumber: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
+  },
+  orderDate: {
+    fontSize: 12,
+    color: Colors.textLight,
+    marginTop: 2,
   },
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: Radius.pill,
   },
   statusText: {
     fontSize: 12,
     color: Colors.white,
     fontWeight: '600',
   },
-  orderDate: {
-    fontSize: 13,
+  customerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+  },
+  customerName: {
+    fontSize: 14,
+    color: Colors.text,
+    flex: 1,
+  },
+  itemsBlock: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    gap: 2,
+  },
+  itemLine: {
+    fontSize: 14,
+    color: Colors.text,
+  },
+  moreItems: {
+    fontSize: 12,
     color: Colors.textLight,
-    marginTop: 6,
+  },
+  orderFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 14,
   },
   orderTotal: {
     fontSize: 18,
     fontWeight: '700',
     color: Colors.darkGreen,
-    marginTop: 4,
   },
-  orderItems: {
-    fontSize: 12,
-    color: Colors.textLight,
-    marginTop: 2,
+  nextButton: {
+    minWidth: 140,
+    alignItems: 'center',
+    backgroundColor: Colors.terracotta,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: Radius.pill,
+  },
+  nextButtonDisabled: {
+    opacity: 0.6,
+  },
+  nextButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.white,
+    fontFamily: secondaryFont,
   },
   empty: {
     alignItems: 'center',

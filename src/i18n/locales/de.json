@@ -1106,7 +1106,24 @@
       "cancelled": "Storniert"
     },
     "groceryTitle": "Lebensmittel-Bestellungen",
-    "noGroceryOrders": "Noch keine Produktbestellungen."
+    "noGroceryOrders": "Noch keine Produktbestellungen.",
+    "tabs": {
+      "todo": "Zu bearbeiten",
+      "inProgress": "In Arbeit",
+      "ready": "Fertig",
+      "done": "Abgeschlossen"
+    },
+    "actions": {
+      "accept": "Annehmen",
+      "startPreparing": "Zubereitung starten",
+      "markReady": "Als fertig markieren",
+      "markDelivered": "Als geliefert markieren"
+    },
+    "moreItems_one": "+ {{count}} weiterer",
+    "moreItems_other": "+ {{count}} weitere",
+    "deliveredConfirmTitle": "Bestellung geliefert?",
+    "deliveredConfirmMessage": "Die Bestellung wird als geliefert markiert und der Betrag dem Restaurant gutgeschrieben.",
+    "noOrdersInTab": "Hier ist gerade nichts."
   },
   "restaurantProfile": {
     "title": "Restaurantprofil",

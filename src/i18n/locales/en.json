@@ -1106,7 +1106,24 @@
       "cancelled": "Cancelled"
     },
     "groceryTitle": "Grocery orders",
-    "noGroceryOrders": "No product orders yet."
+    "noGroceryOrders": "No product orders yet.",
+    "tabs": {
+      "todo": "To do",
+      "inProgress": "In progress",
+      "ready": "Ready",
+      "done": "Done"
+    },
+    "actions": {
+      "accept": "Accept",
+      "startPreparing": "Start preparing",
+      "markReady": "Mark as ready",
+      "markDelivered": "Mark as delivered"
+    },
+    "moreItems_one": "+ {{count}} more",
+    "moreItems_other": "+ {{count}} more",
+    "deliveredConfirmTitle": "Order delivered?",
+    "deliveredConfirmMessage": "The order will be marked as delivered and the amount credited to the restaurant.",
+    "noOrdersInTab": "Nothing here for now."
   },
   "restaurantProfile": {
     "title": "Restaurant profile",

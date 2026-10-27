@@ -1106,7 +1106,24 @@
       "cancelled": "Annulée"
     },
     "groceryTitle": "Commandes grocery",
-    "noGroceryOrders": "Aucune commande de produits pour le moment."
+    "noGroceryOrders": "Aucune commande de produits pour le moment.",
+    "tabs": {
+      "todo": "À traiter",
+      "inProgress": "En cours",
+      "ready": "Prêtes",
+      "done": "Terminées"
+    },
+    "actions": {
+      "accept": "Accepter",
+      "startPreparing": "Lancer la préparation",
+      "markReady": "Marquer prête",
+      "markDelivered": "Marquer livrée"
+    },
+    "moreItems_one": "+ {{count}} autre",
+    "moreItems_other": "+ {{count}} autres",
+    "deliveredConfirmTitle": "Commande livrée ?",
+    "deliveredConfirmMessage": "La commande sera marquée comme livrée et le montant crédité au restaurant.",
+    "noOrdersInTab": "Rien ici pour le moment."
   },
   "restaurantProfile": {
     "title": "Profil restaurant",
