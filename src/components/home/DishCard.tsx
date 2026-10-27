@@ -110,27 +110,26 @@ const DishCard: React.FC<DishCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
-    padding: 12,
-    marginBottom: 12,
+    marginBottom: 16,
     ...Shadows.sm,
   },
+  // Coins arrondis découpés ici et non sur container : overflow hidden masque l'ombre sur iOS
   contentTouchable: {
     flex: 1,
+    borderRadius: Radius.lg,
+    overflow: 'hidden',
   },
   content: {
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   image: {
-    width: 96,
-    height: 96,
-    borderRadius: Radius.md,
-    marginRight: 12,
+    width: '100%',
+    height: 170,
   },
   details: {
-    flex: 1,
-    minWidth: 0,
+    padding: 14,
   },
   header: {
     flexDirection: 'row',
