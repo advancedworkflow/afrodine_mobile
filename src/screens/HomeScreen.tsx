@@ -19,6 +19,7 @@ import DishCardCompact from '../components/home/DishCardCompact';
 import SectionHeader from '../components/home/SectionHeader';
 import PromoBanner from '../components/home/PromoBanner';
 import GroceryShopProductCard from '../components/home/GroceryShopProductCard';
+import GroceryShopCard from '../components/home/GroceryShopCard';
 import {Colors, Radius, Shadows} from '../utils/colors';
 import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontDisplay, fontDisplayMedium, fontHeading, fontSub, fontUI} from '../utils/fonts';
@@ -59,6 +60,7 @@ const HomeScreen = ({navigation}: any) => {
     [promos],
   );
   const [groceryProducts, setGroceryProducts] = useState<groceryShopApi.GroceryShopProductApi[]>([]);
+  const [groceryShops, setGroceryShops] = useState<groceryShopApi.GroceryShopApi[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [categoryDishes, setCategoryDishes] = useState<dishesApi.DishForList[]>([]);
@@ -103,13 +105,14 @@ const HomeScreen = ({navigation}: any) => {
     else setLoading(true);
     setError(null);
     try {
-      const [dishesRes, categoriesRes, recommendedRes, menusRes, promosRes, groceryProductsRes] = await Promise.all([
+      const [dishesRes, categoriesRes, recommendedRes, menusRes, promosRes, groceryProductsRes, groceryShopsRes] = await Promise.all([
         dishesApi.getDishes({limit: 12}),
         categoriesApi.getCategories(),
         dishesApi.getDishes({limit: 12, skip: 12}).catch(() => []),
         menusApi.getMenus().catch(() => []),
         promotionsApi.getActivePromotions({limit: 6}).catch(() => []),
         groceryShopApi.getGroceryShopProducts({limit: 12}).catch(() => []),
+        groceryShopApi.getGroceryShops().catch(() => []),
       ]);
       if (getIsCancelled?.()) return;
 
@@ -122,6 +125,7 @@ const HomeScreen = ({navigation}: any) => {
       setDailyMenus(menusRes);
       setPromos(promosRes);
       setGroceryProducts(groceryProductsRes);
+      setGroceryShops(groceryShopsRes);
     } catch (e: any) {
       if (getIsCancelled?.()) return;
       setError(formatAxiosError(e, t('home.loadError')));
@@ -132,6 +136,7 @@ const HomeScreen = ({navigation}: any) => {
       setDailyMenus([]);
       setPromos([]);
       setGroceryProducts([]);
+      setGroceryShops([]);
     } finally {
       if (!getIsCancelled?.()) {
         setLoading(false);
@@ -357,6 +362,35 @@ const HomeScreen = ({navigation}: any) => {
                     </View>
                   ))}
                 </ScrollView>
+              )}
+            </View>
+
+            <View style={styles.section}>
+              <SectionHeader
+                title={t('home.groceryShops')}
+                seeAllText={groceryShops.length > 0 ? t('home.seeAll') : undefined}
+                onSeeAllPress={groceryShops.length > 0 ? () => stackNav.navigate('GroceryShops') : undefined}
+              />
+              {groceryShops.length > 0 ? (
+                groceryShops.slice(0, 3).map(shop => (
+                  <GroceryShopCard
+                    key={shop.id}
+                    shop={shop}
+                    onPress={() =>
+                      stackNav.navigate('GroceryShopDetails', {groceryShopId: shop.id, groceryShopName: shop.name})
+                    }
+                  />
+                ))
+              ) : (
+                <View style={styles.groceryEmpty}>
+                  <View style={styles.groceryEmptyIcon}>
+                    <IconWrapper name="basket-outline" size={28} color={Colors.darkGreen} />
+                  </View>
+                  <View style={{flex: 1}}>
+                    <Text style={styles.groceryEmptyTitle}>{t('home.groceryShopsSoonTitle')}</Text>
+                    <Text style={styles.groceryEmptyText}>{t('home.groceryShopsSoonText')}</Text>
+                  </View>
+                </View>
               )}
             </View>
 
@@ -724,6 +758,33 @@ const styles = StyleSheet.create({
   },
   dishCardWrap: {
     marginRight: 14,
+  },
+  groceryEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
+    padding: 16,
+  },
+  groceryEmptyIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  groceryEmptyTitle: {
+    fontSize: 17,
+    fontFamily: fontHeading,
+    color: Colors.text,
+  },
+  groceryEmptyText: {
+    fontSize: 15,
+    fontFamily: fontUI,
+    color: Colors.textLight,
+    marginTop: 2,
   },
   nearbyList: {
     gap: 12,

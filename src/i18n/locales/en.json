@@ -600,7 +600,10 @@
     "promoBadge": "PROMO",
     "add": "Add",
     "trending": "Trending",
-    "recommendedForYou": "Recommended for you"
+    "recommendedForYou": "Recommended for you",
+    "groceryShops": "Grocery shops",
+    "groceryShopsSoonTitle": "Grocery shops coming soon",
+    "groceryShopsSoonText": "African grocery shops from your neighbourhood are coming to Namké soon."
   },
   "dishDetails": {
     "loading": "Loading...",

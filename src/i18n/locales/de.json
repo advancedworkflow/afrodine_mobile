@@ -600,7 +600,10 @@
     "promoBadge": "PROMO",
     "add": "Hinzufügen",
     "trending": "Im Trend",
-    "recommendedForYou": "Für Sie empfohlen"
+    "recommendedForYou": "Für Sie empfohlen",
+    "groceryShops": "Lebensmittelläden",
+    "groceryShopsSoonTitle": "Bald gibt es Lebensmittelläden",
+    "groceryShopsSoonText": "Afrikanische Lebensmittelläden aus deinem Kiez kommen bald zu Namké."
   },
   "dishDetails": {
     "loading": "Wird geladen...",

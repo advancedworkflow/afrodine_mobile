@@ -600,7 +600,10 @@
     "promoBadge": "PROMO",
     "add": "Ajouter",
     "trending": "En vogue",
-    "recommendedForYou": "Recommandé pour vous"
+    "recommendedForYou": "Recommandé pour vous",
+    "groceryShops": "Épiceries",
+    "groceryShopsSoonTitle": "Bientôt des épiceries",
+    "groceryShopsSoonText": "Les épiceries africaines du quartier arrivent bientôt sur Namké."
   },
   "dishDetails": {
     "loading": "Chargement...",

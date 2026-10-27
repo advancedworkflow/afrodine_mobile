@@ -37,7 +37,7 @@ const GroceryShopCard = ({shop, onPress}: Props) => {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     marginBottom: 12,
     overflow: 'hidden',
