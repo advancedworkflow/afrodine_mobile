@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     marginBottom: 16,
-    ...Shadows.sm,
+    ...Shadows.md,
   },
   // Coins arrondis découpés ici et non sur container : overflow hidden masque l'ombre sur iOS
   contentTouchable: {

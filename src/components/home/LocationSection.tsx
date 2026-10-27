@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import IconWrapper from '../IconWrapper';
-import {Colors, Radius} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
 import {fontButton, fontHeading} from '../../utils/fonts';
 
 interface LocationSectionProps {
@@ -31,7 +31,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
         style={styles.notificationButton}
         onPress={onNotificationsPress}
         activeOpacity={0.8}>
-        <IconWrapper name="notifications-outline" size={20} color={Colors.white} />
+        <IconWrapper name="notifications-outline" size={20} color={Colors.darkGreen} />
         {hasUnreadNotifications && <View style={styles.notificationBadge} />}
       </TouchableOpacity>
     </View>
@@ -45,9 +45,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 4,
     paddingBottom: 16,
-    backgroundColor: Colors.darkGreen,
+    backgroundColor: Colors.white,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
+    ...Shadows.sm,
   },
   textContainer: {
     flex: 1,
@@ -57,19 +58,19 @@ const styles = StyleSheet.create({
     fontFamily: fontHeading,
     letterSpacing: 0.6,
     textTransform: 'uppercase',
-    color: 'rgba(251,249,217,0.7)',
+    color: Colors.textLight,
     marginBottom: 2,
   },
   address: {
     fontSize: 16.5,
     fontFamily: fontButton,
-    color: Colors.white,
+    color: Colors.text,
   },
   notificationButton: {
     width: 48,
     height: 48,
     borderRadius: Radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',

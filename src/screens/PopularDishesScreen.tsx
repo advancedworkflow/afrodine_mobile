@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import DishCard from '../components/home/DishCard';
 import SearchBar from '../components/home/SearchBar';
-import {Colors} from '../utils/colors';
+import {Colors, Radius, Shadows} from '../utils/colors';
 import {useSearch} from '../contexts/SearchContext';
 import * as dishesApi from '../services/dishes';
 import * as restaurantsApi from '../services/restaurants';
@@ -57,6 +57,7 @@ const PopularDishesScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.searchHeader}>
       <SearchBar
         placeholder={t('popularDishes.searchPlaceholder')}
         onSearch={async query => {
@@ -78,6 +79,7 @@ const PopularDishesScreen = ({navigation}: any) => {
         }}
         onPress={() => navigation.navigate('SearchResults')}
       />
+      </View>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -121,6 +123,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,
+  },
+  searchHeader: {
+    backgroundColor: Colors.white,
+    paddingTop: 12,
+    paddingBottom: 4,
+    borderBottomLeftRadius: Radius.lg,
+    borderBottomRightRadius: Radius.lg,
+    ...Shadows.sm,
   },
   scrollView: {
     flex: 1,

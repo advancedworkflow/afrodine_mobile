@@ -41,9 +41,10 @@ const App = () => {
     <SafeAreaProvider>
       {/* Edge-to-edge (Android 15+) : réserve la barre de navigation système en bas ; le
           provider imbriqué repart de ce cadre, pour que les navigateurs ne la comptent pas deux fois.
-          iOS : réserve aussi le haut (encoche / Dynamic Island), que les écrans ne gèrent pas. */}
+          iOS : réserve le haut (encoche / Dynamic Island), que les écrans ne gèrent pas, mais pas
+          le bas : les barres d'onglets descendent jusqu'au bord et absorbent l'indicateur d'accueil. */}
       <SafeAreaView
-        edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
+        edges={Platform.OS === 'ios' ? ['top'] : ['bottom']}
         style={{flex: 1, backgroundColor: Colors.background}}>
         <SafeAreaProvider>
           <StripeAppRoot>

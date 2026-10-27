@@ -44,7 +44,9 @@ jobs:
           project = Xcodeproj::Project.open('AfrodineMobile.xcodeproj')
           target = project.targets.find { |t| t.name == 'AfrodineMobile' }
           group = project.main_group.find_subpath('AfrodineMobile', true)
-          files = Dir['../src/assets/fonts/*.ttf'] + ['AfrodineMobile/GoogleService-Info.plist']
+          # Ionicons : police des icônes de l'app (IconWrapper), déclarée dans UIAppFonts
+          files = Dir['../src/assets/fonts/*.ttf'] +
+                  ['../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf', 'AfrodineMobile/GoogleService-Info.plist']
           files.each do |path|
             ref = group.new_reference(File.expand_path(path))
             target.resources_build_phase.add_file_reference(ref)

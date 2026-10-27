@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import IconWrapper from '../IconWrapper';
-import {Colors, Radius} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
 import {fontButton, fontDisplayMedium, fontSub} from '../../utils/fonts';
 import {getAbsoluteImageUrl, getJpegFallbackUrl} from '../../utils/api';
 
@@ -10,6 +10,7 @@ const namkeFallback = require('../../assets/namke-fallback.png');
 
 interface DishCardCompactProps {
   name: string;
+  description?: string;
   price: number;
   rating?: number;
   restaurantName?: string;
@@ -21,6 +22,7 @@ interface DishCardCompactProps {
 
 const DishCardCompact: React.FC<DishCardCompactProps> = ({
   name,
+  description,
   price,
   rating,
   restaurantName,
@@ -41,6 +43,7 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+      <View style={styles.cardInner}>
       <View>
         {uri ? (
           <Image
@@ -75,6 +78,11 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
             {rating != null ? `★ ${rating}` : ''}
           </Text>
         )}
+        {description ? (
+          <Text style={styles.description} numberOfLines={2}>
+            {description}
+          </Text>
+        ) : null}
         <View style={styles.footer}>
           <Text style={styles.price}>{price.toFixed(2)} €</Text>
           <TouchableOpacity
@@ -88,6 +96,7 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
           </TouchableOpacity>
         </View>
       </View>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -95,15 +104,18 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
 const styles = StyleSheet.create({
   card: {
     width: 218,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
+    ...Shadows.md,
+  },
+  // Coins découpés ici et non sur card : overflow hidden masque l'ombre sur iOS
+  cardInner: {
     borderRadius: Radius.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
   image: {
     width: '100%',
-    aspectRatio: 4 / 3,
+    aspectRatio: 1,
     backgroundColor: Colors.gray[100],
   },
   promoBadge: {
@@ -136,6 +148,12 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontFamily: fontSub,
     color: Colors.textLight,
+  },
+  description: {
+    fontSize: 12.5,
+    fontFamily: fontSub,
+    color: Colors.textLight,
+    lineHeight: 17,
   },
   footer: {
     flexDirection: 'row',

@@ -345,6 +345,7 @@ const HomeScreen = ({navigation}: any) => {
                         price={dish.price}
                         rating={dish.rating}
                         restaurantName={dish.restaurantName}
+                        description={dish.description}
                         imageUrl={dish.imageUrl}
                         isPromo={promoDishIds.has(dish.id)}
                         onPress={() => navigation.navigate('DishDetails', {dishId: dish.id, restaurantId: dish.restaurantId})}
@@ -503,6 +504,7 @@ const HomeScreen = ({navigation}: any) => {
                         price={dish.price}
                         rating={dish.rating}
                         restaurantName={dish.restaurantName}
+                        description={dish.description}
                         imageUrl={dish.imageUrl}
                         isPromo={promoDishIds.has(dish.id)}
                         onPress={() => navigation.navigate('DishDetails', {dishId: dish.id, restaurantId: dish.restaurantId})}
@@ -540,6 +542,7 @@ const HomeScreen = ({navigation}: any) => {
                         price={dish.price}
                         rating={dish.rating}
                         restaurantName={dish.restaurantName}
+                        description={dish.description}
                         imageUrl={dish.imageUrl}
                         isPromo={promoDishIds.has(dish.id)}
                         onPress={() => navigation.navigate('DishDetails', {dishId: dish.id, restaurantId: dish.restaurantId})}
@@ -569,7 +572,7 @@ const styles = StyleSheet.create({
     paddingBottom: GLOBAL_TAB_BAR_HEIGHT + 16,
   },
   headerCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     paddingBottom: 4,
   },
   categoryRow: {

@@ -109,6 +109,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
   }, [candidateUrls]);
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+      <View style={styles.inner}>
       {uri ? (
         Platform.OS === 'web' ? (
           <View style={styles.image}>
@@ -160,6 +161,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
           </Text>
         ) : null}
       </View>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -167,10 +169,14 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.white,
-    borderRadius: Radius.lg,
-    overflow: 'hidden',
+    borderRadius: Radius.md,
     marginBottom: 14,
-    ...Shadows.sm,
+    ...Shadows.md,
+  },
+  // Coins découpés ici et non sur container : overflow hidden masque l'ombre sur iOS
+  inner: {
+    borderRadius: Radius.md,
+    overflow: 'hidden',
   },
   image: {
     width: '100%',

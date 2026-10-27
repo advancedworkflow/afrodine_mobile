@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native';
-import {initialWindowMetrics} from 'react-native-safe-area-context';
+import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import {StackActions} from '@react-navigation/native';
 import CustomIcon, {type CustomIconName} from './CustomIcon';
@@ -13,10 +13,6 @@ import {getActiveClientTab, navigationRef, GLOBAL_TAB_BAR_HEIGHT, type ClientTab
 interface GlobalTabBarProps {
   currentRoute?: string;
 }
-
-// iOS : App.tsx réserve la zone de l'indicateur d'accueil sous l'app ; la barre déborde
-// dedans pour toucher le bas de l'écran au lieu de flotter au-dessus d'une bande vide.
-const IOS_BOTTOM_INSET = Platform.OS === 'ios' ? initialWindowMetrics?.insets.bottom ?? 0 : 0;
 
 const TABS: {key: ClientTabName; icon: CustomIconName; labelKey: string}[] = [
   {key: 'Home', icon: 'home', labelKey: 'nav.home'},
@@ -36,6 +32,10 @@ const GlobalTabBar: React.FC<GlobalTabBarProps> = ({currentRoute}) => {
   const {isAuthenticated, isRestaurant} = useAuth();
   const {unreadCount} = useNotificationBadges();
   const activeTab = getActiveClientTab(currentRoute);
+  // iOS : App.tsx ne réserve pas le bas de l'écran ; la barre descend jusqu'au bord et garde
+  // l'indicateur d'accueil dans son propre fond. Contexte (et non le hook) : pas de provider sur le web.
+  const insets = useContext(SafeAreaInsetsContext);
+  const bottomInset = Platform.OS === 'ios' ? insets?.bottom ?? 0 : 0;
 
   if (isRestaurant || !activeTab) {
     return null;
@@ -48,7 +48,11 @@ const GlobalTabBar: React.FC<GlobalTabBarProps> = ({currentRoute}) => {
 
   return (
     <View style={styles.container} pointerEvents="box-none">
-      <View style={styles.bar}>
+      <View
+        style={[
+          styles.bar,
+          {height: GLOBAL_TAB_BAR_HEIGHT + bottomInset, paddingBottom: 8 + bottomInset},
+        ]}>
         {TABS.map(tab => {
           const focused = tab.key === activeTab;
           const color = focused ? Colors.terracotta : Colors.textLight;
@@ -85,15 +89,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: -IOS_BOTTOM_INSET,
+    bottom: 0,
   },
   bar: {
     flexDirection: 'row',
     backgroundColor: Colors.background,
     borderTopColor: Colors.border,
     borderTopWidth: 1,
-    height: GLOBAL_TAB_BAR_HEIGHT + IOS_BOTTOM_INSET,
-    paddingBottom: 8 + IOS_BOTTOM_INSET,
     paddingTop: 8,
     ...Shadows.md,
   },

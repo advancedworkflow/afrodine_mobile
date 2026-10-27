@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {View, Text, StyleSheet, Animated, TouchableOpacity, Platform} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IconWrapper from '../components/IconWrapper';
@@ -220,6 +221,9 @@ const RestaurantTabs = () => {
   const ordersBadgeCount = byCategory.order ?? 0;
   const dashboardBadge = dashboardBadgeCount > 0 ? (dashboardBadgeCount > 99 ? '99+' : dashboardBadgeCount) : undefined;
   const ordersBadge = ordersBadgeCount > 0 ? (ordersBadgeCount > 99 ? '99+' : ordersBadgeCount) : undefined;
+  // iOS : le bas de l'écran n'est pas réservé (App.tsx), la barre absorbe l'indicateur d'accueil
+  const insets = useContext(SafeAreaInsetsContext);
+  const bottomInset = Platform.OS === 'ios' ? insets?.bottom ?? 0 : 0;
   return (
     <Tab.Navigator
       screenOptions={{
@@ -229,8 +233,8 @@ const RestaurantTabs = () => {
           backgroundColor: Colors.background,
           borderTopColor: Colors.border,
           borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
+          height: 64 + bottomInset,
+          paddingBottom: 8 + bottomInset,
           paddingTop: 8,
         },
         tabBarShowLabel: false,
