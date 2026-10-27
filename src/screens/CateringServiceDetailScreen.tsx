@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
@@ -327,17 +327,17 @@ const styles = StyleSheet.create({
     fontFamily: fontDisplay,
   },
   heroSubtitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 4,
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.text,
     marginTop: 8,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   heroImage: {
     width: '100%',
@@ -385,22 +385,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardName: {
-    fontSize: 17,
+    fontSize: 18,
     color: Colors.text,
     fontFamily: fontDisplayMedium,
   },
   cardType: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.primary,
     marginTop: 2,
     fontFamily: fontHeading,
   },
   cardDesc: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 6,
-    lineHeight: 18,
+    lineHeight: 19,
   },
   cardMeta: {
     flexDirection: 'row',
@@ -409,12 +409,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardPrice: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.primary,
     fontFamily: fontHeading,
   },
   cardGuests: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.border,
   },
   commoditesTitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginBottom: 6,
     fontFamily: fontHeading,
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   commoditeText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.text,
     fontFamily: fontUI,
   },
@@ -454,13 +454,13 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 19,
     color: Colors.text,
     marginTop: 16,
     fontFamily: fontDisplayMedium,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 8,
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     color: Colors.cream,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
   dishRow: {
@@ -505,12 +505,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dishRowName: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.text,
     fontFamily: fontDisplayMedium,
   },
   dishRowPrice: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.primary,
     marginTop: 4,
     fontFamily: fontHeading,

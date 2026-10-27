@@ -200,7 +200,18 @@
     "title": "Eat like home cooking",
     "subtitle": "African dishes simmered in the morning by neighbours in Neukölln, Kreuzberg and Wedding.",
     "start": "Get started",
-    "alreadyHaveAccount": "I already have an account"
+    "alreadyHaveAccount": "I already have an account",
+    "next": "Next",
+    "slide2Title": "Your neighbourhood kitchens",
+    "slide2Subtitle": "Browse restaurants near you, their dishes of the day, reviews and opening hours.",
+    "slide3Title": "Order in a few taps",
+    "slide3Subtitle": "Pay online, follow your order to your door, and book a caterer for your events."
+  },
+  "detailOptions": {
+    "share": "Share",
+    "report": "Report",
+    "viewRestaurant": "View restaurant",
+    "reportDish": "Report this dish"
   },
   "terms": {
     "title": "Terms of service",

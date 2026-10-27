@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   rating: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
@@ -222,20 +222,20 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   cuisineTagText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.terracotta,
   },
   meta: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontSub,
     color: Colors.textLight,
   },
   description: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontSub,
     color: Colors.textLight,
-    lineHeight: 18,
+    lineHeight: 19,
   },
 });
 

@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -264,14 +264,14 @@ const styles = StyleSheet.create({
     paddingVertical: 64,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 19,
     color: Colors.text,
     marginTop: 16,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginTop: 8,
     fontFamily: secondaryFont,

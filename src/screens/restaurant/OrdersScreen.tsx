@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   tabText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: secondaryFont,
     color: Colors.text,
     flexShrink: 1,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   tabCountText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     color: Colors.white,
   },
@@ -392,13 +392,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   orderNumber: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   orderDate: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 2,
   },
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.white,
     fontWeight: '600',
   },
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   customerName: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     flex: 1,
   },
@@ -431,11 +431,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   itemLine: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
   },
   moreItems: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
   },
   orderFooter: {
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   orderTotal: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.darkGreen,
   },
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   nextButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: Colors.white,
     fontFamily: secondaryFont,
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     marginTop: 12,
   },
@@ -500,19 +500,19 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   modalLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.textLight,
     marginTop: 12,
     marginBottom: 4,
   },
   modalText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     marginBottom: 2,
   },
   modalTotal: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.darkGreen,
     marginTop: 12,
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   statusBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.white,
     fontWeight: '600',
   },

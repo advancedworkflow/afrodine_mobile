@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
 import LocationSection from '../components/home/LocationSection';
@@ -195,6 +196,7 @@ const HomeScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerCard}>
+        {Platform.OS === 'ios' && <View style={styles.statusBarExtension} />}
         <LocationSection
           address={deliveryAddress}
           onPress={() => {
@@ -576,6 +578,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingBottom: 4,
   },
+  // iOS : prolonge le fond blanc sous l'heure / la Dynamic Island (zone réservée par App.tsx)
+  statusBarExtension: {
+    position: 'absolute',
+    top: -120,
+    left: 0,
+    right: 0,
+    height: 120,
+    backgroundColor: Colors.white,
+  },
   categoryRow: {
     paddingVertical: 16,
   },
@@ -609,7 +620,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   menuOfDayBadgeText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.white,
   },
@@ -627,15 +638,15 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   menuOfDayName: {
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   menuOfDayDescription: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontSub,
     color: Colors.textLight,
-    lineHeight: 19,
+    lineHeight: 20,
   },
   menuOfDayFooter: {
     flexDirection: 'row',
@@ -644,7 +655,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   menuOfDayPrice: {
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: fontHeading,
     color: Colors.primary,
   },
@@ -655,7 +666,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   menuOfDayAddBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.white,
   },
@@ -665,7 +676,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
   },
   errorSection: {
@@ -673,7 +684,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.error,
     textAlign: 'center',
   },
@@ -686,11 +697,11 @@ const styles = StyleSheet.create({
   },
   retryText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
     fontStyle: 'italic',
@@ -737,7 +748,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   nearbyName: {
-    fontSize: 16.5,
+    fontSize: 17.5,
     fontFamily: fontDisplay,
     color: Colors.text,
     alignSelf: 'flex-start',
@@ -747,18 +758,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   nearbyMeta: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
   nearbyDescription: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     color: Colors.textLight,
-    lineHeight: 16,
+    lineHeight: 17,
   },
   nearbyPrice: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontDisplay,
     color: Colors.text,
   },

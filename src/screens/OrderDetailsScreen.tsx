@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
@@ -200,7 +199,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   errorText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     textAlign: 'center',
     marginTop: 8,
@@ -227,7 +226,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
@@ -249,12 +248,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
   date: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginBottom: 20,
     fontFamily: secondaryFont,
@@ -266,23 +265,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.gray[100],
-    ...(Platform.OS !== 'web' && {
-      shadowColor: Colors.black,
-      shadowOffset: {width: 0, height: 1},
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 2,
-    }),
   },
   blockTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.text,
     marginBottom: 8,
     fontFamily: secondaryFont,
   },
   blockText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -303,13 +295,13 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.gray[100],
   },
   itemName: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     flex: 1,
     fontFamily: secondaryFont,
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.primary,
     fontFamily: secondaryFont,
@@ -325,7 +317,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   totalLabel: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -344,7 +336,7 @@ const styles = StyleSheet.create({
   },
   detailButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },

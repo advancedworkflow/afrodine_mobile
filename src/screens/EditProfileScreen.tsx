@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   avatarHint: {
     marginTop: 8,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: Colors.primary,
     fontFamily: secondaryFont,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   fieldLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginBottom: 6,
     fontFamily: secondaryFont,
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: secondaryFont,
     backgroundColor: Colors.white,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   saveButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.white,
     fontFamily: secondaryFont,

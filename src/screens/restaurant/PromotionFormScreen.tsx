@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     marginTop: 20,
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 8,
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   imagePickerText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginTop: 8,
     fontFamily: secondaryFont,
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   imagePickerBadgeText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,
@@ -803,7 +803,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   optionBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -832,13 +832,13 @@ const styles = StyleSheet.create({
   },
   checkLabel: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     marginLeft: 8,
     fontFamily: secondaryFont,
   },
   checkPrice: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.olive + '30',
   },
   formatBtnText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGreen,
   },
   formatPrice: {
-    fontSize: 10,
+    fontSize: 11,
     color: Colors.textLight,
     marginTop: 4,
     fontFamily: secondaryFont,
@@ -892,7 +892,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   durationBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   hint: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
     marginBottom: 8,
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   estimatorTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 4,
@@ -935,7 +935,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   estimatorDetail: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 4,
     fontFamily: secondaryFont,
@@ -952,7 +952,7 @@ const styles = StyleSheet.create({
   },
   submitBtnText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },

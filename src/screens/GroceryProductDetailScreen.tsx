@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: fontUI,
   },
@@ -216,15 +216,15 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   metaLine: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
   description: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 21,
+    lineHeight: 22,
   },
   infoBox: {
     backgroundColor: Colors.surface,
@@ -237,12 +237,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   infoLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
   infoValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontButton,
     color: Colors.text,
   },
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   quantity: {
     minWidth: 26,
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontHeading,
     color: Colors.text,
   },
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addToCartText: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
     color: Colors.namkeWhite,
   },

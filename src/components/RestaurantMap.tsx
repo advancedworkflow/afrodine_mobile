@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   mapFallbackText: {
     marginTop: 8,
     color: Colors.textLight,
-    fontSize: 14,
+    fontSize: 15,
   },
   directionsButton: {
     flexDirection: 'row',

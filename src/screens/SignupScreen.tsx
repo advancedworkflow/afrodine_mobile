@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.olive,
   },
   progressLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   eyebrow: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -489,10 +489,10 @@ const styles = StyleSheet.create({
     lineHeight: 34,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 21,
+    lineHeight: 22,
     marginBottom: 8,
   },
   roleCards: {
@@ -530,10 +530,10 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   roleHint: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 18,
+    lineHeight: 19,
   },
   roleMark: {
     width: 22,
@@ -561,16 +561,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoBadgeText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontButton,
     color: Colors.namkeBlack,
   },
   infoText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 18,
+    lineHeight: 19,
   },
   form: {
     marginTop: 6,
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fieldLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     letterSpacing: 0.6,
     textTransform: 'uppercase',
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.text,
     padding: 0,
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pwToggleText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   strengthLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginLeft: 6,
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     minHeight: 54,
   },
   countryCodeText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: Colors.text,
   },
@@ -695,10 +695,10 @@ const styles = StyleSheet.create({
   },
   termsText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 18,
+    lineHeight: 19,
   },
   primaryButton: {
     backgroundColor: Colors.terracotta,
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: Colors.white,
-    fontSize: 16.5,
+    fontSize: 17.5,
     fontFamily: fontButton,
   },
   footer: {
@@ -724,13 +724,13 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: Colors.textLight,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
   },
   footerLink: {
     color: Colors.terracotta,
     fontFamily: fontHeading,
-    fontSize: 15,
+    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
@@ -761,17 +761,17 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   countryRowName: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.text,
   },
   countryRowDial: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
   modalTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: fontDisplay,
     color: Colors.text,
     textAlign: 'center',
@@ -782,7 +782,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   modalCancelText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
   },

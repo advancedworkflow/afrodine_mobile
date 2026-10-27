@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontFamily: fontUI,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
   },
   chipTextActive: {
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   },
   estimateNote: {
     fontFamily: fontUI,
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 8,
   },
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: fontUI,
   },
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   typeBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontFamily: fontHeading,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -543,21 +543,21 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   metaLine: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
   description: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 21,
+    lineHeight: 22,
   },
   block: {
     gap: 9,
   },
   blockLabel: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   includeText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.text,
     flex: 1,
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   menuCount: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -595,12 +595,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   includedDishName: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   includedDishTag: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -625,12 +625,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   dishRowName: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   dishRowDescription: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -668,12 +668,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   cookName: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   cookMeta: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   guestsValue: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
@@ -731,7 +731,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   fieldInput: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.text,
     padding: 0,
@@ -751,12 +751,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   estimateLabel: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
   estimateValue: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   estimateTotalLabel: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   submitButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
     color: Colors.namkeWhite,
   },

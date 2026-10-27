@@ -130,20 +130,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notificationTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 4,
     fontFamily: secondaryFont,
   },
   notificationMessage: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginBottom: 4,
     fontFamily: secondaryFont,
   },
   notificationDate: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     paddingVertical: 64,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     marginTop: 16,
     fontFamily: secondaryFont,

@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -324,12 +324,12 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   settingLabel: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.text,
   },
   settingValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 2,
@@ -340,10 +340,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   inlineFormLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 18,
+    lineHeight: 19,
   },
   inlineInput: {
     borderWidth: 1,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inlineCancelText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   inlineConfirmText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontHeading,
     color: Colors.white,
   },
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: Colors.error,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
 });

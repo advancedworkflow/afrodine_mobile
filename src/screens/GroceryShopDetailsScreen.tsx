@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
@@ -421,19 +421,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[400],
   },
   statusBadgeText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: fontHeading,
     letterSpacing: 0.4,
     textTransform: 'uppercase',
     color: Colors.namkeBlack,
   },
   subLine: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
   deliveryLine: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.darkGreen,
   },
   categoryLabel: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -513,12 +513,12 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   productName: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   productMeta: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -528,12 +528,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   productPrice: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: Colors.text,
   },
   stockBadge: {
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontFamily: fontUI,
     color: Colors.textLight,
     backgroundColor: Colors.surface,
@@ -562,17 +562,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   reviewRating: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
   reviewComment: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.text,
   },
   reviewDate: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -587,10 +587,10 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   emptyState: {
     alignItems: 'center',
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
@@ -621,12 +621,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cartButtonText: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontHeading,
     color: Colors.cream,
   },
   cartButtonTotal: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.mustard,
   },

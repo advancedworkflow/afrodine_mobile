@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   slideHint: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     textAlign: 'center',
     marginBottom: 4,
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.gray[100],
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   resetText: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.error,
     fontWeight: '600',
   },
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.textLight,
     marginBottom: 8,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   optionChipText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   applyButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
     color: Colors.white,
     fontFamily: secondaryFont,

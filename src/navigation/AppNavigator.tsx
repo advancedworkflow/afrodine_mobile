@@ -10,6 +10,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {useNotificationBadges} from '../hooks/useNotificationBadges';
 import {Colors} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
+import {getActiveClientTab, useGlobalTabBarHeight} from './navigationRef';
 import {useTranslation} from 'react-i18next';
 
 const modalScreenOptions = (
@@ -85,6 +86,16 @@ import EmployeesManagementScreen from '../screens/restaurant/EmployeesManagement
 import EmployeeFormScreen from '../screens/restaurant/EmployeeFormScreen';
 
 const Stack = createNativeStackNavigator();
+
+// Ces écrans gèrent déjà la barre d'onglets globale (padding ou barre d'action au-dessus)
+const SCREENS_HANDLING_TAB_BAR = new Set([
+  'MainTabs',
+  'DishDetails',
+  'RestaurantDetails',
+  'GroceryProductDetail',
+  'CateringFormulaDetail',
+  'Catering',
+]);
 const Tab = createBottomTabNavigator();
 const SHOULD_USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
@@ -341,6 +352,7 @@ const AppNavigator = () => {
 
   const authReady = !isLoading || hasTimedOut;
   const showSplash = !splashMinReached || !authReady || hasSeenOnboarding === null;
+  const globalTabBarHeight = useGlobalTabBarHeight();
   const authNavigatorKey = !isAuthenticated
     ? 'guest'
     : isRestaurant
@@ -351,11 +363,21 @@ const AppNavigator = () => {
     return <SplashScreen />;
   }
 
+  // Écrans client sous la barre d'onglets globale qui ne réservent pas eux-mêmes sa hauteur
+  const padForGlobalTabBar = (routeName: string) =>
+    !isRestaurant && getActiveClientTab(routeName) != null && !SCREENS_HANDLING_TAB_BAR.has(routeName)
+      ? {paddingBottom: globalTabBarHeight}
+      : undefined;
+
   return (
     <Stack.Navigator
       key={authNavigatorKey}
       // iOS affiche par défaut le nom de l'écran précédent (ex. "MainTabs") à côté du chevron
-      screenOptions={{headerShown: false, headerBackButtonDisplayMode: 'minimal'}}
+      screenOptions={({route}) => ({
+        headerShown: false,
+        headerBackButtonDisplayMode: 'minimal',
+        contentStyle: padForGlobalTabBar(route.name),
+      })}
       initialRouteName={
         !isAuthenticated
           ? hasSeenOnboarding
@@ -751,7 +773,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   restaurantTabBadgeText: {
-    fontSize: 9,
+    fontSize: 10,
     color: Colors.white,
     fontFamily: secondaryFont,
   },
@@ -764,13 +786,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tabTitleActive: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: secondaryFont,
     fontWeight: '600',
     maxWidth: 72,
   },
   tabTitleInactive: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: secondaryFont,
     color: Colors.textLight,
     maxWidth: 64,

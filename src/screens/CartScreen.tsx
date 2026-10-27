@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 16,
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   },
   browseButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
   itemsContainer: {
@@ -637,18 +637,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   restaurantAvatarText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.namkeBlack,
   },
   restaurantName: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   restaurantCity: {
     marginLeft: 'auto',
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontSub,
     color: Colors.textLight,
   },
@@ -676,17 +676,17 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   itemName: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.text,
     fontFamily: fontButton,
   },
   itemPrice: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontButton,
     color: Colors.text,
   },
   itemExtras: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontSub,
     color: Colors.textLight,
   },
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   removeLinkText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.terracotta,
   },
@@ -717,7 +717,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addMoreText: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontHeading,
     color: Colors.terracotta,
   },
@@ -745,17 +745,17 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   infoTitle: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontButton,
     color: Colors.text,
   },
   infoSubtitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontSub,
     color: Colors.textLight,
   },
   infoAction: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.terracotta,
   },
@@ -771,12 +771,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   summaryLabel: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontSub,
     color: Colors.textLight,
   },
   summaryValue: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontSub,
     color: Colors.text,
   },
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   bottomBarTotalLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   },
   checkoutButtonText: {
     color: CTA_BUTTON_TEXT,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
   checkoutIcon: {
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 48 : 24,
   },
   checkoutModalSectionTitle: {
-    fontSize: 18,
+    fontSize: 19,
     color: Colors.text,
     marginBottom: 12,
     fontFamily: fontDisplay,
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     marginBottom: 12,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -906,12 +906,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   checkoutStripeText: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.primary,
     fontFamily: fontHeading,
   },
   checkoutStripeHint: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.border,
   },
   checkoutSummaryLabel: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
       : {}),
   },
   checkoutModalConfirmText: {
-    fontSize: 16,
+    fontSize: 17,
     color: CTA_BUTTON_TEXT,
     marginRight: 8,
     fontFamily: fontButton,

@@ -215,14 +215,14 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   errorTitle: {
     marginTop: 12,
     marginBottom: 6,
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   errorText: {
     textAlign: 'center',
     color: Colors.textLight,
-    fontSize: 14,
+    fontSize: 15,
     marginBottom: 16,
     fontFamily: secondaryFont,
   },
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
     color: Colors.primary,
     marginBottom: 10,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   metricLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginBottom: 6,
     fontFamily: secondaryFont,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 12,
     color: Colors.text,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     fontFamily: secondaryFont,
   },
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: Colors.textLight,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: secondaryFont,
   },
   statusRow: {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     color: Colors.text,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: secondaryFont,
   },
   statusValue: {
@@ -335,13 +335,13 @@ const styles = StyleSheet.create({
   historyRestaurant: {
     flex: 1,
     color: Colors.text,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
   historyAmount: {
     color: Colors.primary,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     fontFamily: secondaryFont,
   },
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   },
   historyMeta: {
     color: Colors.textLight,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: secondaryFont,
   },
 });

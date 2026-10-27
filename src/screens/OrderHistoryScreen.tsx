@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Platform,
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -208,16 +207,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.gray[100],
-    ...(Platform.OS !== 'web' && {
-      shadowColor: Colors.black,
-      shadowOffset: {width: 0, height: 1},
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 2,
-    }),
-    ...(Platform.OS === 'web' && {
-      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-    }),
   },
   orderHeader: {
     flexDirection: 'row',
@@ -226,7 +215,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   restaurantName: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: 'bold',
     color: Colors.text,
     flex: 1,
@@ -238,7 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
@@ -249,12 +238,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   orderDate: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   orderItems: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -267,12 +256,12 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.gray[100],
   },
   totalLabel: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   totalValue: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
     color: Colors.primary,
     fontFamily: secondaryFont,
@@ -292,11 +281,11 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     textAlign: 'center',
     marginBottom: 24,
-    lineHeight: 24,
+    lineHeight: 25,
     fontFamily: secondaryFont,
   },
   browseButton: {
@@ -307,7 +296,7 @@ const styles = StyleSheet.create({
   },
   browseButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
     fontFamily: secondaryFont,
   },
@@ -321,7 +310,7 @@ const styles = StyleSheet.create({
   },
   detailButtonText: {
     color: Colors.primary,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },

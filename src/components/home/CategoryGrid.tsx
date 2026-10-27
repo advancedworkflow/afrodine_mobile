@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   categoryName: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',

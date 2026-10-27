@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.textLight,
     marginTop: 4,
   },
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
@@ -251,14 +251,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: Colors.text,
     marginTop: 12,
     fontFamily: secondaryFont,
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     textAlign: 'center',
     marginTop: 6,
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   cardMeta: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   roleBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   statusBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: Colors.textDark,
     fontFamily: secondaryFont,

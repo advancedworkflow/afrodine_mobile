@@ -878,7 +878,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: secondaryFont,
     color: Colors.text,
   },
@@ -919,13 +919,13 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   menuCardTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   metaText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 2,
   },
@@ -939,12 +939,12 @@ const styles = StyleSheet.create({
   },
   menuDishName: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     marginRight: 12,
   },
   menuDishPrice: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
   },
@@ -983,12 +983,12 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.darkGreen,
     paddingVertical: 4,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 8,
@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundLight,
   },
   dishPickName: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.darkGreen,
     flex: 1,
   },
@@ -1039,12 +1039,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalBtnCancelText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
   },
   modalBtnConfirmText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.white,
   },
@@ -1068,18 +1068,18 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   dishName: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   dishDesc: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginTop: 4,
   },
   dishPrice: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     marginTop: 6,
@@ -1089,7 +1089,7 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginTop: 8,
     textAlign: 'center',
@@ -1164,7 +1164,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     marginBottom: 12,
   },
@@ -1187,13 +1187,13 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   toggleLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   toggleSub: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 2,
     fontFamily: secondaryFont,
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitBtnText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.white,
   },
@@ -1217,7 +1217,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   imageUploadLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 8,
@@ -1241,7 +1241,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   changeImageBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.white,
   },
@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.darkGreen,
   },
   uploadImageBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.white,
   },
@@ -1272,7 +1272,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   supplementChip: {
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.textLight,
     backgroundColor: Colors.border,
     paddingHorizontal: 6,
@@ -1280,7 +1280,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   modalSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginBottom: 12,
   },
@@ -1294,7 +1294,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   menuPickName: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -1304,12 +1304,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelBtnText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   mutedText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     paddingVertical: 12,
     textAlign: 'center',

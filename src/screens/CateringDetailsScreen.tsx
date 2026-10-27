@@ -89,11 +89,11 @@ const styles = StyleSheet.create({
     fontFamily: fontDisplay,
   },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 25,
   },
   features: {
     backgroundColor: Colors.surface,
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   featureText: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.text,
     marginLeft: 12,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     color: Colors.white,
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontButton,
   },
 });

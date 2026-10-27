@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
     borderWidth: 1.5,
     borderColor: 'rgba(5,16,4,0.22)',
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     right: 12,
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
   },
   suggestionsPanel: {
@@ -258,12 +258,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   suggestionTitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: fontHeading,
   },
   suggestionSubtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 2,
   },

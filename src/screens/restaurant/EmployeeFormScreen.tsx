@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     marginTop: 20,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 8,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.olive + '30',
   },
   optionBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
   submitBtnText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },

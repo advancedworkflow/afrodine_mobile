@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginBottom: 22,
@@ -63,15 +63,15 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sectionTitle: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
   paragraph: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 21,
   },
 });
 

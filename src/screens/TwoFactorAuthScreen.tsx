@@ -218,10 +218,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   paragraph: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 21,
+    lineHeight: 22,
     marginBottom: 24,
   },
   primaryButton: {
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primaryButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: Colors.white,
   },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dangerButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: '#ef4444',
   },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   passwordLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.text,
   },
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   secondaryButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -295,25 +295,25 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   codeLabel: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontFamily: fontHeading,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: Colors.textLight,
   },
   codeValue: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontHeading,
     color: Colors.text,
     letterSpacing: 1,
   },
   codeValueSmall: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.text,
   },
   backupCode: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: Colors.text,
     letterSpacing: 1,

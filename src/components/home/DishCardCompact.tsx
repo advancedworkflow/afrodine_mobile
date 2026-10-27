@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   promoBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontFamily: fontButton,
     color: Colors.white,
     letterSpacing: 0.3,
@@ -140,20 +140,20 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   name: {
-    fontSize: 18.5,
+    fontSize: 19.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   ratingText: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontSub,
     color: Colors.textLight,
   },
   description: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontSub,
     color: Colors.textLight,
-    lineHeight: 17,
+    lineHeight: 18,
   },
   footer: {
     flexDirection: 'row',
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   price: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontButton,
     color: Colors.text,
   },

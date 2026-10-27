@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   name: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
     flex: 1,
@@ -148,11 +148,11 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   description: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginBottom: 8,
-    lineHeight: 16,
+    lineHeight: 17,
   },
   meta: {
     flexDirection: 'row',
@@ -164,18 +164,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ratingText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.text,
     marginLeft: 4,
   },
   separator: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.gray[400],
     marginHorizontal: 8,
   },
   deliveryTime: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   price: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontHeading,
     color: Colors.primary,
   },

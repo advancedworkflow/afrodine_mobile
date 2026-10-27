@@ -10,8 +10,11 @@ import {
   StatusBar,
   Platform,
   ActivityIndicator,
+  Share,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
+import DetailOptionsMenu, {SHARE_BASE_URL} from '../components/DetailOptionsMenu';
+import ReportModal from '../components/ReportModal';
 import {Colors, Radius} from '../utils/colors';
 import {secondaryFont, fontButton, fontDisplay, fontHeading} from '../utils/fonts';
 import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
@@ -41,6 +44,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [supplements, setSupplements] = useState<supplementsApi.SupplementApi[]>([]);
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,6 +141,13 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
     );
   }
 
+  const dishRestaurantId = dish.restaurantId ?? restaurantId;
+  const shareDish = () => {
+    const url = dishRestaurantId ? `${SHARE_BASE_URL}/restaurant/${dishRestaurantId}` : SHARE_BASE_URL;
+    const where = dish.restaurantName ? ` — ${dish.restaurantName}` : '';
+    Share.share({message: `${dish.name}${where} sur Namké : ${url}`});
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
@@ -161,6 +172,20 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
               color={isFavorite ? Colors.error : Colors.terracotta}
             />
           </TouchableOpacity>
+          <DetailOptionsMenu
+            buttonStyle={styles.optionsButton}
+            options={[
+              {icon: 'share-outline', label: t('detailOptions.share'), onPress: shareDish},
+              ...(dishRestaurantId
+                ? [{
+                    icon: 'storefront-outline',
+                    label: t('detailOptions.viewRestaurant'),
+                    onPress: () => navigation.navigate('RestaurantDetails', {restaurantId: Number(dishRestaurantId)}),
+                  }]
+                : []),
+              {icon: 'flag-outline', label: t('detailOptions.report'), onPress: () => setShowReportModal(true), destructive: true},
+            ]}
+          />
         </View>
 
         {/* Dish Info */}
@@ -284,6 +309,12 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
+      <ReportModal
+        visible={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        restaurantId={dishRestaurantId ? Number(dishRestaurantId) : undefined}
+        title={t('detailOptions.reportDish')}
+      />
     </View>
   );
 };
@@ -299,7 +330,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
   },
   imageContainer: {
@@ -318,6 +349,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     left: 20,
+    width: 48,
+    height: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(252,251,245,0.92)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionsButton: {
+    position: 'absolute',
+    top: 16,
+    right: 76,
     width: 48,
     height: 48,
     borderRadius: Radius.pill,
@@ -361,14 +403,14 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   metaLine: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
   description: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
-    lineHeight: 24,
+    lineHeight: 25,
     fontFamily: secondaryFont,
     marginTop: 2,
   },
@@ -394,7 +436,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   ingredientText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -413,7 +455,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   allergenText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.error,
     marginLeft: 6,
     fontWeight: '600',
@@ -455,12 +497,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.darkGreen,
   },
   extraItemText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   extraItemPrice: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: fontHeading,
   },
@@ -501,7 +543,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quantity: {
-    fontSize: 18,
+    fontSize: 19,
     color: Colors.text,
     marginHorizontal: 16,
     minWidth: 24,
@@ -519,7 +561,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   addToCartText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.white,
     fontFamily: fontButton,
   },

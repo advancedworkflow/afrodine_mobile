@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   heroEyebrow: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontFamily: fontHeading,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
@@ -181,10 +181,10 @@ const styles = StyleSheet.create({
     color: Colors.cream,
   },
   heroSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: 'rgba(251,249,217,0.82)',
-    lineHeight: 20,
+    lineHeight: 21,
   },
   content: {
     flex: 1,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     paddingBottom: GLOBAL_TAB_BAR_HEIGHT + 40,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
     fontStyle: 'italic',
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   featuredBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontFamily: fontHeading,
     letterSpacing: 0.3,
     textTransform: 'uppercase',
@@ -243,13 +243,13 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   featuredDescription: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 19,
+    lineHeight: 20,
   },
   featuredMeta: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   featuredPriceUnit: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   detailButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontButton,
     color: Colors.namkeWhite,
   },
@@ -301,12 +301,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   compactName: {
-    fontSize: 16.5,
+    fontSize: 17.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   compactMeta: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -314,12 +314,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   compactPrice: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontDisplay,
     color: Colors.text,
   },
   compactPriceUnit: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },

@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.textLight,
     marginBottom: 4,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   triggerText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     flex: 1,
     fontFamily: secondaryFont,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.gray[100],
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[50],
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
     fontFamily: secondaryFont,
   },

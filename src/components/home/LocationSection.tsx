@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     letterSpacing: 0.6,
     textTransform: 'uppercase',
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   address: {
-    fontSize: 16.5,
+    fontSize: 17.5,
     fontFamily: fontButton,
     color: Colors.text,
   },

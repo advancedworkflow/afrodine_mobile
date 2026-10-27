@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     padding: 22,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryChipText: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontFamily: fontHeading,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   date: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginBottom: 24,
@@ -157,10 +157,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   message: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontUI,
     color: Colors.text,
-    lineHeight: 23,
+    lineHeight: 24,
   },
   actionButton: {
     marginTop: 22,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   actionButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontHeading,
     color: Colors.white,
   },

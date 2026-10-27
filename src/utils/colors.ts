@@ -76,26 +76,9 @@ export const Spacing = {
 };
 
 /** Ombres — teintées encre (namkeBlack), jamais du noir pur. */
+// Design plat : pas d'ombre sur les cartes ; les jetons restent pour ne pas toucher chaque écran
 export const Shadows = {
-  sm: {
-    shadowColor: '#051004',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#051004',
-    shadowOffset: {width: 0, height: 6},
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 5,
-  },
-  lg: {
-    shadowColor: '#051004',
-    shadowOffset: {width: 0, height: 22},
-    shadowOpacity: 0.16,
-    shadowRadius: 50,
-    elevation: 10,
-  },
+  sm: {},
+  md: {},
+  lg: {},
 };

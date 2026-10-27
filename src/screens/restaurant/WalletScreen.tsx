@@ -263,14 +263,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginBottom: 12,
   },
   walletBalance: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   payoutButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,
@@ -308,12 +308,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   connectLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   connectValue: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.darkGreen,
     fontWeight: '600',
     fontFamily: secondaryFont,
@@ -328,17 +328,17 @@ const styles = StyleSheet.create({
   connectButtonText: {
     color: Colors.white,
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: secondaryFont,
   },
   hintText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
     marginTop: 8,
   },
   mutedText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
   },
   payoutRow: {
@@ -353,17 +353,17 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   payoutDate: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   payoutStatus: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   payoutAmount: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,

@@ -187,13 +187,13 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: Colors.text,
     marginTop: 16,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginTop: 8,
     textAlign: 'center',
@@ -218,21 +218,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ratingText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   clientName: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   comment: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   replyBlock: {
     marginTop: 12,
@@ -241,13 +241,13 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.border,
   },
   replyLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.textLight,
     marginBottom: 4,
   },
   replyText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   replyPromptText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: 10,
     padding: 12,
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
     minHeight: 70,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[100],
   },
   replyCancelText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   replySubmitText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,

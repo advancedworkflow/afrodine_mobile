@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -144,11 +144,11 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     textAlign: 'center',
     marginBottom: 24,
-    lineHeight: 24,
+    lineHeight: 25,
     fontFamily: secondaryFont,
   },
   browseButton: {
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   browseButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
     fontFamily: secondaryFont,
   },

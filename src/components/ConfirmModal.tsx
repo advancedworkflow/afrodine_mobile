@@ -98,18 +98,18 @@ const styles = StyleSheet.create({
     }),
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.text,
     fontFamily: secondaryFont,
     marginBottom: 8,
   },
   message: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.textLight,
     fontFamily: secondaryFont,
     marginBottom: 24,
-    lineHeight: 22,
+    lineHeight: 23,
   },
   actions: {
     flexDirection: 'row',
@@ -127,14 +127,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[100],
   },
   cancelText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   confirmButton: {},
   confirmText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,

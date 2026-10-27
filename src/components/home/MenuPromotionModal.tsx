@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.primaryDark ?? Colors.primary,
     marginRight: 12,
@@ -125,9 +125,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[100],
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
-    lineHeight: 20,
+    lineHeight: 21,
     marginBottom: 16,
   },
   priceRow: {
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   priceLabel: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
   },
   price: {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
   },
 });

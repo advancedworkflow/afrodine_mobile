@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginBottom: 4,
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   cardChange: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.darkGreen,
     marginTop: 4,
     fontWeight: '600',
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   chartTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     minHeight: 4,
   },
   barValue: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginTop: 4,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   barLabel: {
-    fontSize: 9,
+    fontSize: 10,
     color: Colors.textLight,
     marginTop: 2,
     maxWidth: 48,
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   legendText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   topDishesLabel: {
     width: 100,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
     flexShrink: 1,
   },
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   topDishesValue: {
     width: 36,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: Colors.darkGreen,
     textAlign: 'right',

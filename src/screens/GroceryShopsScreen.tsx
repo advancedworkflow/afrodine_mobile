@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   pageSubtitle: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: -6,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   chipText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.text,
   },
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.darkGreen,
   },
   cuisineChipText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   emptyText: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fontUI,
     color: Colors.textLight,
     textAlign: 'center',
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[400],
   },
   statusBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontFamily: fontHeading,
     letterSpacing: 0.4,
     textTransform: 'uppercase',
@@ -376,19 +376,19 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   featuredName: {
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
     flexShrink: 1,
   },
   rating: {
     marginLeft: 'auto',
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
   meta: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.textLight,
     flex: 1,
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   visitButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.white,
   },
@@ -435,12 +435,12 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   compactName: {
-    fontSize: 16.5,
+    fontSize: 17.5,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   compactMeta: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },

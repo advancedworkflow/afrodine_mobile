@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,

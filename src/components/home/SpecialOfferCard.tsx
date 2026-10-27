@@ -78,22 +78,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   discountText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.white,
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontDisplayMedium,
     color: Colors.white,
     marginBottom: 4,
   },
   description: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontUI,
     color: Colors.white + 'E6', // 90% opacity
     marginBottom: 12,
-    lineHeight: 16,
+    lineHeight: 17,
   },
   button: {
     alignSelf: 'flex-start',
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   buttonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontButton,
     color: Colors.primaryDark ?? Colors.primary,
   },

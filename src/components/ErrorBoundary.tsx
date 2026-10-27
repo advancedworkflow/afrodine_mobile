@@ -58,13 +58,13 @@ const styles = StyleSheet.create({
     color: '#d32f2f',
   },
   message: {
-    fontSize: 16,
+    fontSize: 17,
     marginBottom: 10,
     color: '#666',
     textAlign: 'center',
   },
   stack: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#999',
     marginTop: 20,
   },

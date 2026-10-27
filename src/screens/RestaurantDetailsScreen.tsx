@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   TextInput,
   Platform,
+  Share,
 } from 'react-native';
 import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
@@ -27,6 +28,7 @@ import {getAbsoluteImageUrl} from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {formatAxiosError} from '../utils/formatApiError';
 import ReportModal from '../components/ReportModal';
+import DetailOptionsMenu, {SHARE_BASE_URL} from '../components/DetailOptionsMenu';
 
 interface RestaurantDetailsScreenProps {
   route: any;
@@ -407,11 +409,18 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
               color={isFavorite ? Colors.error : Colors.terracotta}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.reportButton}
-            onPress={() => setShowReportModal(true)}>
-            <IconWrapper name="flag-outline" size={18} color={Colors.text} />
-          </TouchableOpacity>
+          <DetailOptionsMenu
+            buttonStyle={styles.optionsButton}
+            options={[
+              {
+                icon: 'share-outline',
+                label: t('detailOptions.share'),
+                onPress: () =>
+                  Share.share({message: `${restaurant.name} sur Namké : ${SHARE_BASE_URL}/restaurant/${restaurant.id}`}),
+              },
+              {icon: 'flag-outline', label: t('detailOptions.report'), onPress: () => setShowReportModal(true), destructive: true},
+            ]}
+          />
         </View>
 
         <View style={styles.content}>
@@ -846,7 +855,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -885,12 +894,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  reportButton: {
+  optionsButton: {
     position: 'absolute',
-    top: 72,
-    right: 20,
-    width: 40,
-    height: 40,
+    top: 16,
+    right: 76,
+    width: 48,
+    height: 48,
     borderRadius: Radius.pill,
     backgroundColor: 'rgba(252,251,245,0.92)',
     justifyContent: 'center',
@@ -936,12 +945,12 @@ const styles = StyleSheet.create({
     fontFamily: fontDisplay,
   },
   metaLine: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: fontHeading,
   },
   metaHighlight: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
@@ -956,7 +965,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   tabText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: secondaryFont,
     color: Colors.textLight,
   },
@@ -987,7 +996,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   cardSubTabText: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontHeading,
     color: Colors.textLight,
   },
@@ -1007,9 +1016,9 @@ const styles = StyleSheet.create({
     fontFamily: fontDisplay,
   },
   description: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.text,
-    lineHeight: 24,
+    lineHeight: 25,
     fontFamily: secondaryFont,
   },
   contactItem: {
@@ -1018,7 +1027,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contactText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     marginLeft: 12,
     flex: 1,
@@ -1052,20 +1061,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loyaltyBannerTitle: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.text,
     marginBottom: 4,
     fontFamily: fontDisplayMedium,
   },
   loyaltyBannerSub: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
-    lineHeight: 18,
+    lineHeight: 19,
     fontFamily: secondaryFont,
   },
   loyaltyBalance: {
     marginTop: 8,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -1075,13 +1084,13 @@ const styles = StyleSheet.create({
   },
   loyaltyHint: {
     marginTop: 6,
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontStyle: 'italic',
     fontFamily: secondaryFont,
   },
   reviewHint: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     fontFamily: secondaryFont,
     marginBottom: 8,
@@ -1100,7 +1109,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: 12,
     padding: 12,
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
     minHeight: 80,
@@ -1117,7 +1126,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   reviewSubmitText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.white,
     fontFamily: fontButton,
   },
@@ -1139,14 +1148,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   reviewItemRating: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.warning,
     fontFamily: fontHeading,
   },
   reviewItemComment: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 21,
     fontFamily: secondaryFont,
   },
   bubblesScroll: {
@@ -1170,7 +1179,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   bubbleText: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     color: Colors.text,
     fontFamily: fontHeading,
   },
@@ -1178,7 +1187,7 @@ const styles = StyleSheet.create({
     color: Colors.cream,
   },
   noDishes: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     textAlign: 'center',
     paddingVertical: 24,
@@ -1210,12 +1219,12 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   dishRowName: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   dishRowDescription: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: secondaryFont,
     color: Colors.textLight,
   },
@@ -1225,7 +1234,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   dishRowPrice: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontHeading,
     color: Colors.text,
   },
@@ -1250,7 +1259,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   voirMenuButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.primary,
     fontFamily: fontHeading,
   },
@@ -1280,20 +1289,20 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   menuCardName: {
-    fontSize: 18,
+    fontSize: 19,
     color: Colors.text,
     fontFamily: fontDisplayMedium,
     marginBottom: 4,
   },
   menuCardDescription: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
-    lineHeight: 18,
+    lineHeight: 19,
     fontFamily: secondaryFont,
     marginBottom: 4,
   },
   menuCardPlats: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -1308,7 +1317,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   addMenuToCartText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.white,
     fontFamily: fontButton,
     marginLeft: 8,
@@ -1336,12 +1345,12 @@ const styles = StyleSheet.create({
     minHeight: 56,
   },
   cartBarText: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
     color: Colors.cream,
   },
   cartBarPrice: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontHeading,
     color: Colors.cream,
   },

@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
   },
   errorBlock: {
@@ -155,12 +155,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.error,
     textAlign: 'center',
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.textLight,
     fontStyle: 'italic',
     textAlign: 'center',

@@ -180,13 +180,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   period: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   xLabel: {
     position: 'absolute',
-    fontSize: 10,
+    fontSize: 11,
     color: Colors.textLight,
     textAlign: 'center',
   },

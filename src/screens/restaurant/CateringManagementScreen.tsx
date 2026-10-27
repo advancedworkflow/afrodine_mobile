@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   addButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,
@@ -458,22 +458,22 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   cardName: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   cardType: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 4,
     fontFamily: secondaryFont,
   },
   cardDesc: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginTop: 6,
-    lineHeight: 18,
+    lineHeight: 19,
     fontFamily: secondaryFont,
   },
   cardMeta: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   cardPriceLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -498,12 +498,12 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   cardGuests: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   inactiveBadge: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.error,
     marginTop: 4,
     fontWeight: '600',
@@ -519,14 +519,14 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginTop: 16,
     fontFamily: secondaryFont,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginTop: 8,
     textAlign: 'center',
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   tableHeadCell: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.textLight,
     fontFamily: fontSub,
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   tableCell: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tableCellAmount: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.darkGreen,
   },
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tableRowMeta: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
     paddingHorizontal: 12,
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.error + '20',
   },
   bookingStatusText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -659,14 +659,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[50],
   },
   detailTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
     marginTop: 10,
   },
   detailLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
     color: Colors.textLight,
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   detailLine: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
     fontFamily: secondaryFont,
     marginTop: 2,
@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
   actionPrimaryText: {
     color: Colors.white,
     fontWeight: '600',
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: secondaryFont,
   },
   actionDanger: {
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   actionDangerText: {
     color: Colors.error,
     fontWeight: '600',
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: secondaryFont,
   },
 });

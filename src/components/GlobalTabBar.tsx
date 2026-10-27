@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   label: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: secondaryFont,
     maxWidth: 72,
   },
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeText: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: secondaryFont,
     color: Colors.white,
   },

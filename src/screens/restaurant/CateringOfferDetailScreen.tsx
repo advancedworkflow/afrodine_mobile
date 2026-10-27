@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 8,
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.darkGreen,
     marginBottom: 16,
     backgroundColor: Colors.white,
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.darkGreen,
   },
   typeChipText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   switchLabel: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   saveBtnText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
   },
   feeLabel: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   hint: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
     marginTop: 6,

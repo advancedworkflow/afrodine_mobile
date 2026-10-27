@@ -200,7 +200,18 @@
     "title": "Mangez comme à la maison",
     "subtitle": "Des plats africains mijotés le matin par des voisin·e·s de Neukölln, Kreuzberg et Wedding.",
     "start": "Commencer",
-    "alreadyHaveAccount": "J'ai déjà un compte"
+    "alreadyHaveAccount": "J'ai déjà un compte",
+    "next": "Suivant",
+    "slide2Title": "Les cuisines du quartier",
+    "slide2Subtitle": "Parcourez les restaurants près de chez vous, leurs plats du jour, leurs avis et leurs horaires.",
+    "slide3Title": "Commandez en quelques touches",
+    "slide3Subtitle": "Payez en ligne, suivez votre commande jusqu'à votre porte, et réservez un traiteur pour vos événements."
+  },
+  "detailOptions": {
+    "share": "Partager",
+    "report": "Signaler",
+    "viewRestaurant": "Voir le restaurant",
+    "reportDish": "Signaler ce plat"
   },
   "terms": {
     "title": "Conditions de service",

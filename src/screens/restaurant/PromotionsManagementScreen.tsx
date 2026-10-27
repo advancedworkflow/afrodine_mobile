@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     fontFamily: secondaryFont,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.textLight,
     marginTop: 4,
   },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
@@ -254,14 +254,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: Colors.text,
     marginTop: 12,
     fontFamily: secondaryFont,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
     marginTop: 8,
     textAlign: 'center',
@@ -281,13 +281,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   cardDesc: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginTop: 4,
   },
@@ -298,16 +298,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   statusBadge: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.darkGreen,
     fontWeight: '600',
   },
   cardPrice: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
   },
   discountBadge: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.error,
     fontWeight: '600',
   },

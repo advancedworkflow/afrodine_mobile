@@ -402,14 +402,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.darkGreen,
     marginBottom: 12,
     fontFamily: secondaryFont,
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.darkGreen,
     marginBottom: 8,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   toggleLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray[100],
   },
   formBtnCancelText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGreen,
   },
   formBtnConfirmText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
     fontFamily: secondaryFont,
@@ -490,13 +490,13 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   shopName: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
   },
   shopDesc: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginTop: 4,
     fontFamily: secondaryFont,
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     color: Colors.warning,
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 11,
     color: Colors.textLight,
     marginTop: 4,
     textAlign: 'center',
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     fontFamily: secondaryFont,
   },
@@ -560,14 +560,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: Colors.text,
     marginTop: 12,
     fontFamily: secondaryFont,
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     textAlign: 'center',
     marginTop: 6,
@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cardMeta: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   categoryBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   lowStockText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.warning,
     fontFamily: secondaryFont,
   },
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   statusBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: Colors.textDark,
     fontFamily: secondaryFont,
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stockValue: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,

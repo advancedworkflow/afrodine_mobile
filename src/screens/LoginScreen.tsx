@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   eyebrow: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -181,10 +181,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 22,
+    lineHeight: 23,
   },
   form: {
     width: '100%',
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.text,
   },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Colors.white,
-    fontSize: 16.5,
+    fontSize: 17.5,
     fontFamily: fontButton,
   },
   googleButton: {
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: Colors.text,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
   footer: {
@@ -248,13 +248,13 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: Colors.textLight,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
   },
   footerLink: {
     color: Colors.primary,
     fontFamily: fontHeading,
-    fontSize: 14,
+    fontSize: 15,
   },
   guestButton: {
     padding: 12,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   guestButtonText: {
     color: Colors.primary,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontHeading,
   },
 });

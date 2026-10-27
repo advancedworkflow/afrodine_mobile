@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 20,
+    lineHeight: 21,
     marginBottom: 22,
   },
   contactRow: {
@@ -83,18 +83,18 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   contactLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.textLight,
     marginTop: 6,
   },
   contactValue: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.text,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     letterSpacing: 0.7,
     textTransform: 'uppercase',
@@ -114,15 +114,15 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   faqQuestion: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   faqAnswer: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontUI,
     color: Colors.textLight,
-    lineHeight: 20,
+    lineHeight: 21,
   },
 });
 

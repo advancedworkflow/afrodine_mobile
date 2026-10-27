@@ -54,12 +54,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   name: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   description: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
     marginTop: 4,

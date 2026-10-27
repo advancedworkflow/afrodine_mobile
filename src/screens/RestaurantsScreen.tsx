@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.darkGreen,
   },
   chipText: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontHeading,
     color: Colors.text,
   },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   countText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: Colors.textLight,
     paddingHorizontal: 22,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontUI,
     color: Colors.error,
     textAlign: 'center',
@@ -345,11 +345,11 @@ const styles = StyleSheet.create({
   },
   retryText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.textLight,
     fontStyle: 'italic',

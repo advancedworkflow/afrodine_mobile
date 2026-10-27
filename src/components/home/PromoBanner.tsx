@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   discountBadgeText: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontHeading,
     color: Colors.white,
   },
@@ -92,17 +92,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fontSub,
     color: Colors.textLight,
     marginBottom: 12,
-    lineHeight: 19,
+    lineHeight: 20,
   },
   button: {
     paddingHorizontal: 16,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Colors.white,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontButton,
   },
 });

@@ -427,22 +427,22 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   name: {
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: fontDisplayMedium,
     color: Colors.text,
   },
   email: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
   role: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     color: Colors.darkGreen,
   },
   editLink: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontHeading,
     color: Colors.terracotta,
   },
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fontHeading,
     letterSpacing: 0.7,
     textTransform: 'uppercase',
@@ -479,12 +479,12 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontUI,
     color: Colors.text,
   },
   rowValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fontUI,
     color: 'rgba(5,16,4,0.56)',
   },
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   logoutText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fontButton,
     color: Colors.terracotta,
   },
@@ -519,11 +519,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   unauthorizedText: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.textLight,
     textAlign: 'center',
     marginBottom: 24,
-    lineHeight: 24,
+    lineHeight: 25,
     fontFamily: secondaryFont,
   },
   loginButton: {
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: Colors.namkeWhite,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontButton,
   },
 });

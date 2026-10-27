@@ -1,14 +1,47 @@
-import React from 'react';
-import {View, Text, Image, TouchableOpacity, StyleSheet, StatusBar, Platform} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  Platform,
+  ScrollView,
+  useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
 import {fontButton, fontDisplay, fontUI} from '../utils/fonts';
+import IconWrapper from '../components/IconWrapper';
 
 export const ONBOARDING_SEEN_KEY = 'namke_onboarding_seen';
 
+// La 1re slide garde la bannière photo ; les suivantes une illustration par icône
+const SLIDES = [
+  {key: 'home', titleKey: 'onboarding.title', subtitleKey: 'onboarding.subtitle'},
+  {key: 'kitchens', titleKey: 'onboarding.slide2Title', subtitleKey: 'onboarding.slide2Subtitle', icon: 'storefront-outline', bg: Colors.terracotta},
+  {key: 'order', titleKey: 'onboarding.slide3Title', subtitleKey: 'onboarding.slide3Subtitle', icon: 'bicycle-outline', bg: Colors.darkGreen},
+];
+
 const OnboardingScreen = ({navigation}: any) => {
   const {t} = useTranslation();
+  const {width} = useWindowDimensions();
+  const scrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const [index, setIndex] = useState(0);
+  const isLast = index === SLIDES.length - 1;
+
+  const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setIndex(Math.round(e.nativeEvent.contentOffset.x / width));
+  };
+
+  const goNext = () => {
+    scrollRef.current?.scrollTo({x: (index + 1) * width, animated: true});
+    setIndex(index + 1);
+  };
   const finishOnboarding = async (next: 'Signup' | 'Login') => {
     try {
       await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, '1');
@@ -21,28 +54,54 @@ const OnboardingScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} translucent backgroundColor="transparent" />
-      <View style={styles.imageWrap}>
-        <Image source={require('../assets/namke-banner.png')} style={styles.image} resizeMode="cover" />
-        <View style={styles.overlayTop} />
-        <View style={styles.overlayBottom} />
-        <TouchableOpacity style={styles.skipButton} onPress={() => finishOnboarding('Login')} activeOpacity={0.85}>
-          <Text style={styles.skipButtonText}>{t('onboarding.skip')}</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={onScrollEnd}
+        style={styles.slides}>
+        {SLIDES.map((slide) => (
+          <View key={slide.key} style={{width}}>
+            <View style={styles.imageWrap}>
+              {slide.icon ? (
+                <View style={[styles.illustration, {backgroundColor: slide.bg}]}>
+                  <View style={styles.illustrationCircle}>
+                    <IconWrapper name={slide.icon} size={96} color={Colors.white} />
+                  </View>
+                </View>
+              ) : (
+                <>
+                  <Image source={require('../assets/namke-banner.png')} style={styles.image} resizeMode="cover" />
+                  <View style={styles.overlayTop} />
+                </>
+              )}
+              <View style={styles.overlayBottom} />
+            </View>
+            <View style={styles.slideText}>
+              <Text style={styles.title}>{t(slide.titleKey)}</Text>
+              <Text style={styles.subtitle}>{t(slide.subtitleKey)}</Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      <TouchableOpacity style={styles.skipButton} onPress={() => finishOnboarding('Login')} activeOpacity={0.85}>
+        <Text style={styles.skipButtonText}>{t('onboarding.skip')}</Text>
+      </TouchableOpacity>
 
       <View style={styles.content}>
         <View style={styles.dots}>
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
+          {SLIDES.map((slide, i) => (
+            <View key={slide.key} style={[styles.dot, i === index && styles.dotActive]} />
+          ))}
         </View>
-        <Text style={styles.title}>{t('onboarding.title')}</Text>
-        <Text style={styles.subtitle}>
-          {t('onboarding.subtitle')}
-        </Text>
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.primaryButton} onPress={() => finishOnboarding('Signup')} activeOpacity={0.85}>
-            <Text style={styles.primaryButtonText}>{t('onboarding.start')}</Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={isLast ? () => finishOnboarding('Signup') : goNext}
+            activeOpacity={0.85}>
+            <Text style={styles.primaryButtonText}>{isLast ? t('onboarding.start') : t('onboarding.next')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.secondaryButton} onPress={() => finishOnboarding('Login')} activeOpacity={0.7}>
             <Text style={styles.secondaryButtonText}>{t('onboarding.alreadyHaveAccount')}</Text>
@@ -58,9 +117,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  slides: {
+    flex: 1,
+  },
   imageWrap: {
-    height: '55%',
+    flex: 1,
     position: 'relative',
+  },
+  illustration: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  illustrationCircle: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slideText: {
+    paddingHorizontal: 30,
+    paddingTop: 4,
+    gap: 14,
+    minHeight: 190,
   },
   image: {
     width: '100%',
@@ -96,16 +177,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skipButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontButton,
     color: Colors.darkGreen,
   },
   content: {
-    flex: 1,
     paddingHorizontal: 30,
-    paddingTop: 4,
     paddingBottom: 22,
-    gap: 14,
+    gap: 18,
   },
   dots: {
     flexDirection: 'row',
@@ -130,13 +209,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
-    lineHeight: 25,
+    fontSize: 17,
+    lineHeight: 26,
     fontFamily: fontUI,
     color: Colors.textLight,
   },
   actions: {
-    marginTop: 'auto',
     gap: 12,
   },
   primaryButton: {
@@ -147,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryButtonText: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: fontButton,
     color: Colors.namkeWhite,
   },
@@ -157,7 +235,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryButtonText: {
-    fontSize: 15.5,
+    fontSize: 16.5,
     fontFamily: fontButton,
     color: Colors.darkGreen,
   },

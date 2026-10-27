@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
     fontFamily: fontDisplay,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: fontHeading,
     marginTop: 4,
   },
   seeAll: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.primary,
     fontFamily: fontHeading,
   },

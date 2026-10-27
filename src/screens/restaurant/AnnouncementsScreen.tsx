@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
     fontFamily: secondaryFont,
-    fontSize: 13,
+    fontSize: 14,
   },
   tabBtnActive: {
     backgroundColor: Colors.darkGreen,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.darkGreen,
     fontFamily: secondaryFont,
@@ -196,11 +196,11 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: Colors.white,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
   },
   contentText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
     marginBottom: 8,
@@ -211,13 +211,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   metaText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
   expiryText: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
     color: '#a16207',
     fontFamily: secondaryFont,
   },

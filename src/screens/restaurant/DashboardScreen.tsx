@@ -97,7 +97,7 @@ const dashboardStyles = StyleSheet.create({
   },
   hChartRank: {
     width: 18,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: Colors.textLight,
     textAlign: 'center',
@@ -113,12 +113,12 @@ const dashboardStyles = StyleSheet.create({
   },
   hChartLabel: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   hChartValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.text,
   },
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     padding: Spacing[6],
   },
   heroLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.7)',
     fontFamily: secondaryFont,
   },
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.mustard,
   },
   heroPillText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.white,
     fontFamily: secondaryFont,
   },
@@ -503,13 +503,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
     marginTop: 2,
   },
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   segmentText: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     fontFamily: secondaryFont,
   },
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing[2],
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing[4],
   },
   link: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.primary,
     fontFamily: secondaryFont,
@@ -593,18 +593,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   rowHint: {
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.textLight,
     marginTop: 1,
   },
   mutedText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.textLight,
   },
   reviewRow: {
@@ -617,17 +617,17 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   reviewRating: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: Colors.text,
   },
   reviewComment: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.text,
     fontFamily: secondaryFont,
   },
   reviewAuthor: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textLight,
   },
 });

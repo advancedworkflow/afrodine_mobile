@@ -200,7 +200,18 @@
     "title": "Essen wie zu Hause",
     "subtitle": "Afrikanische Gerichte, morgens von Nachbarn in Neukölln, Kreuzberg und Wedding zubereitet.",
     "start": "Loslegen",
-    "alreadyHaveAccount": "Ich habe bereits ein Konto"
+    "alreadyHaveAccount": "Ich habe bereits ein Konto",
+    "next": "Weiter",
+    "slide2Title": "Küchen aus deinem Kiez",
+    "slide2Subtitle": "Entdecke Restaurants in deiner Nähe, ihre Tagesgerichte, Bewertungen und Öffnungszeiten.",
+    "slide3Title": "Bestellen mit wenigen Klicks",
+    "slide3Subtitle": "Online bezahlen, Bestellung bis zur Haustür verfolgen und Catering für deine Events buchen."
+  },
+  "detailOptions": {
+    "share": "Teilen",
+    "report": "Melden",
+    "viewRestaurant": "Restaurant ansehen",
+    "reportDish": "Dieses Gericht melden"
   },
   "terms": {
     "title": "Nutzungsbedingungen",
