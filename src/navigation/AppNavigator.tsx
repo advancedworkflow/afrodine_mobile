@@ -330,7 +330,8 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       key={authNavigatorKey}
-      screenOptions={{headerShown: false}}
+      // iOS affiche par défaut le nom de l'écran précédent (ex. "MainTabs") à côté du chevron
+      screenOptions={{headerShown: false, headerBackButtonDisplayMode: 'minimal'}}
       initialRouteName={
         !isAuthenticated
           ? hasSeenOnboarding
