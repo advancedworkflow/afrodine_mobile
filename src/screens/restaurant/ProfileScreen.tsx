@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
     fontFamily: secondaryFont,
-    backgroundColor: Colors.backgroundLight,
+    backgroundColor: Colors.white,
   },
   inputMultiline: {
     minHeight: 80,

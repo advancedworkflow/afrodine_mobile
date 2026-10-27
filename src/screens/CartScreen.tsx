@@ -876,7 +876,7 @@ const styles = StyleSheet.create({
     fontFamily: fontDisplay,
   },
   checkoutInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.pill,
     paddingHorizontal: 20,
     paddingVertical: 14,

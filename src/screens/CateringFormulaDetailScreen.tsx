@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   fieldPill: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.pill,
     paddingHorizontal: 18,
     minHeight: 52,

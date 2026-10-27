@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     height: 48,
     paddingLeft: 48,
     paddingRight: 40,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.pill,
     borderWidth: 1.5,
     borderColor: 'rgba(5,16,4,0.22)',

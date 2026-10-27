@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
   },
   inputPill: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.pill,
     paddingHorizontal: 20,
     minHeight: 54,
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   inputPillRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.pill,
     paddingLeft: 20,
     paddingRight: 6,
