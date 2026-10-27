@@ -14,7 +14,7 @@ import {
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
 import {secondaryFont, fontButton, fontDisplay, fontHeading} from '../utils/fonts';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import * as dishesApi from '../services/dishes';
 import * as supplementsApi from '../services/supplements';
 import * as restaurantsApi from '../services/restaurants';
@@ -30,6 +30,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
   route,
   navigation,
 }) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {dishId, restaurantId} = route.params || {};
   const {addItem} = useCart();
@@ -245,7 +246,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
       </ScrollView>
 
       {/* Bottom Bar */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, {bottom: tabBarHeight}]}>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
             style={styles.quantityButtonMinus}

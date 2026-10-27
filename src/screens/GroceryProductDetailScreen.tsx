@@ -11,7 +11,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import {getGroceryShopProductById, type GroceryShopProductApi} from '../services/groceryShop';
 import {getAbsoluteImageUrl} from '../utils/api';
@@ -26,6 +26,7 @@ const formatPrice = (p: number | string) => {
 };
 
 const GroceryProductDetailScreen = ({navigation, route}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {productId} = route.params || {};
   const {addItem} = useCart();
@@ -134,7 +135,7 @@ const GroceryProductDetailScreen = ({navigation, route}: any) => {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, {marginBottom: tabBarHeight}]}>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
             style={styles.quantityButtonMinus}

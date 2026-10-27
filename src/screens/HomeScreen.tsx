@@ -19,7 +19,7 @@ import SectionHeader from '../components/home/SectionHeader';
 import PromoBanner from '../components/home/PromoBanner';
 import GroceryShopProductCard from '../components/home/GroceryShopProductCard';
 import {Colors, Radius, Shadows} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontDisplay, fontDisplayMedium, fontHeading, fontSub, fontUI} from '../utils/fonts';
 import {useSearch} from '../contexts/SearchContext';
 import {useAuth} from '../contexts/AuthContext';
@@ -37,6 +37,7 @@ import {getAbsoluteImageUrl} from '../utils/api';
 const namkeFallback = require('../assets/namke-fallback.png');
 
 const HomeScreen = ({navigation}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {isAuthenticated, isRestaurant} = useAuth();
   const {setSearchQuery, setSearchResults, setIsSearching} = useSearch();
@@ -291,7 +292,7 @@ const HomeScreen = ({navigation}: any) => {
       </View>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, {paddingBottom: tabBarHeight + 16}]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => loadData(true)} colors={[Colors.primary]} />

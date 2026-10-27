@@ -18,7 +18,7 @@ import {
 import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontSub, fontUI} from '../utils/fonts';
 import {useCart} from '../contexts/CartContext';
 import {useAuth} from '../contexts/AuthContext';
@@ -36,6 +36,7 @@ const CTA_BUTTON_BG = '#054625';
 const CTA_BUTTON_TEXT = '#ffffff';
 
 const CartScreen = ({navigation}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {items: cartItems, removeItem, updateQuantity, clearCart} = useCart();
   const {user, isAuthenticated, isRestaurant} = useAuth();
@@ -438,7 +439,7 @@ const CartScreen = ({navigation}: any) => {
       )}
 
       {cartItems.length > 0 && (
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, {marginBottom: tabBarHeight}]}>
           <View style={styles.bottomBarTotal}>
             <Text style={styles.bottomBarTotalLabel}>{t('cart.total')}</Text>
             <Text style={styles.bottomBarTotalValue}>{total.toFixed(2)} €</Text>

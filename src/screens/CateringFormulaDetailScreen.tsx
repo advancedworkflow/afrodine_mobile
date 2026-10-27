@@ -13,7 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import {
   getCateringFormulaBySlug,
@@ -30,6 +30,7 @@ import {CATERING_OCCASION_IDS, DIETARY_IDS} from '../utils/catering';
 const namkeFallback = require('../assets/namke-fallback.png');
 
 const CateringFormulaDetailScreen = ({navigation, route}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {slug} = route.params || {};
   const {user, isAuthenticated} = useAuth();
@@ -421,7 +422,7 @@ const CateringFormulaDetailScreen = ({navigation, route}: any) => {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, {marginBottom: tabBarHeight}]}>
         <TouchableOpacity
           style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
           onPress={handleSubmit}

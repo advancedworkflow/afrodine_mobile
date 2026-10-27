@@ -1,6 +1,5 @@
-import React, {useContext} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native';
-import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
+import React from 'react';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {StackActions} from '@react-navigation/native';
 import CustomIcon, {type CustomIconName} from './CustomIcon';
@@ -8,7 +7,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {useNotificationBadges} from '../hooks/useNotificationBadges';
 import {Colors, Shadows} from '../utils/colors';
 import {secondaryFont} from '../utils/fonts';
-import {getActiveClientTab, navigationRef, GLOBAL_TAB_BAR_HEIGHT, type ClientTabName} from '../navigation/navigationRef';
+import {getActiveClientTab, navigationRef, GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight, type ClientTabName} from '../navigation/navigationRef';
 
 interface GlobalTabBarProps {
   currentRoute?: string;
@@ -33,9 +32,8 @@ const GlobalTabBar: React.FC<GlobalTabBarProps> = ({currentRoute}) => {
   const {unreadCount} = useNotificationBadges();
   const activeTab = getActiveClientTab(currentRoute);
   // iOS : App.tsx ne réserve pas le bas de l'écran ; la barre descend jusqu'au bord et garde
-  // l'indicateur d'accueil dans son propre fond. Contexte (et non le hook) : pas de provider sur le web.
-  const insets = useContext(SafeAreaInsetsContext);
-  const bottomInset = Platform.OS === 'ios' ? insets?.bottom ?? 0 : 0;
+  // l'indicateur d'accueil dans son propre fond.
+  const height = useGlobalTabBarHeight();
 
   if (isRestaurant || !activeTab) {
     return null;
@@ -51,7 +49,7 @@ const GlobalTabBar: React.FC<GlobalTabBarProps> = ({currentRoute}) => {
       <View
         style={[
           styles.bar,
-          {height: GLOBAL_TAB_BAR_HEIGHT + bottomInset, paddingBottom: 8 + bottomInset},
+          {height, paddingBottom: 8 + height - GLOBAL_TAB_BAR_HEIGHT},
         ]}>
         {TABS.map(tab => {
           const focused = tab.key === activeTab;

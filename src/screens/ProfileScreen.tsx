@@ -16,7 +16,7 @@ import IconWrapper from '../components/IconWrapper';
 import {useAuth} from '../contexts/AuthContext';
 import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI, secondaryFont} from '../utils/fonts';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import {getClientProfile, type ClientProfileRead} from '../services/clientProfile';
@@ -24,6 +24,7 @@ import {getMyOrders} from '../services/orders';
 import {getAbsoluteImageUrl} from '../utils/api';
 
 const ProfileScreen = ({navigation}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {user, isAuthenticated, logout, isRestaurant} = useAuth();
   const [clientProfile, setClientProfile] = useState<ClientProfileRead | null>(null);
@@ -253,7 +254,7 @@ const ProfileScreen = ({navigation}: any) => {
     <View style={styles.container}>
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, {paddingBottom: tabBarHeight + 40}]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           !isRestaurant ? (

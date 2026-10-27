@@ -1,3 +1,6 @@
+import {useContext} from 'react';
+import {Platform} from 'react-native';
+import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
 import {createNavigationContainerRef} from '@react-navigation/native';
 
 export const navigationRef = createNavigationContainerRef();
@@ -5,6 +8,13 @@ export const navigationRef = createNavigationContainerRef();
 /** Hauteur de <GlobalTabBar> — à réserver en bas des écrans du parcours client
  * (padding de scroll, ou décalage des barres d'action sticky) pour ne pas être masqués. */
 export const GLOBAL_TAB_BAR_HEIGHT = 64;
+
+/** Hauteur affichée de <GlobalTabBar> : sur iOS elle descend jusqu'au bord de l'écran et
+ * inclut l'indicateur d'accueil. Contexte (et non le hook) : pas de SafeAreaProvider sur le web. */
+export function useGlobalTabBarHeight(): number {
+  const insets = useContext(SafeAreaInsetsContext);
+  return GLOBAL_TAB_BAR_HEIGHT + (Platform.OS === 'ios' ? insets?.bottom ?? 0 : 0);
+}
 
 /** Nom de l'onglet client actif d'après la route courante, ou null si non applicable (auth, onboarding...). */
 export type ClientTabName = 'Home' | 'Restaurants' | 'Catering' | 'Cart' | 'Profile';

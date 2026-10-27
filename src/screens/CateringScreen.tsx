@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontDisplayMedium, fontHeading, fontUI} from '../utils/fonts';
 import {getCateringFormulas, type CateringFormulaApi} from '../services/catering';
 import {getAbsoluteImageUrl} from '../utils/api';
@@ -19,6 +19,7 @@ import {getAbsoluteImageUrl} from '../utils/api';
 const namkeFallback = require('../assets/namke-fallback.png');
 
 const CateringScreen = ({navigation}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const [formulas, setFormulas] = useState<CateringFormulaApi[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +71,7 @@ const CateringScreen = ({navigation}: any) => {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer, {paddingBottom: tabBarHeight + 40}]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
         }>

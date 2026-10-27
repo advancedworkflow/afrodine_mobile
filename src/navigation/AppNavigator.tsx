@@ -378,6 +378,8 @@ const AppNavigator = () => {
             component={DishDetailsScreen}
             options={({route}: any) => ({
               ...modalScreenOptions(route.params?.dishName || 'Plat', true),
+              // L'écran a sa propre flèche retour et son bouton favori sur la photo
+              headerShown: false,
             })}
           />
           <Stack.Screen
@@ -552,6 +554,8 @@ const AppNavigator = () => {
             component={DishDetailsScreen}
             options={({route}: any) => ({
               ...modalScreenOptions(route.params?.dishName || 'Plat', true),
+              // L'écran a sa propre flèche retour et son bouton favori sur la photo
+              headerShown: false,
             })}
           />
           <Stack.Screen

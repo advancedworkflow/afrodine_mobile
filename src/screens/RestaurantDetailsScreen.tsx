@@ -16,7 +16,7 @@ import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
 import RestaurantMap from '../components/RestaurantMap';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {secondaryFont, fontButton, fontDisplay, fontDisplayMedium, fontHeading} from '../utils/fonts';
 import SectionHeader from '../components/home/SectionHeader';
 import {useFavorites} from '../contexts/FavoritesContext';
@@ -39,6 +39,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   route,
   navigation,
 }) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t, i18n} = useTranslation();
   const numberLocale = i18n.language === 'en' ? 'en-GB' : i18n.language === 'de' ? 'de-DE' : 'fr-FR';
   const {restaurantId} = route.params || {};
@@ -809,7 +810,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
       </ScrollView>
 
       {cartForRestaurant.count > 0 && (
-        <View style={styles.cartBar}>
+        <View style={[styles.cartBar, {bottom: tabBarHeight}]}>
           <TouchableOpacity
             style={styles.cartBarButton}
             onPress={() => navigation.popTo('MainTabs', {screen: 'Cart'})}

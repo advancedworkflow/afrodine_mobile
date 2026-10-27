@@ -3,7 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl} from 'react-native';
 import FilterModal, {type FilterOptions, type SelectedFilters} from '../components/FilterModal';
 import {Colors, Radius} from '../utils/colors';
-import {GLOBAL_TAB_BAR_HEIGHT} from '../navigation/navigationRef';
+import {GLOBAL_TAB_BAR_HEIGHT, useGlobalTabBarHeight} from '../navigation/navigationRef';
 import {fontButton, fontDisplay, fontHeading, fontUI} from '../utils/fonts';
 import IconWrapper from '../components/IconWrapper';
 import RestaurantCard from '../components/home/RestaurantCard';
@@ -22,6 +22,7 @@ const defaultFilterOptions: FilterOptions = {
 };
 
 const RestaurantsScreen = ({navigation, route}: any) => {
+  const tabBarHeight = useGlobalTabBarHeight();
   const {t} = useTranslation();
   const {setSearchQuery, setSearchResults, setIsSearching} = useSearch();
   const initialCategory = route.params?.categoryName ?? route.params?.category ?? null;
@@ -229,7 +230,7 @@ const RestaurantsScreen = ({navigation, route}: any) => {
           {loading ? t('restaurantsList.loading') : t('restaurantsList.availableCount', {count: restaurants.length})}
         </Text>
 
-        <View style={styles.restaurantsList}>
+        <View style={[styles.restaurantsList, {paddingBottom: tabBarHeight + 24}]}>
           {loading ? (
             <View style={styles.loadingWrap}>
               <ActivityIndicator size="large" color={Colors.primary} />
