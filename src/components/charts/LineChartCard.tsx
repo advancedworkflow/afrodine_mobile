@@ -98,7 +98,7 @@ export default function LineChartCard({
   const labelIndexes: number[] = [];
   for (let i = 0; i < n; i += labelStep) labelIndexes.push(i);
   if (n > 0 && labelIndexes[labelIndexes.length - 1] !== n - 1) {
-    if (n - 1 - labelIndexes[labelIndexes.length - 1] < labelStep / 2) labelIndexes.pop();
+    if ((n - 1 - labelIndexes[labelIndexes.length - 1]) * stepX < X_LABEL_WIDTH) labelIndexes.pop();
     labelIndexes.push(n - 1);
   }
 

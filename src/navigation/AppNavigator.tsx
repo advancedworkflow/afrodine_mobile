@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from 'react';
 import {View, Text, StyleSheet, Animated, TouchableOpacity, Platform} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator, type BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IconWrapper from '../components/IconWrapper';
 import CustomIcon, {type CustomIconName} from '../components/CustomIcon';
@@ -213,6 +213,39 @@ const MainTabs = () => {
 };
 
 // Restaurant Tab Navigator for restaurant owners (badges selon contexte: commandes, tableau de bord)
+// Barre d'onglets restaurateur dessinée ici : le conteneur d'icône de bottom-tabs a une taille fixe
+// et écrasait l'icône + libellé (TabBarIconWithHighlight) en quelques pixels sur iOS.
+const RestaurantTabBar = ({state, descriptors, navigation}: BottomTabBarProps) => {
+  // iOS : le bas de l'écran n'est pas réservé (App.tsx), la barre absorbe l'indicateur d'accueil
+  const insets = useContext(SafeAreaInsetsContext);
+  const bottomInset = Platform.OS === 'ios' ? insets?.bottom ?? 0 : 0;
+  return (
+    <View style={[styles.restaurantTabBar, {height: 64 + bottomInset, paddingBottom: 8 + bottomInset}]}>
+      {state.routes.map((route, index) => {
+        const {options} = descriptors[route.key];
+        const focused = state.index === index;
+        const color = focused ? Colors.terracotta : Colors.textLight;
+        const onPress = () => {
+          const event = navigation.emit({type: 'tabPress', target: route.key, canPreventDefault: true});
+          if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+        };
+        return (
+          <TouchableOpacity key={route.key} style={styles.restaurantTabItem} onPress={onPress} activeOpacity={0.75}>
+            <View>
+              {options.tabBarIcon?.({focused, color, size: 24})}
+              {options.tabBarBadge != null ? (
+                <View style={styles.restaurantTabBadge}>
+                  <Text style={styles.restaurantTabBadgeText}>{options.tabBarBadge}</Text>
+                </View>
+              ) : null}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
 const RestaurantTabs = () => {
   const {t} = useTranslation();
   const {byCategory} = useNotificationBadges();
@@ -221,23 +254,10 @@ const RestaurantTabs = () => {
   const ordersBadgeCount = byCategory.order ?? 0;
   const dashboardBadge = dashboardBadgeCount > 0 ? (dashboardBadgeCount > 99 ? '99+' : dashboardBadgeCount) : undefined;
   const ordersBadge = ordersBadgeCount > 0 ? (ordersBadgeCount > 99 ? '99+' : ordersBadgeCount) : undefined;
-  // iOS : le bas de l'écran n'est pas réservé (App.tsx), la barre absorbe l'indicateur d'accueil
-  const insets = useContext(SafeAreaInsetsContext);
-  const bottomInset = Platform.OS === 'ios' ? insets?.bottom ?? 0 : 0;
   return (
     <Tab.Navigator
+      tabBar={(props) => <RestaurantTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: Colors.terracotta,
-        tabBarInactiveTintColor: Colors.textLight,
-        tabBarStyle: {
-          backgroundColor: Colors.background,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-          height: 64 + bottomInset,
-          paddingBottom: 8 + bottomInset,
-          paddingTop: 8,
-        },
-        tabBarShowLabel: false,
         headerShown: false,
       }}>
       <Tab.Screen
@@ -706,6 +726,35 @@ const AppNavigator = () => {
 };
 
 const styles = StyleSheet.create({
+  restaurantTabBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.background,
+    borderTopColor: Colors.border,
+    borderTopWidth: 1,
+    paddingTop: 8,
+  },
+  restaurantTabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restaurantTabBadge: {
+    position: 'absolute',
+    top: -4,
+    right: 4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    paddingHorizontal: 3,
+    backgroundColor: Colors.terracotta,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restaurantTabBadgeText: {
+    fontSize: 9,
+    color: Colors.white,
+    fontFamily: secondaryFont,
+  },
   tabIconWrapper: {
     flexDirection: 'column',
     alignItems: 'center',
