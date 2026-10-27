@@ -6,7 +6,6 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
-  SectionList,
   TouchableOpacity,
   Modal,
   TextInput,
@@ -20,7 +19,7 @@ import {alert} from '../../utils/alert';
 import TopBar from '../../components/TopBar';
 import IconWrapper from '../../components/IconWrapper';
 import ConfirmModal from '../../components/ConfirmModal';
-import {Colors} from '../../utils/colors';
+import {Colors, Radius, Shadows} from '../../utils/colors';
 import {secondaryFont} from '../../utils/fonts';
 import {formatAxiosError} from '../../utils/formatApiError';
 import {
@@ -42,12 +41,8 @@ import {getAbsoluteImageUrl} from '../../utils/api';
 
 const DEFAULT_IMAGE_URL = 'https://placehold.co/400x300?text=Plat';
 
-type Section = {
-  title: string;
-  data: { id: number; name: string; description?: string; price: number; dish_image_url?: string }[];
-  isAllDishes?: boolean;
-  menuId?: number;
-};
+// Un onglet par type d'élément ; le bouton + crée un élément du type de l'onglet courant
+type TabKey = 'dishes' | 'menus' | 'supplements';
 
 type DeleteTarget = { type: 'dish'; id: number; name: string } | { type: 'menu'; id: number; name: string } | null;
 
@@ -72,8 +67,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   const [menuImageUrl, setMenuImageUrl] = useState('');
   const [uploadingMenuImage, setUploadingMenuImage] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
-  const [confirmCreateDish, setConfirmCreateDish] = useState(false);
-  const [confirmCreateMenu, setConfirmCreateMenu] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabKey>('dishes');
   const [addDishToMenuTarget, setAddDishToMenuTarget] = useState<{ dishId: number; dishName: string } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<{ click: () => void; value?: string } | null>(null);
@@ -243,7 +237,6 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   const doCreateDish = async () => {
     const name = dishName.trim();
     const price = parseFloat(dishPrice.replace(',', '.'));
-    setConfirmCreateDish(false);
     setSubmitting(true);
     try {
       await createDish({
@@ -274,13 +267,12 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.invalidPrice'));
       return;
     }
-    setConfirmCreateDish(true);
+    doCreateDish();
   };
 
   const doCreateMenu = async () => {
     const name = menuName.trim();
     const priceNum = menuPrice.trim() ? parseFloat(menuPrice.replace(',', '.')) : undefined;
-    setConfirmCreateMenu(false);
     setSubmitting(true);
     try {
       await createMenu({
@@ -305,7 +297,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.menuNameRequired'));
       return;
     }
-    setConfirmCreateMenu(true);
+    doCreateMenu();
   };
 
   const handleConfirmDelete = async () => {
@@ -326,57 +318,20 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     }
   };
 
-  const allSections: Section[] = [
-    ...(allDishes.length > 0 ? [{ title: t('restaurantMenu.allDishes'), data: allDishes, isAllDishes: true as const }] : []),
-    ...menus.map((m) => ({
-      title: m.name,
-      data: (m.dishes ?? []).map((d) => ({ ...d, dish_image_url: d.dish_image_url ?? (d as any).image_url })),
-      isAllDishes: false as const,
-      menuId: m.id,
-    })),
-  ];
-
   const searchLower = searchQuery.trim().toLowerCase();
-  const sections: Section[] = searchLower
-    ? allSections
-        .map((sec) => ({
-          ...sec,
-          data: sec.data.filter(
-            (item) =>
-              item.name.toLowerCase().includes(searchLower) ||
-              sec.title.toLowerCase().includes(searchLower),
-          ),
-        }))
-        .filter((sec) => sec.data.length > 0)
-    : allSections;
-
-  const renderSectionHeader = ({ section }: { section: Section }) => {
-    const menu = menus.find(m => m.name === section.title);
-    return (
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionHeaderLeft}>
-          <IconWrapper name="restaurant-outline" size={22} color={Colors.darkGreen} />
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-        </View>
-        {menu != null && (
-          <TouchableOpacity
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            onPress={() => setDeleteTarget({ type: 'menu', id: menu.id, name: menu.name })}
-            style={styles.deleteIconBtn}>
-            <IconWrapper name="trash-outline" size={22} color={Colors.white} />
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
-
+  const matches = (text?: string) => !searchLower || (text ?? '').toLowerCase().includes(searchLower);
+  const getDishName = (dishId: number) => allDishes.find((d) => d.id === dishId)?.name;
   const getSupplementsForDish = (dishId: number) => supplements.filter((s) => s.dish_id === dishId);
 
-  const renderItem = ({ item, section }: { item: { id: number; name: string; description?: string; price: number; dish_image_url?: string }; section: Section }) => {
+  const visibleDishes = allDishes.filter((d) => matches(d.name) || matches(d.description));
+  const visibleMenus = menus.filter((m) => matches(m.name) || (m.dishes ?? []).some((d) => matches(d.name)));
+  const visibleSupplements = supplements.filter((s) => matches(s.name) || matches(getDishName(s.dish_id)));
+
+  const renderDishCard = (item: ManagementDish) => {
     const dishSupplements = getSupplementsForDish(item.id);
     const imageUrl = item.dish_image_url ?? (item as any).image_url;
     return (
-      <View style={styles.dishRow}>
+      <View key={item.id} style={styles.card}>
         <View style={styles.dishThumbWrap}>
           {imageUrl ? (
             <Image
@@ -389,7 +344,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           )}
         </View>
         <View style={styles.dishInfo}>
-          <Text style={styles.dishName}>{item.name}</Text>
+          <Text style={styles.dishName} numberOfLines={1}>{item.name}</Text>
           {item.description ? (
             <Text style={styles.dishDesc} numberOfLines={2}>{item.description}</Text>
           ) : null}
@@ -400,28 +355,72 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               ))}
             </View>
           )}
-        </View>
-        <View style={styles.dishRight}>
           <Text style={styles.dishPrice}>{item.price.toFixed(2)} €</Text>
-          {!section.isAllDishes ? (
-            <TouchableOpacity
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              onPress={() => setDeleteTarget({ type: 'dish', id: item.id, name: item.name })}
-              style={styles.deleteIconBtnRow}>
-              <IconWrapper name="trash-outline" size={20} color={Colors.error} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              onPress={() => setAddDishToMenuTarget({ dishId: item.id, dishName: item.name })}
-              style={styles.addToMenuBtn}>
-              <IconWrapper name="add-outline" size={20} color={Colors.darkGreen} />
-            </TouchableOpacity>
-          )}
+        </View>
+        <View style={styles.cardActions}>
+          <TouchableOpacity
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            onPress={() => setAddDishToMenuTarget({ dishId: item.id, dishName: item.name })}
+            style={styles.iconBtn}>
+            <IconWrapper name="add-circle-outline" size={22} color={Colors.darkGreen} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            onPress={() => setDeleteTarget({ type: 'dish', id: item.id, name: item.name })}
+            style={styles.iconBtn}>
+            <IconWrapper name="trash-outline" size={20} color={Colors.error} />
+          </TouchableOpacity>
         </View>
       </View>
     );
   };
+
+  const renderMenuCard = (menu: MenuWithDishes) => {
+    const dishes = menu.dishes ?? [];
+    return (
+      <View key={menu.id} style={styles.menuCard}>
+        <View style={styles.menuCardHeader}>
+          <View style={styles.menuCardTitleWrap}>
+            <Text style={styles.menuCardTitle} numberOfLines={1}>{menu.name}</Text>
+            <Text style={styles.metaText}>{t('restaurantMenu.dishCount', {count: dishes.length})}</Text>
+          </View>
+          <TouchableOpacity
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            onPress={() => setDeleteTarget({ type: 'menu', id: menu.id, name: menu.name })}
+            style={styles.iconBtn}>
+            <IconWrapper name="trash-outline" size={20} color={Colors.error} />
+          </TouchableOpacity>
+        </View>
+        {dishes.length === 0 ? (
+          <Text style={styles.metaText}>{t('restaurantMenu.menuEmpty')}</Text>
+        ) : (
+          dishes.map((d) => (
+            <View key={d.id} style={styles.menuDishRow}>
+              <Text style={styles.menuDishName} numberOfLines={1}>{d.name}</Text>
+              <Text style={styles.menuDishPrice}>{d.price.toFixed(2)} €</Text>
+            </View>
+          ))
+        )}
+      </View>
+    );
+  };
+
+  const renderSupplementRow = (s: ManagementSupplement) => (
+    <View key={s.id} style={styles.supplementCard}>
+      <View style={styles.menuCardTitleWrap}>
+        <Text style={styles.dishName} numberOfLines={1}>{s.name}</Text>
+        <Text style={styles.metaText}>{t('restaurantMenu.forDish', {name: getDishName(s.dish_id) ?? '—'})}</Text>
+      </View>
+      <Text style={styles.dishPrice}>+{s.price.toFixed(2)} €</Text>
+    </View>
+  );
+
+  const renderEmpty = (emptyKey: 'restaurantMenu.noDishes' | 'restaurantMenu.noMenus' | 'restaurantMenu.noSupplements') => (
+    <View style={styles.empty}>
+      <IconWrapper name="restaurant-outline" size={48} color={Colors.textLight} />
+      <Text style={styles.emptyText}>{searchLower ? t('restaurantMenu.noResults') : t(emptyKey)}</Text>
+    </View>
+  );
 
   const openSupplementModal = () => {
     setSupplementName('');
@@ -458,41 +457,13 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     }
   };
 
-  const ListHeader = (
-    <>
-      <View style={styles.searchWrap}>
-        <IconWrapper name="search-outline" size={20} color={Colors.textLight} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('restaurantMenu.searchPlaceholder')}
-          placeholderTextColor={Colors.textLight}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery.length > 0 ? (
-          <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={8}>
-            <IconWrapper name="close-circle" size={20} color={Colors.textLight} />
-          </TouchableOpacity>
-        ) : null}
-      </View>
-      <View style={styles.addActionsBlock}>
-        <View style={styles.addRow}>
-          <TouchableOpacity style={styles.addButton} onPress={openDishModal}>
-            <IconWrapper name="add" size={22} color={Colors.white} />
-            <Text style={styles.addButtonText}>{t('restaurantMenu.dish')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.addButton} onPress={openMenuModal}>
-            <IconWrapper name="add" size={22} color={Colors.white} />
-            <Text style={styles.addButtonText}>{t('restaurantMenu.menu')}</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.addButtonSupplement} onPress={openSupplementModal}>
-          <IconWrapper name="add-outline" size={22} color={Colors.white} />
-          <Text style={styles.addButtonSupplementText}>{t('restaurantMenu.supplement')}</Text>
-        </TouchableOpacity>
-      </View>
-    </>
-  );
+  const tabs: { key: TabKey; count: number }[] = [
+    { key: 'dishes', count: allDishes.length },
+    { key: 'menus', count: menus.length },
+    { key: 'supplements', count: supplements.length },
+  ];
+  const openCreateModal =
+    activeTab === 'dishes' ? openDishModal : activeTab === 'menus' ? openMenuModal : openSupplementModal;
 
   if (loading) {
     return (
@@ -508,35 +479,56 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <TopBar navigation={navigation} title={t('restaurantMenu.title')} />
-      {sections.length === 0 ? (
-        <ScrollView
-          style={styles.content}
-          contentContainerStyle={styles.emptyScroll}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
-          }>
-          {ListHeader}
-          <View style={styles.empty}>
-            <IconWrapper name="restaurant-outline" size={56} color={Colors.textLight} />
-            <Text style={styles.emptyTitle}>{t('restaurantMenu.noDishOrMenu')}</Text>
-            <Text style={styles.emptyText}>{t('restaurantMenu.noDishOrMenuSubtitle')}</Text>
-          </View>
-        </ScrollView>
-      ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={renderItem}
-          renderSectionHeader={renderSectionHeader}
-          ListHeaderComponent={ListHeader}
-          stickySectionHeadersEnabled
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
-          }
-          ListFooterComponent={<View style={{ height: 24 }} />}
+      <View style={styles.tabs}>
+        {tabs.map((tab) => {
+          const active = tab.key === activeTab;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tab, active && styles.tabActive]}
+              onPress={() => setActiveTab(tab.key)}
+              activeOpacity={0.8}>
+              <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={1}>
+                {t(`restaurantMenu.tabs.${tab.key}`)} ({tab.count})
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <View style={styles.searchWrap}>
+        <IconWrapper name="search-outline" size={20} color={Colors.textLight} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t('restaurantMenu.searchPlaceholder')}
+          placeholderTextColor={Colors.textLight}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-      )}
+        {searchQuery.length > 0 ? (
+          <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={8}>
+            <IconWrapper name="close-circle" size={20} color={Colors.textLight} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.darkGreen]} />
+        }>
+        {activeTab === 'dishes' &&
+          (visibleDishes.length > 0 ? visibleDishes.map(renderDishCard) : renderEmpty('restaurantMenu.noDishes'))}
+        {activeTab === 'menus' &&
+          (visibleMenus.length > 0 ? visibleMenus.map(renderMenuCard) : renderEmpty('restaurantMenu.noMenus'))}
+        {activeTab === 'supplements' &&
+          (visibleSupplements.length > 0
+            ? visibleSupplements.map(renderSupplementRow)
+            : renderEmpty('restaurantMenu.noSupplements'))}
+      </ScrollView>
+      <TouchableOpacity style={styles.fab} onPress={openCreateModal} activeOpacity={0.85}>
+        <IconWrapper name="add" size={30} color={Colors.white} />
+      </TouchableOpacity>
 
       <Modal visible={modalDish} animationType="fade" presentationStyle="pageSheet">
         <KeyboardAvoidingView
@@ -705,26 +697,6 @@ const RestaurantMenuScreen = ({navigation}: any) => {
         </KeyboardAvoidingView>
       </Modal>
 
-      <ConfirmModal
-        visible={confirmCreateDish}
-        title={t('restaurantMenu.createDishConfirmTitle')}
-        message={t('restaurantMenu.createDishConfirmMessage', {name: dishName.trim() || '—', price: dishPrice || '0'})}
-        confirmLabel={t('restaurantMenu.create')}
-        cancelLabel={t('restaurantMenu.cancel')}
-        variant="primary"
-        onConfirm={doCreateDish}
-        onCancel={() => setConfirmCreateDish(false)}
-      />
-      <ConfirmModal
-        visible={confirmCreateMenu}
-        title={t('restaurantMenu.createMenuConfirmTitle')}
-        message={t('restaurantMenu.createMenuConfirmMessage', {name: menuName.trim() || '—', priceSuffix: menuPrice.trim() ? ` • ${menuPrice} €` : ''})}
-        confirmLabel={t('restaurantMenu.create')}
-        cancelLabel={t('restaurantMenu.cancel')}
-        variant="primary"
-        onConfirm={doCreateMenu}
-        onCancel={() => setConfirmCreateMenu(false)}
-      />
       {/* Modal Nouveau supplément (slide vers le haut, comme Nouveau plat) */}
       <Modal visible={modalSupplement} animationType="fade" presentationStyle="pageSheet">
         <KeyboardAvoidingView
@@ -858,72 +830,134 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  emptyScroll: {
-    padding: 16,
-    paddingBottom: 32,
-  },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addActionsBlock: {
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
-  },
-  addRow: {
+  tabs: {
     flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.white,
+    ...Shadows.sm,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    paddingHorizontal: 4,
+    borderRadius: Radius.pill,
+  },
+  tabActive: {
+    backgroundColor: Colors.darkGreen,
+  },
+  tabText: {
+    fontSize: 13,
+    fontFamily: secondaryFont,
+    color: Colors.text,
+  },
+  tabTextActive: {
+    color: Colors.white,
+    fontWeight: '600',
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: Colors.white,
+    padding: 12,
+    marginBottom: 12,
+    borderRadius: Radius.md,
+    ...Shadows.sm,
+  },
+  cardActions: {
+    alignItems: 'center',
     gap: 12,
   },
-  addButton: {
+  iconBtn: {
+    padding: 4,
+  },
+  menuCard: {
+    backgroundColor: Colors.white,
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: Radius.md,
+    ...Shadows.sm,
+  },
+  menuCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  menuCardTitleWrap: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.darkGreen,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    marginRight: 12,
   },
-  addButtonText: {
+  menuCardTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.darkGreen,
+    fontFamily: secondaryFont,
+  },
+  metaText: {
+    fontSize: 12,
+    color: Colors.textLight,
+    marginTop: 2,
+  },
+  menuDishRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  menuDishName: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.text,
+    marginRight: 12,
+  },
+  menuDishPrice: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.white,
+    color: Colors.darkGreen,
   },
-  addButtonSupplement: {
-    marginTop: 10,
+  supplementCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.darkGreen,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    backgroundColor: Colors.white,
+    padding: 14,
+    marginBottom: 10,
+    borderRadius: Radius.md,
+    ...Shadows.sm,
   },
-  addButtonSupplementText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.white,
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: Colors.terracotta,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.md,
   },
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     marginHorizontal: 16,
     marginTop: 12,
-    marginBottom: 4,
     gap: 8,
+    ...Shadows.sm,
   },
   searchInput: {
     flex: 1,
@@ -994,52 +1028,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingBottom: 32,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.darkGreen,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginTop: 16,
-    borderRadius: 10,
-    gap: 10,
-  },
-  sectionHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  deleteIconBtn: {
-    padding: 4,
-  },
-  deleteIconBtnRow: {
-    padding: 4,
-    marginLeft: 8,
-  },
-  dishRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.white,
-    fontFamily: secondaryFont,
-  },
-  dishRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    backgroundColor: Colors.white,
-    padding: 14,
-    marginTop: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    // Laisse la place au bouton + flottant
+    paddingBottom: 100,
   },
   dishThumbWrap: {
     width: 64,
@@ -1070,16 +1060,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: Colors.darkGreen,
+    marginTop: 6,
   },
   empty: {
     alignItems: 'center',
     paddingVertical: 48,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.text,
-    marginTop: 16,
   },
   emptyText: {
     fontSize: 14,
@@ -1271,10 +1256,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
-  },
-  addToMenuBtn: {
-    padding: 4,
-    marginLeft: 8,
   },
   modalSubtitle: {
     fontSize: 14,

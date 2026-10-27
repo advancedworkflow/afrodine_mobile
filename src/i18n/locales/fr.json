@@ -1422,6 +1422,19 @@
     "addToMenu": "Ajouter à un menu",
     "noMenuCreateFirst": "Aucun menu. Créez d'abord un menu.",
     "dishAddedToMenu": "Plat ajouté au menu « {{name}} ».",
-    "addToMenuError": "Impossible d'ajouter au menu."
+    "addToMenuError": "Impossible d'ajouter au menu.",
+    "tabs": {
+      "dishes": "Plats",
+      "menus": "Menus",
+      "supplements": "Suppléments"
+    },
+    "noDishes": "Aucun plat pour le moment. Touchez + pour en créer un.",
+    "noMenus": "Aucun menu pour le moment. Touchez + pour en créer un.",
+    "noSupplements": "Aucun supplément pour le moment. Touchez + pour en créer un.",
+    "noResults": "Aucun résultat.",
+    "dishCount_one": "{{count}} plat",
+    "dishCount_other": "{{count}} plats",
+    "menuEmpty": "Aucun plat dans ce menu. Ajoutez-en depuis l'onglet Plats.",
+    "forDish": "Pour : {{name}}"
   }
 }

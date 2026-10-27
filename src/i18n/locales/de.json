@@ -1422,6 +1422,19 @@
     "addToMenu": "Zu einem Menü hinzufügen",
     "noMenuCreateFirst": "Kein Menü. Erstellen Sie zuerst ein Menü.",
     "dishAddedToMenu": "Gericht zum Menü „{{name}}“ hinzugefügt.",
-    "addToMenuError": "Zum Menü hinzufügen nicht möglich."
+    "addToMenuError": "Zum Menü hinzufügen nicht möglich.",
+    "tabs": {
+      "dishes": "Gerichte",
+      "menus": "Menüs",
+      "supplements": "Extras"
+    },
+    "noDishes": "Noch keine Gerichte. Tippen Sie auf +, um eines anzulegen.",
+    "noMenus": "Noch keine Menüs. Tippen Sie auf +, um eines anzulegen.",
+    "noSupplements": "Noch keine Extras. Tippen Sie auf +, um eines anzulegen.",
+    "noResults": "Keine Ergebnisse.",
+    "dishCount_one": "{{count}} Gericht",
+    "dishCount_other": "{{count}} Gerichte",
+    "menuEmpty": "Keine Gerichte in diesem Menü. Fügen Sie welche im Tab Gerichte hinzu.",
+    "forDish": "Für: {{name}}"
   }
 }

@@ -1422,6 +1422,19 @@
     "addToMenu": "Add to a menu",
     "noMenuCreateFirst": "No menu. Create a menu first.",
     "dishAddedToMenu": "Dish added to menu \"{{name}}\".",
-    "addToMenuError": "Unable to add to the menu."
+    "addToMenuError": "Unable to add to the menu.",
+    "tabs": {
+      "dishes": "Dishes",
+      "menus": "Menus",
+      "supplements": "Extras"
+    },
+    "noDishes": "No dishes yet. Tap + to create one.",
+    "noMenus": "No menus yet. Tap + to create one.",
+    "noSupplements": "No extras yet. Tap + to create one.",
+    "noResults": "No results.",
+    "dishCount_one": "{{count}} dish",
+    "dishCount_other": "{{count}} dishes",
+    "menuEmpty": "No dishes in this menu. Add some from the Dishes tab.",
+    "forDish": "For: {{name}}"
   }
 }
