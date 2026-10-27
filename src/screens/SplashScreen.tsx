@@ -1,11 +1,11 @@
 import React from 'react';
-import {View, Image, StyleSheet, StatusBar, Platform} from 'react-native';
+import {View, Image, StyleSheet, StatusBar, Platform, Modal} from 'react-native';
 import {Colors} from '../utils/colors';
 
 const SplashScreen = () => {
-  return (
+  const content = (
     <View style={styles.container}>
-      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
       <Image
         source={require('../assets/namke-logo-splash.png')}
         style={styles.splashLogo}
@@ -13,6 +13,15 @@ const SplashScreen = () => {
       />
     </View>
   );
+  // iOS : App.tsx réserve le haut de l'écran (Dynamic Island) ; une Modal couvre tout l'écran
+  if (Platform.OS === 'ios') {
+    return (
+      <Modal visible animationType="none">
+        {content}
+      </Modal>
+    );
+  }
+  return content;
 };
 
 const styles = StyleSheet.create({

@@ -694,8 +694,11 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     fontStyle: 'italic',
   },
+  // Marge verticale : une ScrollView horizontale coupe ce qui dépasse, dont l'ombre des cartes
   horizontalScroll: {
     paddingRight: 22,
+    paddingTop: 4,
+    paddingBottom: 16,
   },
   promoScroll: {
     paddingRight: 22,
@@ -717,14 +720,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     padding: 12,
+    ...Shadows.md,
   },
   nearbyImage: {
-    width: 62,
-    height: 62,
-    borderRadius: 20,
+    width: 92,
+    height: 92,
+    borderRadius: Radius.md,
     backgroundColor: Colors.gray[100],
   },
   nearbyInfo: {

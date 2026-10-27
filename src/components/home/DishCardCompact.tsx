@@ -103,7 +103,7 @@ const DishCardCompact: React.FC<DishCardCompactProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    width: 218,
+    width: 250,
     backgroundColor: Colors.white,
     borderRadius: Radius.lg,
     ...Shadows.md,

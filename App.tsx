@@ -14,6 +14,7 @@ import GlobalTabBar from './src/components/GlobalTabBar';
 import {navigationRef} from './src/navigation/navigationRef';
 import {Colors} from './src/utils/colors';
 import notificationService from './src/services/notificationService';
+import AppSplashScreen from './src/screens/SplashScreen';
 import {StripeAppRoot} from './src/components/StripeAppRoot.native';
 
 const App = () => {
@@ -33,8 +34,9 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Même visuel que le splash de AppNavigator : pas d'écran blanc entre lancement natif et splash
   if (!isReady) {
-    return null;
+    return <AppSplashScreen />;
   }
 
   return (

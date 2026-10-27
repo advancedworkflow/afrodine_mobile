@@ -53,7 +53,13 @@ if (typeof Intl === 'undefined' || !Intl.PluralRules) {
       return {pluralCategories: ['one', 'other']};
     }
   }
-  (globalThis as any).Intl = {...(globalThis as any).Intl, PluralRules};
+  // Ajout sur l'objet existant : le recopier ({...Intl}) perdrait DateTimeFormat/NumberFormat,
+  // propriétés non énumérables (crash "undefined cannot be used as a constructor")
+  if (typeof Intl === 'undefined') {
+    (globalThis as any).Intl = {PluralRules};
+  } else {
+    (Intl as any).PluralRules = PluralRules;
+  }
 }
 
 i18n.use(initReactI18next).init({
