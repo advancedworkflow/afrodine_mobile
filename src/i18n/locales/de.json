@@ -25,7 +25,20 @@
     "continueAsGuest": "Ohne Konto fortfahren",
     "errorTitle": "Fehler",
     "fillAllFields": "Bitte füllen Sie alle Felder aus",
-    "loginErrorTitle": "Anmeldefehler"
+    "loginErrorTitle": "Anmeldefehler",
+    "forgotPassword": "Passwort vergessen?"
+  },
+  "forgotPassword": {
+    "title": "Passwort vergessen",
+    "subtitle": "Gib die E-Mail-Adresse deines Kontos ein – wir schicken dir einen Link, um ein neues Passwort festzulegen.",
+    "submit": "Link senden",
+    "sending": "Wird gesendet...",
+    "sentTitle": "Prüfe deine E-Mails",
+    "sentMessage": "Falls ein Konto für {{email}} existiert, erhältst du einen Link zum Zurücksetzen. Öffne ihn, lege ein neues Passwort fest und melde dich dann wieder an.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "errorTitle": "Fehler",
+    "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "sendFailed": "Der Link konnte gerade nicht gesendet werden."
   },
   "orderHistory": {
     "status": {

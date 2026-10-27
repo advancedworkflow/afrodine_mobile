@@ -25,7 +25,20 @@
     "continueAsGuest": "Continuer sans compte",
     "errorTitle": "Erreur",
     "fillAllFields": "Veuillez remplir tous les champs",
-    "loginErrorTitle": "Erreur de connexion"
+    "loginErrorTitle": "Erreur de connexion",
+    "forgotPassword": "Mot de passe oublié ?"
+  },
+  "forgotPassword": {
+    "title": "Mot de passe oublié",
+    "subtitle": "Saisissez l'email de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+    "submit": "Envoyer le lien",
+    "sending": "Envoi...",
+    "sentTitle": "Vérifiez vos emails",
+    "sentMessage": "Si un compte existe pour {{email}}, vous allez recevoir un lien de réinitialisation. Ouvrez-le pour choisir un nouveau mot de passe, puis revenez vous connecter.",
+    "backToLogin": "Retour à la connexion",
+    "errorTitle": "Erreur",
+    "invalidEmail": "Veuillez saisir une adresse email valide.",
+    "sendFailed": "Impossible d'envoyer le lien pour le moment."
   },
   "orderHistory": {
     "status": {

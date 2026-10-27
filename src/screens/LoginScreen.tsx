@@ -108,6 +108,12 @@ const LoginScreen = () => {
           </View>
 
           <TouchableOpacity
+            style={styles.forgotButton}
+            onPress={() => (navigation as any).navigate('ForgotPassword', {email: email.trim()})}>
+            <Text style={styles.forgotText}>{t('login.forgotPassword')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleLogin}
             disabled={loading}>
@@ -206,6 +212,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: fontUI,
     color: Colors.text,
+  },
+  forgotButton: {
+    alignSelf: 'flex-end',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginTop: -6,
+    marginBottom: 10,
+  },
+  forgotText: {
+    color: Colors.primary,
+    fontSize: 15,
+    fontFamily: fontHeading,
   },
   button: {
     backgroundColor: Colors.primary,

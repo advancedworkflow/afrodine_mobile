@@ -25,7 +25,20 @@
     "continueAsGuest": "Continue as guest",
     "errorTitle": "Error",
     "fillAllFields": "Please fill in all fields",
-    "loginErrorTitle": "Login error"
+    "loginErrorTitle": "Login error",
+    "forgotPassword": "Forgot password?"
+  },
+  "forgotPassword": {
+    "title": "Forgot password",
+    "subtitle": "Enter your account email and we'll send you a link to choose a new password.",
+    "submit": "Send the link",
+    "sending": "Sending...",
+    "sentTitle": "Check your emails",
+    "sentMessage": "If an account exists for {{email}}, you'll receive a reset link. Open it to choose a new password, then come back to log in.",
+    "backToLogin": "Back to login",
+    "errorTitle": "Error",
+    "invalidEmail": "Please enter a valid email address.",
+    "sendFailed": "Unable to send the link right now."
   },
   "orderHistory": {
     "status": {
