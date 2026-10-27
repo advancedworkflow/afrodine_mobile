@@ -62,7 +62,7 @@ const TopBar: React.FC<TopBarProps> = ({
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle="light-content"
+        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'}
         backgroundColor={Colors.darkGreen}
       />
       <View style={styles.content}>

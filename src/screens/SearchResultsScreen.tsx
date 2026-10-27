@@ -8,6 +8,7 @@ import {
   StatusBar,
   ActivityIndicator,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
 import {Colors} from '../utils/colors';
@@ -132,7 +133,7 @@ const SearchResultsScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
       <SearchBar
         placeholder={t('searchResults.placeholder')}
         onSearch={handleSearch}

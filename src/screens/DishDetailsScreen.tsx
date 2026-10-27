@@ -117,7 +117,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
   if (loading) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>{t('dishDetails.loading')}</Text>
@@ -128,7 +128,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
   if (!dish) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>{t('dishDetails.notFound')}</Text>
         </View>
@@ -138,7 +138,7 @@ const DishDetailsScreen: React.FC<DishDetailsScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Image header */}
         <View style={styles.imageContainer}>

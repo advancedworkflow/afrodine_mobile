@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {StatusBar, View} from 'react-native';
+import {Platform, StatusBar, View} from 'react-native';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import SplashScreen from 'react-native-splash-screen';
 import './src/utils/applyDefaultFont';
@@ -40,8 +40,11 @@ const App = () => {
   return (
     <SafeAreaProvider>
       {/* Edge-to-edge (Android 15+) : réserve la barre de navigation système en bas ; le
-          provider imbriqué repart de ce cadre, pour que les navigateurs ne la comptent pas deux fois. */}
-      <SafeAreaView edges={['bottom']} style={{flex: 1, backgroundColor: Colors.background}}>
+          provider imbriqué repart de ce cadre, pour que les navigateurs ne la comptent pas deux fois.
+          iOS : réserve aussi le haut (encoche / Dynamic Island), que les écrans ne gèrent pas. */}
+      <SafeAreaView
+        edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
+        style={{flex: 1, backgroundColor: Colors.background}}>
         <SafeAreaProvider>
           <StripeAppRoot>
             <AuthProvider>

@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Image, TouchableOpacity, StyleSheet, StatusBar} from 'react-native';
+import {View, Text, Image, TouchableOpacity, StyleSheet, StatusBar, Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 import {Colors, Radius} from '../utils/colors';
@@ -20,7 +20,7 @@ const OnboardingScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} translucent backgroundColor="transparent" />
       <View style={styles.imageWrap}>
         <Image source={require('../assets/namke-banner.png')} style={styles.image} resizeMode="cover" />
         <View style={styles.overlayTop} />

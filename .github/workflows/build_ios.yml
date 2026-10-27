@@ -36,19 +36,6 @@ jobs:
             echo "::warning::REVERSED_CLIENT_ID absent : Google Sign-In inactif sur iOS"
           fi
 
-      - name: Generate app icon
-        run: |
-          ICONSET=ios/AfrodineMobile/Images.xcassets/AppIcon.appiconset
-          sips -z 1024 1024 store-assets/play-store-icon-512.png --out $ICONSET/icon-1024.png
-          cat > $ICONSET/Contents.json <<'EOF'
-          {
-            "images" : [
-              { "filename" : "icon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" }
-            ],
-            "info" : { "author" : "xcode", "version" : 1 }
-          }
-          EOF
-
       - name: Add fonts and GoogleService-Info.plist to Xcode project
         working-directory: ios
         run: |

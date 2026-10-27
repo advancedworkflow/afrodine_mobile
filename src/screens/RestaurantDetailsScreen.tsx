@@ -10,6 +10,7 @@ import {
   StatusBar,
   ActivityIndicator,
   TextInput,
+  Platform,
 } from 'react-native';
 import {alert} from '../utils/alert';
 import IconWrapper from '../components/IconWrapper';
@@ -339,7 +340,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   if (loading) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>{t('restaurantDetails.loading')}</Text>
@@ -350,7 +351,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
   if (!restaurant) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>{t('restaurantDetails.notFound')}</Text>
         </View>
@@ -360,7 +361,7 @@ const RestaurantDetailsScreen: React.FC<RestaurantDetailsScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Couverture */}
         <View style={styles.imageContainer}>
