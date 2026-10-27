@@ -335,7 +335,9 @@
     "addressPlaceholder": "Straße, Postleitzahl, Stadt…",
     "birthDate": "Geburtsdatum (optional)",
     "birthDatePlaceholder": "JJJJ-MM-TT",
-    "saveChanges": "Änderungen speichern"
+    "saveChanges": "Änderungen speichern",
+    "changePhoto": "Foto ändern",
+    "photoUploadError": "Das Foto konnte nicht hochgeladen werden."
   },
   "profile": {
     "errorTitle": "Fehler",

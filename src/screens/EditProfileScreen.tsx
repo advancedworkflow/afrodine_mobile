@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import {alert} from '../utils/alert';
 import TopBar from '../components/TopBar';
@@ -19,15 +20,40 @@ import {secondaryFont} from '../utils/fonts';
 import {
   getClientProfile,
   updateClientProfile,
+  uploadClientAvatar,
   type ClientProfileRead,
   type ClientProfileUpdatePayload,
 } from '../services/clientProfile';
+import {getAbsoluteImageUrl} from '../utils/api';
+
+const ImagePicker = Platform.OS !== 'web' ? require('react-native-image-picker') : null;
+
+// Galerie du téléphone (ou sélecteur de fichier sur le web) ; null si annulé
+function pickAvatarFile(): Promise<Blob | {uri: string; name: string; type: string} | null> {
+  if (Platform.OS === 'web') {
+    return new Promise((resolve) => {
+      const input = (globalThis as any).document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = () => resolve(input.files?.[0] ?? null);
+      input.click();
+    });
+  }
+  return new Promise((resolve) => {
+    ImagePicker.launchImageLibrary({mediaType: 'photo', quality: 0.8, maxWidth: 1024, maxHeight: 1024}, (response: any) => {
+      const asset = response.assets?.[0];
+      if (response.didCancel || response.errorCode || !asset?.uri) return resolve(null);
+      resolve({uri: asset.uri, name: asset.fileName || 'avatar.jpg', type: asset.type || 'image/jpeg'});
+    });
+  });
+}
 
 const EditProfileScreen = ({navigation}: any) => {
   const {t} = useTranslation();
   const [profile, setProfile] = useState<ClientProfileRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -58,6 +84,20 @@ const EditProfileScreen = ({navigation}: any) => {
       cancelled = true;
     };
   }, []);
+
+  // La photo est enregistrée tout de suite, indépendamment du bouton « Enregistrer »
+  const handleChangeAvatar = async () => {
+    const file = await pickAvatarFile();
+    if (!file) return;
+    setUploadingAvatar(true);
+    try {
+      setProfile(await uploadClientAvatar(file));
+    } catch {
+      alert(t('editProfile.errorTitle'), t('editProfile.photoUploadError'));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -101,6 +141,28 @@ const EditProfileScreen = ({navigation}: any) => {
       style={styles.scroll}
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled">
+      <TouchableOpacity
+        style={styles.avatarWrap}
+        onPress={handleChangeAvatar}
+        disabled={uploadingAvatar}
+        activeOpacity={0.8}>
+        <View style={styles.avatar}>
+          {profile?.avatar_url ? (
+            <Image source={{uri: getAbsoluteImageUrl(profile.avatar_url) ?? profile.avatar_url}} style={styles.avatarImage} />
+          ) : (
+            <IconWrapper name="person-outline" size={44} color={Colors.textLight} />
+          )}
+        </View>
+        <View style={styles.avatarBadge}>
+          {uploadingAvatar ? (
+            <ActivityIndicator size="small" color={Colors.white} />
+          ) : (
+            <IconWrapper name="camera-outline" size={16} color={Colors.white} />
+          )}
+        </View>
+        <Text style={styles.avatarHint}>{t('editProfile.changePhoto')}</Text>
+      </TouchableOpacity>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('editProfile.personalInfo')}</Text>
         <Field label={t('editProfile.firstName')} value={firstName} onChangeText={setFirstName} placeholder={t('editProfile.firstName')} />
@@ -186,6 +248,42 @@ function Field({
 }
 
 const styles = StyleSheet.create({
+  avatarWrap: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: Colors.gray[100],
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarBadge: {
+    position: 'absolute',
+    top: 72,
+    marginLeft: 72,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.darkGreen,
+    borderWidth: 2,
+    borderColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarHint: {
+    marginTop: 8,
+    fontSize: 13,
+    color: Colors.darkGreen,
+    fontFamily: secondaryFont,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundLight,

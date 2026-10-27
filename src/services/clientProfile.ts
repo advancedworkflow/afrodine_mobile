@@ -9,6 +9,7 @@ export interface ClientProfileRead {
   phone: string | null;
   birth_date: string | null;
   address: string | null;
+  avatar_url?: string | null;
 }
 
 export interface ClientProfileUpdatePayload {
@@ -37,4 +38,16 @@ export async function updateClientProfile(
   } catch {
     return null;
   }
+}
+
+/** Envoie la photo de profil (mobile : {uri, name, type} ; web : File) et renvoie le profil à jour. */
+export async function uploadClientAvatar(
+  file: Blob | { uri: string; name: string; type: string },
+): Promise<ClientProfileRead> {
+  const formData = new FormData();
+  formData.append('file', file as any);
+  const { data } = await api.post<ClientProfileRead>(`${BASE}/client/avatar`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
 }
