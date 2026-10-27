@@ -11,7 +11,7 @@ import {CartProvider} from './src/contexts/CartContext';
 import {FavoritesProvider} from './src/contexts/FavoritesContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import GlobalTabBar from './src/components/GlobalTabBar';
-import {navigationRef} from './src/navigation/navigationRef';
+import {getTopAreaColor, navigationRef} from './src/navigation/navigationRef';
 import {Colors} from './src/utils/colors';
 import notificationService from './src/services/notificationService';
 import AppSplashScreen from './src/screens/SplashScreen';
@@ -35,6 +35,14 @@ const App = () => {
     );
   }, [splashOpacity]);
 
+  const topAreaColor = getTopAreaColor(currentRoute);
+
+  // Les écrans posent souvent leur propre StatusBar ; on impose ici le style lisible sur la bande du haut
+  useEffect(() => {
+    if (Platform.OS !== 'ios' || splashVisible) return;
+    StatusBar.setBarStyle(topAreaColor === Colors.darkGreen ? 'light-content' : 'dark-content', true);
+  }, [topAreaColor, splashVisible]);
+
   return (
     <SafeAreaProvider>
       {/* Edge-to-edge (Android 15+) : réserve la barre de navigation système en bas ; le
@@ -43,14 +51,14 @@ const App = () => {
           le bas : les barres d'onglets descendent jusqu'au bord et absorbent l'indicateur d'accueil. */}
       <SafeAreaView
         edges={Platform.OS === 'ios' ? ['top'] : ['bottom']}
-        style={{flex: 1, backgroundColor: Colors.background}}>
+        style={{flex: 1, backgroundColor: Platform.OS === 'ios' ? topAreaColor : Colors.background}}>
         <SafeAreaProvider>
           <StripeAppRoot>
             <AuthProvider>
               <SearchProvider>
                 <CartProvider>
                   <FavoritesProvider>
-                    <View style={{flex: 1}}>
+                    <View style={{flex: 1, backgroundColor: Colors.background}}>
                       <NavigationContainer
                         ref={navigationRef}
                         onReady={() => setCurrentRoute(navigationRef.getCurrentRoute()?.name)}

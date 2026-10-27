@@ -9,7 +9,6 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
-  Platform,
 } from 'react-native';
 import IconWrapper from '../components/IconWrapper';
 import LocationSection from '../components/home/LocationSection';
@@ -201,7 +200,6 @@ const HomeScreen = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerCard}>
-        {Platform.OS === 'ios' && <View style={styles.statusBarExtension} />}
         <LocationSection
           address={deliveryAddress}
           onPress={() => {
@@ -611,15 +609,6 @@ const styles = StyleSheet.create({
   headerCard: {
     backgroundColor: Colors.white,
     paddingBottom: 4,
-  },
-  // iOS : prolonge le fond blanc sous l'heure / la Dynamic Island (zone réservée par App.tsx)
-  statusBarExtension: {
-    position: 'absolute',
-    top: -120,
-    left: 0,
-    right: 0,
-    height: 120,
-    backgroundColor: Colors.white,
   },
   categoryRow: {
     paddingVertical: 16,

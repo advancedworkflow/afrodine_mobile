@@ -1,3 +1,4 @@
+import {Colors} from '../utils/colors';
 import {useContext} from 'react';
 import {Platform} from 'react-native';
 import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
@@ -55,4 +56,50 @@ const ROUTE_TO_TAB: Record<string, ClientTabName> = {
 export function getActiveClientTab(routeName?: string): ClientTabName | null {
   if (!routeName) return null;
   return ROUTE_TO_TAB[routeName] ?? null;
+}
+
+// Écrans dont le haut est vert (TopBar, en-tête natif vert, bandeau traiteur)
+const GREEN_TOP_ROUTES = new Set([
+  'Catering',
+  'CateringDetails',
+  'CateringServiceDetail',
+  'EditProfile',
+  'GroceryShops',
+  'GroceryShopDetails',
+  'SearchResults',
+  'PopularDishes',
+  'Settings',
+  'TwoFactorAuth',
+  'Help',
+  'Terms',
+  'Notifications',
+  'NotificationDetail',
+  'Favorites',
+  'OrderHistory',
+  'OrderDetails',
+  'OrderStats',
+  // Restaurateur
+  'Dashboard',
+  'Orders',
+  'Menu',
+  'Analytics',
+  'RestaurantProfile',
+  'RestaurantReviews',
+  'RestaurantAnnouncements',
+  'RestaurantWallet',
+  'GroceryManagement',
+  'GroceryProductForm',
+  'CateringManagement',
+  'CateringOfferDetail',
+  'PromotionsManagement',
+  'PromotionForm',
+  'EmployeesManagement',
+  'EmployeeForm',
+]);
+
+/** iOS : couleur de la bande sous l'heure / la Dynamic Island, pour prolonger le haut de l'écran affiché. */
+export function getTopAreaColor(routeName?: string): string {
+  if (routeName && GREEN_TOP_ROUTES.has(routeName)) return Colors.darkGreen;
+  if (routeName === 'Home') return Colors.white;
+  return Colors.background;
 }

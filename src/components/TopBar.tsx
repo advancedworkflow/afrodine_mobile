@@ -62,7 +62,6 @@ const TopBar: React.FC<TopBarProps> = ({
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.darkGreen} />
-      {Platform.OS === 'ios' && <View style={styles.statusBarExtension} />}
       <View style={styles.content}>
         <View style={styles.leftSection}>
           {showBackButton && (
@@ -145,15 +144,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
-  },
-  // iOS : prolonge le fond vert sous l'heure / la Dynamic Island (zone réservée par App.tsx)
-  statusBarExtension: {
-    position: 'absolute',
-    top: -120,
-    left: 0,
-    right: 0,
-    height: 120,
-    backgroundColor: Colors.darkGreen,
   },
   content: {
     flexDirection: 'row',
