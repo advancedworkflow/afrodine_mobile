@@ -36,6 +36,26 @@ function getDeviceLanguage(): SupportedLanguage {
     : 'fr';
 }
 
+// Les clés de pluriel "_one"/"_other" (ex. viewCart, catering.heroSubtitle) passent par
+// Intl.PluralRules, que Hermes n'expose pas toujours. Sans lui, i18next retombe sur le format v3
+// ("_plural") et affiche la clé brute : on fournit les règles fr/en/de (one/other) si besoin.
+if (typeof Intl === 'undefined' || !Intl.PluralRules) {
+  class PluralRules {
+    private lang: string;
+    constructor(locale?: string | string[]) {
+      this.lang = String(Array.isArray(locale) ? locale[0] : locale ?? '').slice(0, 2);
+    }
+    select(n: number) {
+      const isOne = this.lang === 'fr' ? n === 0 || n === 1 : n === 1;
+      return isOne ? 'one' : 'other';
+    }
+    resolvedOptions() {
+      return {pluralCategories: ['one', 'other']};
+    }
+  }
+  (globalThis as any).Intl = {...(globalThis as any).Intl, PluralRules};
+}
+
 i18n.use(initReactI18next).init({
   resources: {
     fr: {translation: fr},
@@ -49,11 +69,6 @@ i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false,
   },
-  // Le résolveur de pluriel par défaut (v4) s'appuie sur Intl.PluralRules, absent sur
-  // Hermes/Android sans build ICU dédié : les clés "_one"/"_other" (ex. viewCart, availableCount)
-  // ne se résolvaient alors pas et affichaient la clé brute à l'écran. v3 utilise les règles
-  // de pluriel internes d'i18next, sans dépendre d'Intl.
-  compatibilityJSON: 'v3',
 });
 
 // Au premier lancement (rien de persisté), on suit la langue du téléphone.
