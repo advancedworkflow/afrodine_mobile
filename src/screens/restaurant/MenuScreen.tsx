@@ -32,6 +32,7 @@ import {
   deleteDish,
   deleteMenu,
   addDishesToMenu,
+  uploadManagementImage,
   uploadManagementImageFile,
   type MenuWithDishes,
   type ManagementDish,
@@ -40,6 +41,8 @@ import {
 import {getAbsoluteImageUrl} from '../../utils/api';
 
 const DEFAULT_IMAGE_URL = 'https://placehold.co/400x300?text=Plat';
+
+const ImagePicker = Platform.OS !== 'web' ? require('react-native-image-picker') : null;
 
 // Un onglet par type d'élément ; le bouton + crée un élément du type de l'onglet courant
 type TabKey = 'dishes' | 'menus' | 'supplements';
@@ -145,8 +148,30 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     setModalDish(true);
   };
 
+  // Mobile : galerie du téléphone puis envoi au CDN (le web passe par un <input type="file">)
+  const pickAndUploadNative = (folder: 'dishes' | 'menus', setUploading: (v: boolean) => void, setUrl: (url: string) => void) => {
+    ImagePicker.launchImageLibrary({mediaType: 'photo', quality: 0.8}, async (response: any) => {
+      if (response.didCancel || response.errorCode) return;
+      const asset = response.assets?.[0];
+      if (!asset?.uri) return;
+      setUploading(true);
+      try {
+        const {image_url} = await uploadManagementImage(asset.uri, asset.fileName || 'image.jpg', asset.type || 'image/jpeg', folder);
+        setUrl(image_url || '');
+      } catch {
+        alert(t('restaurantMenu.errorTitle'), t('restaurantMenu.uploadError'));
+      } finally {
+        setUploading(false);
+      }
+    });
+  };
+
   const handleImagePick = () => {
-    fileInputRef.current?.click();
+    if (Platform.OS === 'web') {
+      fileInputRef.current?.click();
+      return;
+    }
+    pickAndUploadNative('dishes', setUploadingImage, setDishImageUrl);
   };
 
   useEffect(() => {
@@ -228,10 +253,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
       menuFileInputRef.current?.click();
       return;
     }
-    alert(
-      t('restaurantMenu.menuImageTitle'),
-      t('restaurantMenu.menuImageMobileHint'),
-    );
+    pickAndUploadNative('menus', setUploadingMenuImage, setMenuImageUrl);
   };
 
   const doCreateDish = async () => {
