@@ -417,7 +417,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
             </TouchableOpacity>
           </View>
           {targetType === 'dish' && (
-            <View style={styles.listBox}>
+            <ScrollView style={styles.listBox} nestedScrollEnabled keyboardShouldPersistTaps="handled">
               {loadingData ? (
                 <Text style={styles.hint}>{t('restaurantPromotionForm.loading')}</Text>
               ) : dishes.length === 0 ? (
@@ -441,10 +441,10 @@ const PromotionFormScreen = ({navigation, route}: any) => {
                   ))}
                 </>
               )}
-            </View>
+            </ScrollView>
           )}
           {targetType === 'menu' && (
-            <View style={styles.listBox}>
+            <ScrollView style={styles.listBox} nestedScrollEnabled keyboardShouldPersistTaps="handled">
               {loadingData ? (
                 <Text style={styles.hint}>{t('restaurantPromotionForm.loading')}</Text>
               ) : menus.length === 0 ? (
@@ -467,7 +467,7 @@ const PromotionFormScreen = ({navigation, route}: any) => {
                   ))}
                 </>
               )}
-            </View>
+            </ScrollView>
           )}
 
           <Text style={styles.sectionTitle}>{t('restaurantPromotionForm.displayFormat')}</Text>
@@ -814,6 +814,7 @@ const styles = StyleSheet.create({
   optionBtnTextDisabled: {
     color: Colors.textLight,
   },
+  // Appliqué à une ScrollView : la liste défile dans le cadre au lieu de déborder sur la suite
   listBox: {
     maxHeight: 200,
     borderWidth: 1,
