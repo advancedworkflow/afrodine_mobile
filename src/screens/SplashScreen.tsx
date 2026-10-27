@@ -1,9 +1,9 @@
 import React from 'react';
-import {View, Image, StyleSheet, StatusBar, Platform, Modal} from 'react-native';
+import {View, Image, StyleSheet, StatusBar} from 'react-native';
 import {Colors} from '../utils/colors';
 
 const SplashScreen = () => {
-  const content = (
+  return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
       <Image
@@ -13,15 +13,6 @@ const SplashScreen = () => {
       />
     </View>
   );
-  // iOS : App.tsx réserve le haut de l'écran (Dynamic Island) ; une Modal couvre tout l'écran
-  if (Platform.OS === 'ios') {
-    return (
-      <Modal visible animationType="none">
-        {content}
-      </Modal>
-    );
-  }
-  return content;
 };
 
 const styles = StyleSheet.create({

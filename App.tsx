@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {Platform, StatusBar, View} from 'react-native';
+import {Animated, Platform, StatusBar, StyleSheet, View} from 'react-native';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import SplashScreen from 'react-native-splash-screen';
 import './src/utils/applyDefaultFont';
@@ -18,26 +18,22 @@ import AppSplashScreen from './src/screens/SplashScreen';
 import {StripeAppRoot} from './src/components/StripeAppRoot.native';
 
 const App = () => {
-  const [isReady, setIsReady] = useState(false);
   const [currentRoute, setCurrentRoute] = useState<string | undefined>();
+  const [splashVisible, setSplashVisible] = useState(true);
+  const splashOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Configure notifications
     notificationService.configure();
-
-    // Hide splash screen after app is ready (3 s)
-    const timer = setTimeout(() => {
-      SplashScreen.hide();
-      setIsReady(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    SplashScreen.hide();
   }, []);
 
-  // Même visuel que le splash de AppNavigator : pas d'écran blanc entre lancement natif et splash
-  if (!isReady) {
-    return <AppSplashScreen />;
-  }
+  // Un seul splash, en calque plein écran au-dessus de l'app (pas de Modal : son ouverture et sa
+  // fermeture faisaient clignoter l'écran en blanc) ; il s'efface quand AppNavigator est prêt.
+  const hideSplash = useCallback(() => {
+    Animated.timing(splashOpacity, {toValue: 0, duration: 250, useNativeDriver: true}).start(() =>
+      setSplashVisible(false),
+    );
+  }, [splashOpacity]);
 
   return (
     <SafeAreaProvider>
@@ -63,7 +59,7 @@ const App = () => {
                           barStyle="dark-content"
                           backgroundColor={Colors.primary}
                         />
-                        <AppNavigator />
+                        <AppNavigator onSplashDone={hideSplash} />
                       </NavigationContainer>
                       <GlobalTabBar currentRoute={currentRoute} />
                     </View>
@@ -74,6 +70,11 @@ const App = () => {
           </StripeAppRoot>
         </SafeAreaProvider>
       </SafeAreaView>
+      {splashVisible && (
+        <Animated.View style={[StyleSheet.absoluteFill, {opacity: splashOpacity}]} pointerEvents="none">
+          <AppSplashScreen />
+        </Animated.View>
+      )}
     </SafeAreaProvider>
   );
 };

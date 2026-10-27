@@ -317,12 +317,17 @@ const RestaurantTabs = () => {
   );
 };
 
-const SPLASH_MIN_DURATION_MS = 3000; // Durée minimale d'affichage du splash (3 s)
+const SPLASH_MIN_DURATION_MS = 800; // Durée minimale d'affichage du splash, juste assez pour éviter un flash
 
-const AppNavigator = () => {
+interface AppNavigatorProps {
+  /** Mobile : le splash est un calque posé par App.tsx ; prévenu ici quand il peut disparaître. */
+  onSplashDone?: () => void;
+}
+
+const AppNavigator = ({onSplashDone}: AppNavigatorProps) => {
   const {isAuthenticated, isLoading, isRestaurant} = useAuth();
 
-  // Durée minimale du splash pour qu'il soit toujours visible au moins 3 s
+  // Durée minimale du splash
   const [splashMinReached, setSplashMinReached] = useState(false);
   // Timeout de sécurité pour éviter le chargement infini
   const [hasTimedOut, setHasTimedOut] = useState(false);
@@ -359,8 +364,12 @@ const AppNavigator = () => {
       ? 'restaurant'
       : 'user';
 
+  useEffect(() => {
+    if (!showSplash) onSplashDone?.();
+  }, [showSplash, onSplashDone]);
+
   if (showSplash) {
-    return <SplashScreen />;
+    return onSplashDone ? null : <SplashScreen />;
   }
 
   // Écrans client sous la barre d'onglets globale qui ne réservent pas eux-mêmes sa hauteur

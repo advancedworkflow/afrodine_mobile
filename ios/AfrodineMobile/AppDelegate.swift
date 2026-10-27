@@ -48,6 +48,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
+  // Même orange que LaunchScreen.storyboard : pas d'écran blanc entre l'écran de lancement et le splash JS
+  override func customize(_ rootView: RCTRootView) {
+    super.customize(rootView)
+    rootView.backgroundColor = UIColor(red: 239 / 255, green: 76 / 255, blue: 35 / 255, alpha: 1)
+  }
+
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
   }
