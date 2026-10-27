@@ -28,6 +28,7 @@ import {
   getManagementSupplements,
   createManagementSupplement,
   createDish,
+  updateDish,
   createMenu,
   deleteDish,
   deleteMenu,
@@ -64,6 +65,8 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   const [dishPrice, setDishPrice] = useState('');
   const [dishImageUrl, setDishImageUrl] = useState('');
   const [dishCateringOnly, setDishCateringOnly] = useState(false);
+  // Plat en cours de modification ; null = création
+  const [editingDish, setEditingDish] = useState<ManagementDish | null>(null);
   const [menuName, setMenuName] = useState('');
   const [menuDesc, setMenuDesc] = useState('');
   const [menuPrice, setMenuPrice] = useState('');
@@ -140,11 +143,22 @@ const RestaurantMenuScreen = ({navigation}: any) => {
   };
 
   const openDishModal = () => {
+    setEditingDish(null);
     setDishName('');
     setDishDesc('');
     setDishPrice('');
     setDishImageUrl('');
     setDishCateringOnly(false);
+    setModalDish(true);
+  };
+
+  const openEditDish = (dish: ManagementDish) => {
+    setEditingDish(dish);
+    setDishName(dish.name);
+    setDishDesc(dish.description ?? '');
+    setDishPrice(String(dish.price));
+    setDishImageUrl(dish.dish_image_url ?? '');
+    setDishCateringOnly(!!dish.catering_only);
     setModalDish(true);
   };
 
@@ -261,18 +275,37 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     const price = parseFloat(dishPrice.replace(',', '.'));
     setSubmitting(true);
     try {
-      await createDish({
-        name,
-        description: dishDesc.trim() || undefined,
-        price,
-        dish_image_url: dishImageUrl.trim() || DEFAULT_IMAGE_URL,
-        catering_only: dishCateringOnly,
-      });
+      if (editingDish) {
+        // Champs non modifiables ici repris du plat existant (le PUT remplace tout)
+        await updateDish(editingDish.id, {
+          name,
+          description: dishDesc.trim() || undefined,
+          price,
+          dish_image_url: dishImageUrl.trim() || DEFAULT_IMAGE_URL,
+          catering_only: dishCateringOnly,
+          category_id: editingDish.category_id,
+          diet_type: editingDish.diet_type,
+          is_available: editingDish.is_available,
+          hidden_from_marketplace: editingDish.hidden_from_marketplace,
+          is_grocery_product: editingDish.is_grocery_product,
+        });
+      } else {
+        await createDish({
+          name,
+          description: dishDesc.trim() || undefined,
+          price,
+          dish_image_url: dishImageUrl.trim() || DEFAULT_IMAGE_URL,
+          catering_only: dishCateringOnly,
+        });
+      }
       setModalDish(false);
       load();
-      alert(t('restaurantMenu.successTitle'), t('restaurantMenu.dishCreated'));
+      alert(t('restaurantMenu.successTitle'), t(editingDish ? 'restaurantMenu.dishUpdated' : 'restaurantMenu.dishCreated'));
     } catch (e: any) {
-      alert(t('restaurantMenu.errorTitle'), formatAxiosError(e, t('restaurantMenu.createDishError')));
+      alert(
+        t('restaurantMenu.errorTitle'),
+        formatAxiosError(e, t(editingDish ? 'restaurantMenu.updateDishError' : 'restaurantMenu.createDishError')),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -380,6 +413,12 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           <Text style={styles.dishPrice}>{item.price.toFixed(2)} €</Text>
         </View>
         <View style={styles.cardActions}>
+          <TouchableOpacity
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            onPress={() => openEditDish(item)}
+            style={styles.iconBtn}>
+            <IconWrapper name="create-outline" size={21} color={Colors.darkGreen} />
+          </TouchableOpacity>
           <TouchableOpacity
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={() => setAddDishToMenuTarget({ dishId: item.id, dishName: item.name })}
@@ -557,7 +596,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalFullScreen}>
           <View style={styles.modalFullHeader}>
-            <Text style={styles.modalFullTitle}>{t('restaurantMenu.newDish')}</Text>
+            <Text style={styles.modalFullTitle}>{t(editingDish ? 'restaurantMenu.editDish' : 'restaurantMenu.newDish')}</Text>
             <TouchableOpacity
               onPress={() => setModalDish(false)}
               style={styles.modalCloseBtn}
@@ -641,7 +680,11 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
               onPress={handleCreateDish}
               disabled={submitting}>
-              <Text style={styles.submitBtnText}>{submitting ? t('restaurantMenu.creating') : t('restaurantMenu.createDish')}</Text>
+              <Text style={styles.submitBtnText}>
+                {editingDish
+                  ? submitting ? t('restaurantMenu.saving') : t('restaurantMenu.saveDish')
+                  : submitting ? t('restaurantMenu.creating') : t('restaurantMenu.createDish')}
+              </Text>
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>

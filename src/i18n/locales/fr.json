@@ -1475,6 +1475,11 @@
     "dishCount_one": "{{count}} plat",
     "dishCount_other": "{{count}} plats",
     "menuEmpty": "Aucun plat dans ce menu. Ajoutez-en depuis l'onglet Plats.",
-    "forDish": "Pour : {{name}}"
+    "forDish": "Pour : {{name}}",
+    "editDish": "Modifier le plat",
+    "saveDish": "Enregistrer",
+    "saving": "Enregistrement...",
+    "dishUpdated": "Plat modifié.",
+    "updateDishError": "Impossible de modifier le plat."
   }
 }

@@ -1475,6 +1475,11 @@
     "dishCount_one": "{{count}} dish",
     "dishCount_other": "{{count}} dishes",
     "menuEmpty": "No dishes in this menu. Add some from the Dishes tab.",
-    "forDish": "For: {{name}}"
+    "forDish": "For: {{name}}",
+    "editDish": "Edit dish",
+    "saveDish": "Save",
+    "saving": "Saving...",
+    "dishUpdated": "Dish updated.",
+    "updateDishError": "Unable to update the dish."
   }
 }

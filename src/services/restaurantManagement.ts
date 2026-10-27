@@ -96,6 +96,9 @@ export interface ManagementDish {
   is_available?: boolean;
   restaurant_id?: number;
   catering_only?: boolean;
+  diet_type?: string;
+  hidden_from_marketplace?: boolean;
+  is_grocery_product?: boolean;
 }
 
 export interface MenuWithDishes {
@@ -137,6 +140,8 @@ export interface DishCreatePayload {
   diet_type?: string;
   is_available?: boolean;
   catering_only?: boolean;
+  hidden_from_marketplace?: boolean;
+  is_grocery_product?: boolean;
 }
 
 export interface MenuCreatePayload {
@@ -170,6 +175,9 @@ export async function updateDish(dishId: number, payload: Partial<DishCreatePayl
     diet_type: payload.diet_type ?? 'none',
     is_available: payload.is_available ?? true,
     catering_only: payload.catering_only ?? false,
+    // Le PUT remplace tout le plat : sans ces champs, le backend les remettrait à false
+    hidden_from_marketplace: payload.hidden_from_marketplace ?? false,
+    is_grocery_product: payload.is_grocery_product ?? false,
   });
   return data;
 }

@@ -1475,6 +1475,11 @@
     "dishCount_one": "{{count}} Gericht",
     "dishCount_other": "{{count}} Gerichte",
     "menuEmpty": "Keine Gerichte in diesem Menü. Fügen Sie welche im Tab Gerichte hinzu.",
-    "forDish": "Für: {{name}}"
+    "forDish": "Für: {{name}}",
+    "editDish": "Gericht bearbeiten",
+    "saveDish": "Speichern",
+    "saving": "Wird gespeichert...",
+    "dishUpdated": "Gericht aktualisiert.",
+    "updateDishError": "Das Gericht konnte nicht aktualisiert werden."
   }
 }
