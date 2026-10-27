@@ -10,6 +10,7 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {alert} from '../../utils/alert';
@@ -20,9 +21,59 @@ import {secondaryFont} from '../../utils/fonts';
 import {
   getRestaurantProfile,
   updateRestaurantProfile,
+  getRestaurantImages,
+  addRestaurantImage,
+  deleteRestaurantImage,
+  uploadManagementImage,
+  uploadManagementImageFile,
+  type RestaurantImage,
   type RestaurantProfileRead,
   type RestaurantProfileUpdatePayload,
 } from '../../services/restaurantManagement';
+import {getAbsoluteImageUrl} from '../../utils/api';
+
+const ImagePicker = Platform.OS !== 'web' ? require('react-native-image-picker') : null;
+const IMAGE_FOLDER = 'restaurants';
+
+// Galerie du téléphone (ou sélecteur de fichier sur le web) puis envoi au CDN ; null si annulé
+function pickAndUploadImage(): Promise<string | null> {
+  if (Platform.OS === 'web') {
+    return new Promise((resolve, reject) => {
+      const input = (globalThis as any).document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return resolve(null);
+        try {
+          resolve((await uploadManagementImageFile(file, IMAGE_FOLDER)).image_url || null);
+        } catch (e) {
+          reject(e);
+        }
+      };
+      input.click();
+    });
+  }
+  return new Promise((resolve, reject) => {
+    ImagePicker.launchImageLibrary({mediaType: 'photo', quality: 0.8}, async (response: any) => {
+      const asset = response.assets?.[0];
+      if (response.didCancel || response.errorCode || !asset?.uri) return resolve(null);
+      try {
+        const {image_url} = await uploadManagementImage(
+          asset.uri,
+          asset.fileName || 'image.jpg',
+          asset.type || 'image/jpeg',
+          IMAGE_FOLDER,
+        );
+        resolve(image_url || null);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
+}
+
+type PhotoSlot = 'logo' | 'banner' | 'main' | 'gallery';
 
 const RestaurantProfileScreen = ({navigation}: any) => {
   const {t} = useTranslation();
@@ -44,6 +95,20 @@ const RestaurantProfileScreen = ({navigation}: any) => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [facebookLink, setFacebookLink] = useState('');
   const [instagramLink, setInstagramLink] = useState('');
+  const [mainImages, setMainImages] = useState<RestaurantImage[]>([]);
+  const [galleryImages, setGalleryImages] = useState<RestaurantImage[]>([]);
+  const [uploadingSlot, setUploadingSlot] = useState<PhotoSlot | null>(null);
+
+  const loadImages = useCallback(async () => {
+    try {
+      const images = await getRestaurantImages();
+      setMainImages(images.filter((img) => img.image_type === 'restaurant'));
+      setGalleryImages(images.filter((img) => img.image_type === 'gallery'));
+    } catch {
+      setMainImages([]);
+      setGalleryImages([]);
+    }
+  }, []);
 
   const loadProfile = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -74,7 +139,52 @@ const RestaurantProfileScreen = ({navigation}: any) => {
 
   useEffect(() => {
     loadProfile();
-  }, [loadProfile]);
+    loadImages();
+  }, [loadProfile, loadImages]);
+
+  // Choisit une photo, l'envoie, puis l'enregistre selon l'emplacement :
+  // logo / bannière dans le profil, photo principale (remplacée) et galerie dans /images
+  const handlePickPhoto = async (slot: PhotoSlot) => {
+    try {
+      const url = await pickAndUploadImage();
+      if (!url) return;
+      setUploadingSlot(slot);
+      if (slot === 'logo' || slot === 'banner') {
+        const updated = await updateRestaurantProfile(slot === 'logo' ? {logo_url: url} : {banner_image_url: url});
+        if (!updated) throw new Error('profile update failed');
+        setProfile(updated);
+      } else if (slot === 'main') {
+        await Promise.all(mainImages.map((img) => deleteRestaurantImage(img.id)));
+        await addRestaurantImage(url, 'restaurant', true);
+        await loadImages();
+      } else {
+        await addRestaurantImage(url, 'gallery');
+        await loadImages();
+      }
+    } catch {
+      alert(t('restaurantProfile.errorTitle'), t('restaurantProfile.uploadError'));
+    } finally {
+      setUploadingSlot(null);
+    }
+  };
+
+  const handleDeleteGalleryPhoto = (img: RestaurantImage) => {
+    alert(t('restaurantProfile.deletePhotoTitle'), t('restaurantProfile.deletePhotoMessage'), [
+      {text: t('restaurantProfile.cancel'), style: 'cancel'},
+      {
+        text: t('restaurantProfile.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteRestaurantImage(img.id);
+            await loadImages();
+          } catch {
+            alert(t('restaurantProfile.errorTitle'), t('restaurantProfile.errorMessage'));
+          }
+        },
+      },
+    ]);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -125,8 +235,70 @@ const RestaurantProfileScreen = ({navigation}: any) => {
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => loadProfile(true)} colors={[Colors.darkGreen]} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            loadProfile(true);
+            loadImages();
+          }}
+          colors={[Colors.darkGreen]}
+        />
       }>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('restaurantProfile.photos')}</Text>
+        <Text style={styles.fieldLabel}>{t('restaurantProfile.banner')}</Text>
+        <PhotoTile
+          uri={profile?.banner_image_url}
+          loading={uploadingSlot === 'banner'}
+          onPress={() => handlePickPhoto('banner')}
+          style={styles.bannerTile}
+        />
+        <View style={styles.photoRow}>
+          <View style={styles.photoCol}>
+            <Text style={styles.fieldLabel}>{t('restaurantProfile.logo')}</Text>
+            <PhotoTile
+              uri={profile?.logo_url}
+              loading={uploadingSlot === 'logo'}
+              onPress={() => handlePickPhoto('logo')}
+              style={styles.squareTile}
+            />
+          </View>
+          <View style={styles.photoCol}>
+            <Text style={styles.fieldLabel}>{t('restaurantProfile.mainPhoto')}</Text>
+            <PhotoTile
+              uri={mainImages[0]?.image_url}
+              loading={uploadingSlot === 'main'}
+              onPress={() => handlePickPhoto('main')}
+              style={styles.squareTile}
+            />
+          </View>
+        </View>
+        <Text style={styles.fieldLabel}>{t('restaurantProfile.gallery')}</Text>
+        <View style={styles.galleryGrid}>
+          {galleryImages.map((img) => (
+            <View key={img.id} style={styles.galleryItem}>
+              <Image source={{uri: getAbsoluteImageUrl(img.image_url) ?? img.image_url}} style={styles.galleryImage} />
+              <TouchableOpacity style={styles.galleryDelete} onPress={() => handleDeleteGalleryPhoto(img)} hitSlop={6}>
+                <IconWrapper name="close" size={14} color={Colors.white} />
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TouchableOpacity
+            style={[styles.galleryItem, styles.galleryAdd]}
+            onPress={() => handlePickPhoto('gallery')}
+            disabled={uploadingSlot !== null}>
+            {uploadingSlot === 'gallery' ? (
+              <ActivityIndicator size="small" color={Colors.darkGreen} />
+            ) : (
+              <>
+                <IconWrapper name="add" size={22} color={Colors.darkGreen} />
+                <Text style={styles.galleryAddText}>{t('restaurantProfile.addPhoto')}</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('restaurantProfile.generalInfo')}</Text>
         <Field label={t('restaurantProfile.restaurantName')} value={name} onChangeText={setName} placeholder={t('restaurantProfile.namePlaceholder')} />
@@ -186,6 +358,36 @@ const RestaurantProfileScreen = ({navigation}: any) => {
     </View>
   );
 };
+
+// Emplacement photo : image actuelle (ou icône) ; toucher pour la remplacer
+function PhotoTile({
+  uri,
+  loading,
+  onPress,
+  style,
+}: {
+  uri?: string | null;
+  loading: boolean;
+  onPress: () => void;
+  style: object;
+}) {
+  return (
+    <TouchableOpacity style={[styles.photoTile, style]} onPress={onPress} disabled={loading} activeOpacity={0.8}>
+      {uri ? (
+        <Image source={{uri: getAbsoluteImageUrl(uri) ?? uri}} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      ) : (
+        <IconWrapper name="image-outline" size={28} color={Colors.textLight} />
+      )}
+      <View style={styles.photoBadge}>
+        {loading ? (
+          <ActivityIndicator size="small" color={Colors.white} />
+        ) : (
+          <IconWrapper name="camera-outline" size={16} color={Colors.white} />
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 function Field({
   label,
@@ -302,6 +504,81 @@ const styles = StyleSheet.create({
   },
   bottomPad: {
     height: 24,
+  },
+  photoTile: {
+    borderRadius: 12,
+    backgroundColor: Colors.gray[100],
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  bannerTile: {
+    width: '100%',
+    height: 130,
+  },
+  squareTile: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  photoBadge: {
+    position: 'absolute',
+    right: 8,
+    bottom: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(5,70,37,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  photoCol: {
+    flex: 1,
+  },
+  galleryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  galleryItem: {
+    width: 84,
+    height: 84,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: Colors.gray[100],
+  },
+  galleryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  galleryDelete: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galleryAdd: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: Colors.darkGreen,
+    backgroundColor: Colors.white,
+  },
+  galleryAddText: {
+    fontSize: 11,
+    color: Colors.darkGreen,
+    marginTop: 2,
+    fontFamily: secondaryFont,
   },
 });
 

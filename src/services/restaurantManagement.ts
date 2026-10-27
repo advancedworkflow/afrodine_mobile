@@ -729,6 +729,41 @@ export async function uploadManagementImage(
   return { image_url: data?.image_url ?? '' };
 }
 
+// --- Images du restaurant (photo principale, galerie...) ---
+export type RestaurantImageType = 'restaurant' | 'gallery' | 'banner' | 'logo' | 'slide' | 'card';
+
+export interface RestaurantImage {
+  id: number;
+  image_url: string;
+  image_type: RestaurantImageType;
+  is_primary: boolean;
+  sort_order: number;
+}
+
+export async function getRestaurantImages(imageType?: RestaurantImageType): Promise<RestaurantImage[]> {
+  const { data } = await api.get<RestaurantImage[]>(`${BASE}/images`, {
+    params: imageType ? { image_type: imageType } : undefined,
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function addRestaurantImage(
+  imageUrl: string,
+  imageType: RestaurantImageType,
+  isPrimary = false,
+): Promise<RestaurantImage> {
+  const { data } = await api.post<RestaurantImage>(`${BASE}/images`, {
+    image_url: imageUrl,
+    image_type: imageType,
+    is_primary: isPrimary,
+  });
+  return data;
+}
+
+export async function deleteRestaurantImage(imageId: number): Promise<void> {
+  await api.delete(`${BASE}/images/${imageId}`);
+}
+
 /** Upload depuis un File (web) : envoie vers le CDN via l’API management. */
 export async function uploadManagementImageFile(
   file: File,

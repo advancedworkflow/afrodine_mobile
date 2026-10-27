@@ -1155,7 +1155,18 @@
     "savedTitle": "Profil enregistré",
     "savedMessage": "Les modifications ont bien été enregistrées.",
     "errorTitle": "Erreur",
-    "errorMessage": "Impossible d'enregistrer le profil. Réessayez."
+    "errorMessage": "Impossible d'enregistrer le profil. Réessayez.",
+    "photos": "Photos",
+    "logo": "Logo",
+    "banner": "Bannière",
+    "mainPhoto": "Photo principale",
+    "gallery": "Photos de l'établissement",
+    "addPhoto": "Ajouter",
+    "uploadError": "Impossible d'envoyer la photo.",
+    "deletePhotoTitle": "Supprimer la photo ?",
+    "deletePhotoMessage": "Elle ne sera plus visible sur votre page.",
+    "delete": "Supprimer",
+    "cancel": "Annuler"
   },
   "restaurantReviews": {
     "title": "Avis",

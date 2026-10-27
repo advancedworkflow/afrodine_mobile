@@ -1155,7 +1155,18 @@
     "savedTitle": "Profile saved",
     "savedMessage": "The changes have been saved successfully.",
     "errorTitle": "Error",
-    "errorMessage": "Unable to save the profile. Please try again."
+    "errorMessage": "Unable to save the profile. Please try again.",
+    "photos": "Photos",
+    "logo": "Logo",
+    "banner": "Banner",
+    "mainPhoto": "Main photo",
+    "gallery": "Venue photos",
+    "addPhoto": "Add",
+    "uploadError": "Unable to upload the photo.",
+    "deletePhotoTitle": "Delete this photo?",
+    "deletePhotoMessage": "It will no longer be visible on your page.",
+    "delete": "Delete",
+    "cancel": "Cancel"
   },
   "restaurantReviews": {
     "title": "Reviews",

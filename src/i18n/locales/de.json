@@ -1155,7 +1155,18 @@
     "savedTitle": "Profil gespeichert",
     "savedMessage": "Die Änderungen wurden erfolgreich gespeichert.",
     "errorTitle": "Fehler",
-    "errorMessage": "Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    "errorMessage": "Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "photos": "Fotos",
+    "logo": "Logo",
+    "banner": "Banner",
+    "mainPhoto": "Hauptfoto",
+    "gallery": "Fotos des Lokals",
+    "addPhoto": "Hinzufügen",
+    "uploadError": "Das Foto konnte nicht hochgeladen werden.",
+    "deletePhotoTitle": "Foto löschen?",
+    "deletePhotoMessage": "Es ist dann auf Ihrer Seite nicht mehr sichtbar.",
+    "delete": "Löschen",
+    "cancel": "Abbrechen"
   },
   "restaurantReviews": {
     "title": "Bewertungen",
