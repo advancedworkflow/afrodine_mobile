@@ -43,6 +43,13 @@ import {getAbsoluteImageUrl} from '../../utils/api';
 
 const DEFAULT_IMAGE_URL = 'https://placehold.co/400x300?text=Plat';
 
+// Commission ajoutée au prix voulu par le restaurant (= PLATFORM_COMMISSION_RATE de l'API) :
+// le restaurant saisit ce qu'il touche, le prix enregistré et affiché au client est majoré de 10 %.
+const COMMISSION_RATE = 0.1;
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const toClientPrice = (restaurantPrice: number) => round2(restaurantPrice * (1 + COMMISSION_RATE));
+const toRestaurantPrice = (clientPrice: number) => round2(clientPrice / (1 + COMMISSION_RATE));
+
 const ImagePicker = Platform.OS !== 'web' ? require('react-native-image-picker') : null;
 
 // Un onglet par type d'élément ; le bouton + crée un élément du type de l'onglet courant
@@ -156,7 +163,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
     setEditingDish(dish);
     setDishName(dish.name);
     setDishDesc(dish.description ?? '');
-    setDishPrice(String(dish.price));
+    setDishPrice(String(toRestaurantPrice(dish.price)));
     setDishImageUrl(dish.dish_image_url ?? '');
     setDishCateringOnly(!!dish.catering_only);
     setModalDish(true);
@@ -272,7 +279,7 @@ const RestaurantMenuScreen = ({navigation}: any) => {
 
   const doCreateDish = async () => {
     const name = dishName.trim();
-    const price = parseFloat(dishPrice.replace(',', '.'));
+    const price = toClientPrice(parseFloat(dishPrice.replace(',', '.')));
     setSubmitting(true);
     try {
       if (editingDish) {
@@ -633,6 +640,15 @@ const RestaurantMenuScreen = ({navigation}: any) => {
               placeholderTextColor={Colors.textLight}
               keyboardType="decimal-pad"
             />
+            {parseFloat(dishPrice.replace(',', '.')) > 0 && (
+              <Text style={styles.clientPriceHint}>
+                {t('restaurantMenu.clientPriceHint', {
+                  price: toClientPrice(parseFloat(dishPrice.replace(',', '.'))).toFixed(2),
+                  rate: COMMISSION_RATE * 100,
+                  commission: (toClientPrice(parseFloat(dishPrice.replace(',', '.'))) - parseFloat(dishPrice.replace(',', '.'))).toFixed(2),
+                })}
+              </Text>
+            )}
             <View style={styles.imageUploadSection}>
               <Text style={styles.imageUploadLabel}>{t('restaurantMenu.dishPhoto')}</Text>
               <TextInput
@@ -1258,6 +1274,12 @@ const styles = StyleSheet.create({
   },
   imageUploadSection: {
     marginBottom: 16,
+  },
+  clientPriceHint: {
+    fontSize: 13,
+    color: Colors.textLight,
+    marginTop: -6,
+    marginBottom: 12,
   },
   imageUploadLabel: {
     fontSize: 15,
